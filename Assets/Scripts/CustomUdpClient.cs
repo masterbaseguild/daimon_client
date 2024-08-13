@@ -10,15 +10,15 @@ using System.IO.Compression;
 
 public class CustomUdpClient : MonoBehaviour
 {
-    public string serverIp = "127.0.0.1";
-    public int serverPort = 4000;
-    public int clientPort = 6000;
-    public string username = "Entity";
+    public const string ip = "127.0.0.1";
+    public const int serverPort = 4000;
+    public const string username = "Entity";
+    public const int clientPort = 6000;
     public int index;
     public GameObject userPrefab;
     public List<GameObject> connectedUsers = new List<GameObject>();
     public Region region;
-    public ApiClient apiClient;
+    public ApiClient apiClient = new ApiClient();
 
     UdpClient client;
     IPEndPoint remoteIpEndPoint;
@@ -28,8 +28,8 @@ public class CustomUdpClient : MonoBehaviour
         try
         {
             client = new UdpClient(clientPort);
-            remoteIpEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
-            client.Connect(serverIp, serverPort);
+            remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
+            client.Connect(remoteIpEndPoint);
             client.BeginReceive(Get, null);
             Send($"connect\t0\t{username}");
             print("Attempting to connect to API...");
@@ -84,7 +84,7 @@ public class CustomUdpClient : MonoBehaviour
         {
             byte[] bytes = client.EndReceive(result, ref remoteIpEndPoint);
             string data = Encoding.UTF8.GetString(bytes);
-            Packet message = ParsePacket(data);
+            Packet message = new Packet(data);
             HandlePacket(message);
             client.BeginReceive(Get, null);
             return;
@@ -94,15 +94,6 @@ public class CustomUdpClient : MonoBehaviour
             print(e.ToString());
             return;
         }
-    }
-
-    Packet ParsePacket(string message)
-    {
-        string[] split = message.Split('\t');
-        string type = split[0];
-        string[] data = split.Skip(1).ToArray();
-        Packet packet = new Packet(type, data);
-        return packet;
     }
 
     void HandlePacket(Packet packet)
@@ -166,10 +157,9 @@ public class CustomUdpClient : MonoBehaviour
                         firstUser.GetComponent<OtherUser>().username = firstUsername;
                         connectedUsers.Add(firstUser);
                     }
-                    //Send("region");
                     break;
                 case "confirmregion":
-                    region = parseRegion(packet.data[0]);
+                    region = new Region(packet.parseData());
                     print($"First 3 Lines of Region Header:");
                     for (int i = 0; i < 3; i++)
                     {
@@ -244,67 +234,6 @@ public class CustomUdpClient : MonoBehaviour
         }
         log += $"position: {transform.position}\n";
         print(log);
-    }
-
-    Region parseRegion(string packetData)
-    {
-        byte[] data = Convert.FromBase64String(packetData);
-        byte[] buffer = zlibDecompress(data);
-
-        byte[] headerBuffer = new byte[256 * 6];
-        byte[] contentBuffer = new byte[buffer.Length - (256 * 6)];
-        Array.Copy(buffer, headerBuffer, headerBuffer.Length);
-        Array.Copy(buffer, 256 * 6, contentBuffer, 0, contentBuffer.Length);
-
-        Region region = new Region();
-        for (int i = 0; i < 256; i++)
-        {
-            region.Header.Add(BitConverter.ToString(headerBuffer, i * 6, 6).Replace("-", ""));
-        }
-
-        for (int i = 0; i < 16; i++)
-        {
-            region.Data.Add(new List<List<List<List<List<byte>>>>>()); // region x
-            for (int j = 0; j < 16; j++)
-            {
-                region.Data[i].Add(new List<List<List<List<byte>>>>()); // region y
-                for (int k = 0; k < 16; k++)
-                {
-                    region.Data[i][j].Add(new List<List<List<byte>>>()); // region z
-                    for (int l = 0; l < 16; l++)
-                    {
-                        region.Data[i][j][k].Add(new List<List<byte>>()); // chunk x
-                        for (int m = 0; m < 16; m++)
-                        {
-                            region.Data[i][j][k][l].Add(new List<byte>()); // chunk y
-                            for (int n = 0; n < 16; n++)
-                            {
-                                int index = i * 16 * 16 * 16 * 16 * 16 + j * 16 * 16 * 16 * 16 + k * 16 * 16 * 16 + l * 16 * 16 + m * 16 + n;
-                                region.Data[i][j][k][l][m].Add(contentBuffer[index]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return region;
-    }
-
-    byte[] zlibDecompress(byte[] data)
-    {
-        using (MemoryStream input = new MemoryStream(data))
-        {
-            // skip zlib header
-            input.Seek(2, SeekOrigin.Begin);
-            using (MemoryStream output = new MemoryStream())
-            {
-                using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
-                {
-                    dstream.CopyTo(output);
-                    return output.ToArray();
-                }
-            }
-        }
     }
 
     // disconnect on application quit

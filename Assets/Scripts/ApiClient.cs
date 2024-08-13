@@ -2,22 +2,10 @@ using UnityEngine;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-public class ApiClient : MonoBehaviour
+public class ApiClient
 {
     public string endpoint = "https://api.projectdaimon.com/";
     public HttpClient client = new HttpClient();
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     //the following method requests a resource of given type and given id, and returns it as a json string
     public async Task<string> GetResource(string type, string id)
