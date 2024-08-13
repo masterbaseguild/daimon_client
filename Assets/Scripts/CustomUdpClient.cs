@@ -104,9 +104,7 @@ public class CustomUdpClient : MonoBehaviour
         Block block = blockPalette[index];
         block.OnTextureLoaded += () =>
         {
-            print("Texture loaded!");
             Texture2D texture = block.texture2D;
-            print(texture);
 
             if (texture != null)
             {
@@ -118,7 +116,6 @@ public class CustomUdpClient : MonoBehaviour
             }
         };
     }
-
 
     void HandlePacket(Packet packet)
     {
@@ -196,15 +193,8 @@ public class CustomUdpClient : MonoBehaviour
                     string[] results = await Task.WhenAll(tasks);
                     foreach (string result in results)
                     {
-                        print(result);
                         blockPalette.Add(jsonToBlock(result));
                     }
-                    print($"Block Palette:");
-                    foreach (Block block in blockPalette)
-                    {
-                        print(block.display);
-                    }
-                    DisplayBlockTexture(1);
                     break;
                 case "conflict":
                     PrintChatMessage("Username already taken!");

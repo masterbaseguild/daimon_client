@@ -12,19 +12,16 @@ public static class TextureLoader
 
     private static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)
     {
-        Debug.Log("Downloading texture: " + url);
         using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(url))
         {
             yield return www.SendWebRequest();
 
             if (www.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError("Failed to download texture: " + www.error);
                 onTextureLoaded?.Invoke(null);
             }
             else
             {
-                Debug.Log("Texture downloaded: " + url);
                 Texture2D texture = DownloadHandlerTexture.GetContent(www);
                 onTextureLoaded?.Invoke(texture);
             }

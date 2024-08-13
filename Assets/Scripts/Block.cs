@@ -22,15 +22,12 @@ public class Block
         {
             TextureLoader.LoadTexture(texture, (texture2D) =>
             {
-                Debug.Log("Texture loaded: " + texture);
                 this.texture2D = texture2D;
-                Debug.Log(texture2D);
                 OnTextureLoaded?.Invoke();
             });
         }
         else
         {
-            Debug.LogWarning("Block " + id + " has no texture");
             this.texture2D = null;
         }
     }
