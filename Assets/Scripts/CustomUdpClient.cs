@@ -7,6 +7,7 @@ using System.Text;
 using UnityEngine;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 
 public class CustomUdpClient : MonoBehaviour
 {
@@ -31,13 +32,13 @@ public class CustomUdpClient : MonoBehaviour
             remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
             client.Connect(remoteIpEndPoint);
             client.BeginReceive(Get, null);
-            Send($"connect\t0\t{username}");
             print("Attempting to connect to API...");
             apiClient.Ping().ContinueWith(task =>
             {
                 if (task.Result)
                 {
                     print("Connected to API!");
+                    Send($"connect\t0\t{username}");
                 }
                 else
                 {
@@ -98,7 +99,7 @@ public class CustomUdpClient : MonoBehaviour
 
     void HandlePacket(Packet packet)
     {
-        MainThreadDispatcher.Enqueue(() =>
+        MainThreadDispatcher.Enqueue(async () =>
         {
             switch (packet.type)
             {
@@ -143,6 +144,7 @@ public class CustomUdpClient : MonoBehaviour
                     PrintChatMessage($"{chatUser.GetComponent<OtherUser>().username}: {chatMessage}");
                     break;
                 case "confirmconnect":
+                    print($"Connected with index: {packet.data[0]}");
                     index = int.Parse(packet.data[0]);
                     for (int i = 1; i < packet.data.Length; i += 2)
                     {
@@ -157,17 +159,25 @@ public class CustomUdpClient : MonoBehaviour
                         firstUser.GetComponent<OtherUser>().username = firstUsername;
                         connectedUsers.Add(firstUser);
                     }
+                    Send($"region");
                     break;
                 case "confirmregion":
                     region = new Region(packet.parseData());
                     print($"First 3 Lines of Region Header:");
+                    List<Task<string>> tasks = new List<Task<string>>();
                     for (int i = 0; i < 3; i++)
                     {
                         print(region.Header[i]);
-                        apiClient.GetResource("item", region.Header[i]).ContinueWith(task =>
+                        tasks.Add(apiClient.GetResource("item", region.Header[i]));
+                        /* apiClient.GetResource("item", region.Header[i]).ContinueWith(task =>
                         {
                             print(task.Result);
-                        });
+                        }); */
+                    }
+                    string[] results = await Task.WhenAll(tasks);
+                    foreach (string result in results)
+                    {
+                        print(result);
                     }
                     break;
                 case "conflict":
