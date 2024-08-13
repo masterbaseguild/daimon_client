@@ -7,7 +7,7 @@ public static class TextureLoader
 {
     public static void LoadTexture(string url, Action<Texture2D> onTextureLoaded)
     {
-        CoroutineRunner.Instance.StartCoroutine(LoadTextureCoroutine(url, onTextureLoaded));
+        MainThreadDispatcher.Instance.StartCoroutine(LoadTextureCoroutine(url, onTextureLoaded));
     }
 
     private static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)

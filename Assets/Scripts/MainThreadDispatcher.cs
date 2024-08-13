@@ -4,6 +4,19 @@ using UnityEngine;
 
 public class MainThreadDispatcher : MonoBehaviour
 {
+    public static MainThreadDispatcher Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
     private static readonly Queue<Action> _executionQueue = new Queue<Action>();
 
     public static void Enqueue(Action action)

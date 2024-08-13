@@ -195,6 +195,7 @@ public class CustomUdpClient : MonoBehaviour
                     {
                         blockPalette.Add(jsonToBlock(result));
                     }
+                    DisplayBlockTexture(2);
                     break;
                 case "conflict":
                     PrintChatMessage("Username already taken!");
