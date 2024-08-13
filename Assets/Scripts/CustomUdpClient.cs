@@ -8,6 +8,7 @@ using UnityEngine;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 public class CustomUdpClient : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class CustomUdpClient : MonoBehaviour
     public int index;
     public GameObject userPrefab;
     public List<GameObject> connectedUsers = new List<GameObject>();
+    public List<Block> blockPalette = new List<Block>();
     public Region region;
     public ApiClient apiClient = new ApiClient();
 
@@ -169,15 +171,17 @@ public class CustomUdpClient : MonoBehaviour
                     {
                         print(region.Header[i]);
                         tasks.Add(apiClient.GetResource("item", region.Header[i]));
-                        /* apiClient.GetResource("item", region.Header[i]).ContinueWith(task =>
-                        {
-                            print(task.Result);
-                        }); */
                     }
                     string[] results = await Task.WhenAll(tasks);
                     foreach (string result in results)
                     {
                         print(result);
+                        blockPalette.Add(jsonToBlock(result));
+                    }
+                    print($"Block Palette:");
+                    foreach (Block block in blockPalette)
+                    {
+                        print(block.display);
                     }
                     break;
                 case "conflict":
@@ -229,6 +233,11 @@ public class CustomUdpClient : MonoBehaviour
     void PrintChatMessage(string message)
     {
         print(message);
+    }
+    
+    Block jsonToBlock(string json)
+    {
+        return JsonConvert.DeserializeObject<Block>(json);
     }
 
     void LogGameState()
