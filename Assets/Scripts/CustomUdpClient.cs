@@ -99,6 +99,27 @@ public class CustomUdpClient : MonoBehaviour
         }
     }
 
+    void DisplayBlockTexture(int index)
+    {
+        Block block = blockPalette[index];
+        block.OnTextureLoaded += () =>
+        {
+            print("Texture loaded!");
+            Texture2D texture = block.texture2D;
+            print(texture);
+
+            if (texture != null)
+            {
+                // Create a Quad to display the texture
+                GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                quad.transform.position = new Vector3(0, 100, 0); // Position the Quad as needed
+                quad.transform.Rotate(90, 0, 0); // Rotate the Quad as needed
+                quad.GetComponent<Renderer>().material.mainTexture = texture;
+            }
+        };
+    }
+
+
     void HandlePacket(Packet packet)
     {
         MainThreadDispatcher.Enqueue(async () =>
@@ -183,6 +204,7 @@ public class CustomUdpClient : MonoBehaviour
                     {
                         print(block.display);
                     }
+                    DisplayBlockTexture(1);
                     break;
                 case "conflict":
                     PrintChatMessage("Username already taken!");
