@@ -77,7 +77,7 @@ public class Region
         // parse header
         for (int i = 0; i < HEADER_BLOCK_COUNT; i++)
         {
-            Header.Add(BitConverter.ToString(headerBuffer, i * HEADER_BLOCK_SIZE, HEADER_BLOCK_SIZE).Replace("-", ""));
+            Header.Add(BitConverter.ToString(headerBuffer, i * HEADER_BLOCK_SIZE, HEADER_BLOCK_SIZE).Replace("-", "").ToLower());
         }
 
         // parse chunks

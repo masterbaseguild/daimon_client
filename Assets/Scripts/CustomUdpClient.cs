@@ -19,9 +19,11 @@ public class CustomUdpClient : MonoBehaviour
     public int index;
     public GameObject userPrefab;
     public List<GameObject> connectedUsers = new List<GameObject>();
-    public List<Block> blockPalette = new List<Block>();
+    public BlockPalette blockPalette;
     public Region region;
     public ApiClient apiClient = new ApiClient();
+
+    public ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
 
     UdpClient client;
     IPEndPoint remoteIpEndPoint;
@@ -101,7 +103,7 @@ public class CustomUdpClient : MonoBehaviour
 
     void DisplayBlockTexture(int index)
     {
-        Block block = blockPalette[index];
+        Block block = blockPalette.blocks[index];
         block.OnTextureLoaded += () =>
         {
             Texture2D texture = block.texture2D;
@@ -115,6 +117,64 @@ public class CustomUdpClient : MonoBehaviour
                 quad.GetComponent<Renderer>().material.mainTexture = texture;
             }
         };
+    }
+
+    void DisplayBlock(int x, int y, int z)
+    {
+        Voxel voxel = region.getVoxel(x, y, z);
+        Block block = blockPalette.blocks.Find(b => b.id == voxel.id);
+        block.OnTextureLoaded += () =>
+        {
+            Texture2D texture = block.texture2D;
+            // set filter to point to prevent blurring
+            texture.filterMode = FilterMode.Point;
+
+            if (texture != null)
+            {
+                GameObject blockObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                blockObject.transform.position = new Vector3(x, y, z);
+                blockObject.GetComponent<Renderer>().material.mainTexture = texture;
+                blockObject.GetComponent<Renderer>().material.mainTexture = block.texture2D;
+            }
+        };
+    }
+
+    void DisplayChunk(int x, int y, int z)
+    {
+        Chunk chunk = region.chunks[0, 0, 0];
+        ChunkMesh chunkMesh = new ChunkMesh();
+        chunks[0] = chunkMesh;
+        Voxel voxel = region.getVoxel(x, y, z);
+        chunkMesh.AddBlockToMesh(x, y, z, voxel.id, blockPalette);
+    }
+
+    void DisplayRegion() {
+        const string air = "000000000000";
+        for (int x = 0; x < Region.REGION_SIZE; x++)
+        {
+            for (int y = 0; y < Region.REGION_SIZE; y++)
+            {
+                for (int z = 0; z < Region.REGION_SIZE; z++)
+                {
+                    Chunk chunk = region.chunks[x, y, z];
+                    for (int cx = 0; cx < Chunk.CHUNK_SIZE; cx++)
+                    {
+                        for (int cy = 0; cy < Chunk.CHUNK_SIZE; cy++)
+                        {
+                            for (int cz = 0; cz < Chunk.CHUNK_SIZE; cz++)
+                            {
+                                Voxel voxel = chunk.getVoxel(cx, cy, cz);
+                                if (voxel.id == air)
+                                {
+                                    continue;
+                                }
+                                DisplayBlock(x * Chunk.CHUNK_SIZE + cx, y * Chunk.CHUNK_SIZE + cy, z * Chunk.CHUNK_SIZE + cz);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void HandlePacket(Packet packet)
@@ -191,11 +251,11 @@ public class CustomUdpClient : MonoBehaviour
                         tasks.Add(apiClient.GetResource("item", region.Header[i]));
                     }
                     string[] results = await Task.WhenAll(tasks);
-                    foreach (string result in results)
-                    {
-                        blockPalette.Add(jsonToBlock(result));
-                    }
-                    DisplayBlockTexture(2);
+                    blockPalette = new BlockPalette(results, chunks);
+                    //DisplayBlockTexture(2);
+                    //DisplayBlock(100, 100, 100);
+                    //DisplayRegion();
+                    DisplayChunk(100, 100, 100);
                     break;
                 case "conflict":
                     PrintChatMessage("Username already taken!");
