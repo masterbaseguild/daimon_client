@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 public class ApiClient
 {
-    public string endpoint = "http://localhost/";
+    public string endpoint = "https://api.projectdaimon.com/";
     public HttpClient client = new HttpClient();
 
     //the following method requests a resource of given type and given id, and returns it as a json string
