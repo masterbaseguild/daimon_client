@@ -6,7 +6,7 @@ using System.Linq;
 public class Chunk
 {
     public const int CHUNK_SIZE = 16;
-    public Voxel[,,] voxels = new Voxel[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
+    public int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
 
     public Chunk()
     {
@@ -16,18 +16,18 @@ public class Chunk
             {
                 for (int z = 0; z < CHUNK_SIZE; z++)
                 {
-                    voxels[x, y, z] = new Voxel("air");
+                    voxels[x, y, z] = 0;
                 }
             }
         }
     }
 
-    public Voxel getVoxel(int x, int y, int z)
+    public int getVoxel(int x, int y, int z)
     {
         return voxels[x, y, z];
     }
 
-    public void setVoxel(int x, int y, int z, Voxel voxel)
+    public void setVoxel(int x, int y, int z, int voxel)
     {
         voxels[x, y, z] = voxel;
     }

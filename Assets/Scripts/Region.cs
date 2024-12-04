@@ -58,7 +58,7 @@ public class Region
                             for (int voxelZ = 0; voxelZ < Chunk.CHUNK_SIZE; voxelZ++)
                             {
                                 byte voxelData = contentBuffer[index++];
-                                chunk.setVoxel(voxelX, voxelY, voxelZ, new Voxel(Header[voxelData]));
+                                chunk.setVoxel(voxelX, voxelY, voxelZ, voxelData);
                             }
                         }
                     }
@@ -77,7 +77,7 @@ public class Region
         chunks[x, y, z] = chunk;
     }
 
-    public Voxel getVoxel(int x, int y, int z)
+    public int getVoxel(int x, int y, int z)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
@@ -88,7 +88,7 @@ public class Region
         return chunks[chunkX, chunkY, chunkZ].getVoxel(voxelX, voxelY, voxelZ);
     }
 
-    public void setVoxel(int x, int y, int z, Voxel voxel)
+    public void setVoxel(int x, int y, int z, int voxel)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;

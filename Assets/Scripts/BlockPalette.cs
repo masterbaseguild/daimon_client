@@ -70,6 +70,11 @@ public class BlockPalette
         return JsonConvert.DeserializeObject<BlockType>(json);
     }
 
+    public BlockType GetBlockType(int index)
+    {
+        return blocks[index];
+    }
+
     // get texture coordinates for a block
     public Vector2[] GetBlockUVs(BlockType block)
     {

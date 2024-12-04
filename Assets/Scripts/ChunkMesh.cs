@@ -18,8 +18,9 @@ public class ChunkMesh
         meshFilter.mesh = mesh;
     }
 
-    public void AddBlockToMesh(int x, int y, int z, string type, BlockPalette BlockPalette)
+    public void AddBlockToMesh(int x, int y, int z, BlockType type, BlockPalette BlockPalette)
     {
+        string id = type.id;
         Vector3[] cubeVertices = new Vector3[]
         {
             new Vector3(x, y, z),

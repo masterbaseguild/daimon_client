@@ -132,8 +132,8 @@ public class PlayerUdpClient : MonoBehaviour
 
     void DisplayBlock(int x, int y, int z)
     {
-        Voxel voxel = region.getVoxel(x, y, z);
-        BlockType block = blockPalette.blocks.Find(b => b.id == voxel.id);
+        int voxel = region.getVoxel(x, y, z);
+        BlockType block = blockPalette.blocks[voxel];
         block.OnTextureLoaded += () =>
         {
             Texture2D texture = block.texture2D;
@@ -155,8 +155,8 @@ public class PlayerUdpClient : MonoBehaviour
         Chunk chunk = region.chunks[0, 0, 0];
         ChunkMesh chunkMesh = new ChunkMesh();
         chunks[0] = chunkMesh;
-        Voxel voxel = region.getVoxel(x, y, z);
-        chunkMesh.AddBlockToMesh(x, y, z, voxel.id, blockPalette);
+        int voxel = region.getVoxel(x, y, z);
+        chunkMesh.AddBlockToMesh(x, y, z, blockPalette.blocks[voxel], blockPalette);
     }
 
     void DisplayRegion() {
@@ -174,8 +174,8 @@ public class PlayerUdpClient : MonoBehaviour
                         {
                             for (int cz = 0; cz < Chunk.CHUNK_SIZE; cz++)
                             {
-                                Voxel voxel = chunk.getVoxel(cx, cy, cz);
-                                if (voxel.id == air)
+                                int voxel = chunk.getVoxel(cx, cy, cz);
+                                if (voxel == 0)
                                 {
                                     continue;
                                 }
