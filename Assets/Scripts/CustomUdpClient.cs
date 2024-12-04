@@ -12,18 +12,18 @@ using Newtonsoft.Json;
 
 public class CustomUdpClient : MonoBehaviour
 {
-    public const string ip = "127.0.0.1";
-    public const int serverPort = 4000;
-    public const string username = "Entity";
-    public const int clientPort = 6000;
-    public int index;
+    public static string ip = "127.0.0.1";
+    public static int serverPort = 4000;
+    public static string username = "Entity";
+    int clientPort;
+    int index;
     public GameObject userPrefab;
-    public List<GameObject> connectedUsers = new List<GameObject>();
-    public BlockPalette blockPalette;
-    public Region region;
-    public ApiClient apiClient = new ApiClient();
+    List<GameObject> connectedUsers = new List<GameObject>();
+    BlockPalette blockPalette;
+    Region region;
+    ApiClient apiClient = new ApiClient();
 
-    public ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
+    ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
 
     UdpClient client;
     IPEndPoint remoteIpEndPoint;
@@ -32,6 +32,7 @@ public class CustomUdpClient : MonoBehaviour
     {
         try
         {
+            clientPort = generateEphemeralPort();
             client = new UdpClient(clientPort);
             remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
             client.Connect(remoteIpEndPoint);
@@ -63,9 +64,19 @@ public class CustomUdpClient : MonoBehaviour
         if (Input.GetKey(KeyCode.S)) transform.Translate(Vector3.back * Time.deltaTime * 10);
         if (Input.GetKey(KeyCode.A)) transform.Translate(Vector3.left * Time.deltaTime * 10);
         if (Input.GetKey(KeyCode.D)) transform.Translate(Vector3.right * Time.deltaTime * 10);
+        if (Input.GetKey(KeyCode.Space)) transform.Translate(Vector3.up * Time.deltaTime * 10);
+        if (Input.GetKey(KeyCode.LeftShift)) transform.Translate(Vector3.down * Time.deltaTime * 10);
         if (Input.GetKeyDown(KeyCode.T)) SendChatMessage("Hello World!");
         if (Input.GetKeyDown(KeyCode.Y)) LogGameState();
         Send($"position\t{index}\t{transform.position.x}\t{transform.position.y}\t{transform.position.z}");
+    }
+
+    int generateEphemeralPort()
+    {
+        UdpClient tempClient = new UdpClient(0);
+        int port = ((IPEndPoint)tempClient.Client.LocalEndPoint).Port;
+        tempClient.Close();
+        return port;
     }
 
     // send function
@@ -306,11 +317,6 @@ public class CustomUdpClient : MonoBehaviour
     void PrintChatMessage(string message)
     {
         print(message);
-    }
-    
-    Block jsonToBlock(string json)
-    {
-        return JsonConvert.DeserializeObject<Block>(json);
     }
 
     void LogGameState()
