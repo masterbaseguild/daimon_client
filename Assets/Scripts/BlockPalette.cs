@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
+using System.Collections;
+using UnityEngine.Networking;
 
 public class BlockPalette
 {
@@ -18,6 +21,29 @@ public class BlockPalette
         GenerateTextureAtlas(chunks);
     }
 
+    public static void LoadTexture(string url, Action<Texture2D> onTextureLoaded)
+    {
+        MainThreadDispatcher.Instance.StartCoroutine(LoadTextureCoroutine(url, onTextureLoaded));
+    }
+
+    static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)
+    {
+        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(url))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                onTextureLoaded?.Invoke(null);
+            }
+            else
+            {
+                Texture2D texture = DownloadHandlerTexture.GetContent(www);
+                onTextureLoaded?.Invoke(texture);
+            }
+        }
+    }
+
     void GenerateTextureAtlas(ChunkMesh[] chunks)
     {
         textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE);
@@ -29,7 +55,7 @@ public class BlockPalette
         {
             if (!string.IsNullOrEmpty(block.GetTexture()))
             {
-                TextureLoader.LoadTexture(block.GetTexture(), (texture2D) =>
+                LoadTexture(block.GetTexture(), (texture2D) =>
                 {
                     block.SetTexture2D(texture2D);
 

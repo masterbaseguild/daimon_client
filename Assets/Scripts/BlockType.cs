@@ -20,7 +20,7 @@ public class BlockType
         this.texture = texture;
         if (!string.IsNullOrEmpty(texture))
         {
-            TextureLoader.LoadTexture(texture, (texture2D) =>
+            BlockPalette.LoadTexture(texture, (texture2D) =>
             {
                 this.texture2D = texture2D;
                 OnTextureLoaded?.Invoke();
