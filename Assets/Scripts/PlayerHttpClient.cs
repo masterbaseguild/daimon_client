@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-public class ApiClient
+public class PlayerHttpClient
 {
     public string endpoint = "https://api.projectdaimon.com/";
     public HttpClient client = new HttpClient();

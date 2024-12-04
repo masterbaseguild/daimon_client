@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class OtherUser : MonoBehaviour
+public class User : MonoBehaviour
 {
     public string username;
     public int index;

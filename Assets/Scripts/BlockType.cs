@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public class Block
+public class BlockType
 {
     public string id;
     public string display;
@@ -11,7 +11,7 @@ public class Block
     public Texture2D texture2D;
     public Action OnTextureLoaded;
 
-    public Block(string id, string display, bool isOpaque, bool isConcrete, string texture)
+    public BlockType(string id, string display, bool isOpaque, bool isConcrete, string texture)
     {
         this.id = id;
         this.display = display;

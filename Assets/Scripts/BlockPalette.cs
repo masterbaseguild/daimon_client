@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 public class BlockPalette
 {
-    public List<Block> blocks = new List<Block>();
+    public List<BlockType> blocks = new List<BlockType>();
     public int TEXTURE_SIZE = 16;
     // texture atlas
     public Texture2D textureAtlas;
@@ -27,7 +27,7 @@ public class BlockPalette
         textureAtlas.wrapMode = TextureWrapMode.Clamp;
 
         int xOffset = 0;
-        foreach (Block block in blocks)
+        foreach (BlockType block in blocks)
         {
             if (!string.IsNullOrEmpty(block.texture))
             {
@@ -65,13 +65,13 @@ public class BlockPalette
         }
     }
     
-    private Block jsonToBlock(string json)
+    private BlockType jsonToBlock(string json)
     {
-        return JsonConvert.DeserializeObject<Block>(json);
+        return JsonConvert.DeserializeObject<BlockType>(json);
     }
 
     // get texture coordinates for a block
-    public Vector2[] GetBlockUVs(Block block)
+    public Vector2[] GetBlockUVs(BlockType block)
     {
         int x = blocks.IndexOf(block) * TEXTURE_SIZE;
         float atlasWidth = textureAtlas.width;
@@ -89,7 +89,7 @@ public class BlockPalette
 
     public Vector2[] GetBlockUVs(string id)
     {
-        Block block = blocks.Find(b => b.id == id);
+        BlockType block = blocks.Find(b => b.id == id);
         return GetBlockUVs(block);
     }
 }

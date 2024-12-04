@@ -10,7 +10,7 @@ using System.IO.Compression;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-public class CustomUdpClient : MonoBehaviour
+public class PlayerUdpClient : MonoBehaviour
 {
     public static string ip = "127.0.0.1";
     public static int serverPort = 4000;
@@ -21,7 +21,7 @@ public class CustomUdpClient : MonoBehaviour
     List<GameObject> connectedUsers = new List<GameObject>();
     BlockPalette blockPalette;
     Region region;
-    ApiClient apiClient = new ApiClient();
+    PlayerHttpClient apiClient = new PlayerHttpClient();
 
     ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
 
@@ -114,7 +114,7 @@ public class CustomUdpClient : MonoBehaviour
 
     void DisplayBlockTexture(int index)
     {
-        Block block = blockPalette.blocks[index];
+        BlockType block = blockPalette.blocks[index];
         block.OnTextureLoaded += () =>
         {
             Texture2D texture = block.texture2D;
@@ -133,7 +133,7 @@ public class CustomUdpClient : MonoBehaviour
     void DisplayBlock(int x, int y, int z)
     {
         Voxel voxel = region.getVoxel(x, y, z);
-        Block block = blockPalette.blocks.Find(b => b.id == voxel.id);
+        BlockType block = blockPalette.blocks.Find(b => b.id == voxel.id);
         block.OnTextureLoaded += () =>
         {
             Texture2D texture = block.texture2D;
@@ -209,7 +209,7 @@ public class CustomUdpClient : MonoBehaviour
                         float positionX = float.Parse(packet.data[i + 1]);
                         float positionY = float.Parse(packet.data[i + 2]);
                         float positionZ = float.Parse(packet.data[i + 3]);
-                        GameObject positionUser = connectedUsers.Find(user => user.GetComponent<OtherUser>().index == positionIndex);
+                        GameObject positionUser = connectedUsers.Find(user => user.GetComponent<User>().index == positionIndex);
                         if(positionUser == null)
                         {
                             continue;
@@ -226,13 +226,13 @@ public class CustomUdpClient : MonoBehaviour
                         PrintChatMessage($"{chatUsername}: {chatMessage}");
                         return;
                     }
-                    GameObject chatUser = connectedUsers.Find(user => user.GetComponent<OtherUser>().index == chatIndex);
+                    GameObject chatUser = connectedUsers.Find(user => user.GetComponent<User>().index == chatIndex);
                     if (chatUser == null)
                     {
                         PrintChatMessage($"{chatUsername}: {chatMessage}");
                         return;
                     }
-                    PrintChatMessage($"{chatUser.GetComponent<OtherUser>().username}: {chatMessage}");
+                    PrintChatMessage($"{chatUser.GetComponent<User>().username}: {chatMessage}");
                     break;
                 case "confirmconnect":
                     print($"Connected with index: {packet.data[0]}");
@@ -246,8 +246,8 @@ public class CustomUdpClient : MonoBehaviour
                         }
                         string firstUsername = packet.data[i + 1];
                         GameObject firstUser = Instantiate(userPrefab);
-                        firstUser.GetComponent<OtherUser>().index = firstIndex;
-                        firstUser.GetComponent<OtherUser>().username = firstUsername;
+                        firstUser.GetComponent<User>().index = firstIndex;
+                        firstUser.GetComponent<User>().username = firstUsername;
                         connectedUsers.Add(firstUser);
                     }
                     Send($"region");
@@ -284,8 +284,8 @@ public class CustomUdpClient : MonoBehaviour
                     }
                     string connectedUsername = packet.data[1];
                     GameObject connectedUser = Instantiate(userPrefab);
-                    connectedUser.GetComponent<OtherUser>().index = connectedIndex;
-                    connectedUser.GetComponent<OtherUser>().username = connectedUsername;
+                    connectedUser.GetComponent<User>().index = connectedIndex;
+                    connectedUser.GetComponent<User>().username = connectedUsername;
                     connectedUsers.Add(connectedUser);
                     break;
                 case "userdisconnected":
@@ -294,7 +294,7 @@ public class CustomUdpClient : MonoBehaviour
                     {
                         return;
                     }
-                    GameObject disconnectedUser = connectedUsers.Find(user => user.GetComponent<OtherUser>().index == disconnectedIndex);
+                    GameObject disconnectedUser = connectedUsers.Find(user => user.GetComponent<User>().index == disconnectedIndex);
                     if (disconnectedUser == null)
                     {
                         return;
@@ -328,7 +328,7 @@ public class CustomUdpClient : MonoBehaviour
         log += $"connectedUsers: {connectedUsers.Count}\n";
         foreach (GameObject user in connectedUsers)
         {
-            log += $"\t{user.GetComponent<OtherUser>().index} {user.GetComponent<OtherUser>().username}\n";
+            log += $"\t{user.GetComponent<User>().index} {user.GetComponent<User>().username}\n";
         }
         log += $"position: {transform.position}\n";
         print(log);
