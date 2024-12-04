@@ -5,12 +5,12 @@ using System.Linq;
 
 public class Region
 {
-    public const int REGION_SIZE = 16;
-    public const int HEADER_BLOCK_SIZE = 6;
-    public const int HEADER_BLOCK_COUNT = 256;
-    public const int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
-    public Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
-    public List<string> Header { get; } = new List<string>();
+    public static int REGION_SIZE = 16;
+    static int HEADER_BLOCK_SIZE = 6;
+    static int HEADER_BLOCK_COUNT = 256;
+    static int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
+    Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
+    List<string> Header = new List<string>();
 
     public Region()
     {
@@ -67,14 +67,14 @@ public class Region
         }
     }
 
+    public string getHeaderLine(int index)
+    {
+        return Header[index];
+    }
+
     public Chunk getChunk(int x, int y, int z)
     {
         return chunks[x, y, z];
-    }
-
-    public void setChunk(int x, int y, int z, Chunk chunk)
-    {
-        chunks[x, y, z] = chunk;
     }
 
     public int getVoxel(int x, int y, int z)
@@ -88,7 +88,7 @@ public class Region
         return chunks[chunkX, chunkY, chunkZ].getVoxel(voxelX, voxelY, voxelZ);
     }
 
-    public void setVoxel(int x, int y, int z, int voxel)
+    void setVoxel(int x, int y, int z, int voxel)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;

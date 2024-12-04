@@ -4,12 +4,10 @@ using Newtonsoft.Json;
 
 public class BlockPalette
 {
-    public List<BlockType> blocks = new List<BlockType>();
-    public int TEXTURE_SIZE = 16;
+    List<BlockType> blocks = new List<BlockType>();
+    static int TEXTURE_SIZE = 16;
     // texture atlas
-    public Texture2D textureAtlas;
-
-    public bool isAtlasReady = false;
+    Texture2D textureAtlas;
 
     public BlockPalette(string[] blocks, ChunkMesh[] chunks)
     {
@@ -20,7 +18,7 @@ public class BlockPalette
         GenerateTextureAtlas(chunks);
     }
 
-    private void GenerateTextureAtlas(ChunkMesh[] chunks)
+    void GenerateTextureAtlas(ChunkMesh[] chunks)
     {
         textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE);
         textureAtlas.filterMode = FilterMode.Point;
@@ -29,11 +27,11 @@ public class BlockPalette
         int xOffset = 0;
         foreach (BlockType block in blocks)
         {
-            if (!string.IsNullOrEmpty(block.texture))
+            if (!string.IsNullOrEmpty(block.GetTexture()))
             {
-                TextureLoader.LoadTexture(block.texture, (texture2D) =>
+                TextureLoader.LoadTexture(block.GetTexture(), (texture2D) =>
                 {
-                    block.texture2D = texture2D;
+                    block.SetTexture2D(texture2D);
 
                     if (xOffset + TEXTURE_SIZE > textureAtlas.width)
                     {
@@ -47,7 +45,6 @@ public class BlockPalette
 
                     if (xOffset >= textureAtlas.width)
                     {
-                        isAtlasReady = true;
                         ApplyTextureToMaterial(chunks);
                     }
                 });
@@ -55,17 +52,17 @@ public class BlockPalette
         }
     }
 
-    private void ApplyTextureToMaterial(ChunkMesh[] chunks)
+    void ApplyTextureToMaterial(ChunkMesh[] chunks)
     {
         Material material = new Material(Shader.Find("Unlit/Texture"));
         material.mainTexture = textureAtlas;
         foreach (ChunkMesh chunk in chunks)
         {
-            chunk.gameObject.GetComponent<MeshRenderer>().material = material;
+            chunk.SetMaterial(material);
         }
     }
     
-    private BlockType jsonToBlock(string json)
+    BlockType jsonToBlock(string json)
     {
         return JsonConvert.DeserializeObject<BlockType>(json);
     }
@@ -88,13 +85,5 @@ public class BlockPalette
             new Vector2((x + TEXTURE_SIZE) / atlasWidth, TEXTURE_SIZE / atlasHeight),
             new Vector2(x / atlasWidth, TEXTURE_SIZE / atlasHeight)
         };
-    }
-
-    // get texture coordinates for a block by id
-
-    public Vector2[] GetBlockUVs(string id)
-    {
-        BlockType block = blocks.Find(b => b.id == id);
-        return GetBlockUVs(block);
     }
 }

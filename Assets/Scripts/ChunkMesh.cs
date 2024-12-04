@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 public class ChunkMesh
 {
-    public GameObject gameObject;
-    private Mesh mesh = new Mesh();
-    private List<Vector3> vertices = new List<Vector3>();
-    private List<int> triangles = new List<int>();
-    private List<Vector2> uvs = new List<Vector2>();
+    GameObject gameObject;
+    Mesh mesh = new Mesh();
+    List<Vector3> vertices = new List<Vector3>();
+    List<int> triangles = new List<int>();
+    List<Vector2> uvs = new List<Vector2>();
 
     public ChunkMesh()
     {
@@ -18,9 +18,14 @@ public class ChunkMesh
         meshFilter.mesh = mesh;
     }
 
-    public void AddBlockToMesh(int x, int y, int z, BlockType type, BlockPalette BlockPalette)
+    public void SetMaterial(Material material)
     {
-        string id = type.id;
+        gameObject.GetComponent<MeshRenderer>().material = material;
+    }
+
+    public void AddBlockToMesh(int x, int y, int z, int voxel, BlockPalette BlockPalette)
+    {
+        BlockType type = BlockPalette.GetBlockType(voxel);
         Vector3[] cubeVertices = new Vector3[]
         {
             new Vector3(x, y, z),
@@ -73,7 +78,7 @@ public class ChunkMesh
         UpdateMesh();
     }
 
-    public void UpdateMesh()
+    void UpdateMesh()
     {
         if (vertices.Count != uvs.Count)
         {

@@ -15,7 +15,7 @@ public class Packet
         this.data = split.Skip(1).ToArray();
     }
 
-    public byte[] parseData()
+    public byte[] parseRegionData()
     {
         string data = this.data[0];
         byte[] bytes = Convert.FromBase64String(data);
@@ -23,7 +23,7 @@ public class Packet
         return decompressed;
     }
 
-    private byte[] zlibDecompress(byte[] data)
+    byte[] zlibDecompress(byte[] data)
     {
         using (MemoryStream input = new MemoryStream(data))
         {

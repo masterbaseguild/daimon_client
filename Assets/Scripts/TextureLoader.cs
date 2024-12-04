@@ -10,7 +10,7 @@ public static class TextureLoader
         MainThreadDispatcher.Instance.StartCoroutine(LoadTextureCoroutine(url, onTextureLoaded));
     }
 
-    private static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)
+    static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)
     {
         using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(url))
         {

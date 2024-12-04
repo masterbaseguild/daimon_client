@@ -12,9 +12,9 @@ using Newtonsoft.Json;
 
 public class PlayerUdpClient : MonoBehaviour
 {
-    public static string ip = "127.0.0.1";
-    public static int serverPort = 4000;
-    public static string username = "Entity";
+    static string ip = "127.0.0.1";
+    static int serverPort = 4000;
+    static string username = "Entity";
     int clientPort;
     int index;
     public GameObject userPrefab;
@@ -114,10 +114,10 @@ public class PlayerUdpClient : MonoBehaviour
 
     void DisplayBlockTexture(int index)
     {
-        BlockType block = blockPalette.blocks[index];
+        BlockType block = blockPalette.GetBlockType(index);
         block.OnTextureLoaded += () =>
         {
-            Texture2D texture = block.texture2D;
+            Texture2D texture = block.GetTexture2D();
 
             if (texture != null)
             {
@@ -133,10 +133,10 @@ public class PlayerUdpClient : MonoBehaviour
     void DisplayBlock(int x, int y, int z)
     {
         int voxel = region.getVoxel(x, y, z);
-        BlockType block = blockPalette.blocks[voxel];
+        BlockType block = blockPalette.GetBlockType(voxel);
         block.OnTextureLoaded += () =>
         {
-            Texture2D texture = block.texture2D;
+            Texture2D texture = block.GetTexture2D();
             // set filter to point to prevent blurring
             texture.filterMode = FilterMode.Point;
 
@@ -145,29 +145,28 @@ public class PlayerUdpClient : MonoBehaviour
                 GameObject blockObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 blockObject.transform.position = new Vector3(x, y, z);
                 blockObject.GetComponent<Renderer>().material.mainTexture = texture;
-                blockObject.GetComponent<Renderer>().material.mainTexture = block.texture2D;
+                blockObject.GetComponent<Renderer>().material.mainTexture = block.GetTexture2D();
             }
         };
     }
 
     void DisplayChunk(int x, int y, int z)
     {
-        Chunk chunk = region.chunks[0, 0, 0];
+        Chunk chunk = region.getChunk(0, 0, 0);
         ChunkMesh chunkMesh = new ChunkMesh();
         chunks[0] = chunkMesh;
         int voxel = region.getVoxel(x, y, z);
-        chunkMesh.AddBlockToMesh(x, y, z, blockPalette.blocks[voxel], blockPalette);
+        chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette);
     }
 
     void DisplayRegion() {
-        const string air = "000000000000";
         for (int x = 0; x < Region.REGION_SIZE; x++)
         {
             for (int y = 0; y < Region.REGION_SIZE; y++)
             {
                 for (int z = 0; z < Region.REGION_SIZE; z++)
                 {
-                    Chunk chunk = region.chunks[x, y, z];
+                    Chunk chunk = region.getChunk(x, y, z);
                     for (int cx = 0; cx < Chunk.CHUNK_SIZE; cx++)
                     {
                         for (int cy = 0; cy < Chunk.CHUNK_SIZE; cy++)
@@ -253,13 +252,13 @@ public class PlayerUdpClient : MonoBehaviour
                     Send($"region");
                     break;
                 case "confirmregion":
-                    region = new Region(packet.parseData());
+                    region = new Region(packet.parseRegionData());
                     print($"First 3 Lines of Region Header:");
                     List<Task<string>> tasks = new List<Task<string>>();
                     for (int i = 0; i < 3; i++)
                     {
-                        print(region.Header[i]);
-                        tasks.Add(apiClient.GetResource("item", region.Header[i]));
+                        print(region.getHeaderLine(i));
+                        tasks.Add(apiClient.GetResource("item", region.getHeaderLine(i)));
                     }
                     string[] results = await Task.WhenAll(tasks);
                     blockPalette = new BlockPalette(results, chunks);

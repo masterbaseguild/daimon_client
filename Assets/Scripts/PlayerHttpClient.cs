@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 public class PlayerHttpClient
 {
-    public string endpoint = "https://api.projectdaimon.com/";
-    public HttpClient client = new HttpClient();
+    static string endpoint = "https://api.projectdaimon.com/";
+    HttpClient client = new HttpClient();
 
     //the following method requests a resource of given type and given id, and returns it as a json string
     public async Task<string> GetResource(string type, string id)

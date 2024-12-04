@@ -5,8 +5,8 @@ using System.Linq;
 
 public class Chunk
 {
-    public const int CHUNK_SIZE = 16;
-    public int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
+    public static int CHUNK_SIZE = 16;
+    int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
 
     public Chunk()
     {

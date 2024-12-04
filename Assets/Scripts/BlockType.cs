@@ -3,12 +3,12 @@ using System;
 
 public class BlockType
 {
-    public string id;
-    public string display;
-    public bool isOpaque;
-    public bool isConcrete;
-    public string texture;
-    public Texture2D texture2D;
+    string id;
+    string display;
+    bool isOpaque;
+    bool isConcrete;
+    string texture;
+    Texture2D texture2D;
     public Action OnTextureLoaded;
 
     public BlockType(string id, string display, bool isOpaque, bool isConcrete, string texture)
@@ -30,5 +30,20 @@ public class BlockType
         {
             this.texture2D = null;
         }
+    }
+
+    public string GetTexture()
+    {
+        return texture;
+    }
+
+    public void SetTexture2D(Texture2D texture2D)
+    {
+        this.texture2D = texture2D;
+    }
+
+    public Texture2D GetTexture2D()
+    {
+        return texture2D;
     }
 }
