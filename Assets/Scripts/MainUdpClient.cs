@@ -10,22 +10,14 @@ using System.IO.Compression;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-public class PlayerUdpClient : MonoBehaviour
+public class MainUdpClient : MonoBehaviour
 {
     static string ip = "127.0.0.1";
     static int serverPort = 4000;
     static string username = "Entity";
     int clientPort;
-    int index;
-    public GameObject userPrefab;
-    List<GameObject> connectedUsers = new List<GameObject>();
-    BlockPalette blockPalette;
-    Region region;
-    PlayerHttpClient apiClient = new PlayerHttpClient();
-
-    ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
-
-    UdpClient client;
+    static int index;
+    static UdpClient client;
     IPEndPoint remoteIpEndPoint;
 
     void Start()
@@ -37,20 +29,6 @@ public class PlayerUdpClient : MonoBehaviour
             remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
             client.Connect(remoteIpEndPoint);
             client.BeginReceive(Get, null);
-            print("Attempting to connect to API...");
-            apiClient.Ping().ContinueWith(task =>
-            {
-                if (task.Result)
-                {
-                    print("Connected to API!");
-                    Send($"connect\t0\t{username}");
-                }
-                else
-                {
-                    print("Failed to connect to API!");
-                    Application.Quit();
-                }
-            });
         }
         catch (Exception e)
         {
@@ -60,15 +38,8 @@ public class PlayerUdpClient : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.W)) transform.Translate(Vector3.forward * Time.deltaTime * 10);
-        if (Input.GetKey(KeyCode.S)) transform.Translate(Vector3.back * Time.deltaTime * 10);
-        if (Input.GetKey(KeyCode.A)) transform.Translate(Vector3.left * Time.deltaTime * 10);
-        if (Input.GetKey(KeyCode.D)) transform.Translate(Vector3.right * Time.deltaTime * 10);
-        if (Input.GetKey(KeyCode.Space)) transform.Translate(Vector3.up * Time.deltaTime * 10);
-        if (Input.GetKey(KeyCode.LeftShift)) transform.Translate(Vector3.down * Time.deltaTime * 10);
-        if (Input.GetKeyDown(KeyCode.T)) SendChatMessage("Hello World!");
-        if (Input.GetKeyDown(KeyCode.Y)) LogGameState();
-        Send($"position\t{index}\t{transform.position.x}\t{transform.position.y}\t{transform.position.z}");
+        Vector3 position = MainUser.GetPosition();
+        Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}");
     }
 
     int generateEphemeralPort()
@@ -80,7 +51,7 @@ public class PlayerUdpClient : MonoBehaviour
     }
 
     // send function
-    void Send(string data)
+    static void Send(string data)
     {
         try
         {
@@ -91,6 +62,11 @@ public class PlayerUdpClient : MonoBehaviour
         {
             print(e.ToString());
         }
+    }
+
+    public static void Connect()
+    {
+        Send($"connect\t0\t{username}");
     }
 
     // get callback
@@ -112,81 +88,6 @@ public class PlayerUdpClient : MonoBehaviour
         }
     }
 
-    void DisplayBlockTexture(int index)
-    {
-        BlockType block = blockPalette.GetBlockType(index);
-        block.OnTextureLoaded += () =>
-        {
-            Texture2D texture = block.GetTexture2D();
-
-            if (texture != null)
-            {
-                // Create a Quad to display the texture
-                GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                quad.transform.position = new Vector3(0, 100, 0); // Position the Quad as needed
-                quad.transform.Rotate(90, 0, 0); // Rotate the Quad as needed
-                quad.GetComponent<Renderer>().material.mainTexture = texture;
-            }
-        };
-    }
-
-    void DisplayBlock(int x, int y, int z)
-    {
-        int voxel = region.getVoxel(x, y, z);
-        BlockType block = blockPalette.GetBlockType(voxel);
-        block.OnTextureLoaded += () =>
-        {
-            Texture2D texture = block.GetTexture2D();
-            // set filter to point to prevent blurring
-            texture.filterMode = FilterMode.Point;
-
-            if (texture != null)
-            {
-                GameObject blockObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                blockObject.transform.position = new Vector3(x, y, z);
-                blockObject.GetComponent<Renderer>().material.mainTexture = texture;
-                blockObject.GetComponent<Renderer>().material.mainTexture = block.GetTexture2D();
-            }
-        };
-    }
-
-    void DisplayChunk(int x, int y, int z)
-    {
-        Chunk chunk = region.getChunk(0, 0, 0);
-        ChunkMesh chunkMesh = new ChunkMesh();
-        chunks[0] = chunkMesh;
-        int voxel = region.getVoxel(x, y, z);
-        chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette);
-    }
-
-    void DisplayRegion() {
-        for (int x = 0; x < Region.REGION_SIZE; x++)
-        {
-            for (int y = 0; y < Region.REGION_SIZE; y++)
-            {
-                for (int z = 0; z < Region.REGION_SIZE; z++)
-                {
-                    Chunk chunk = region.getChunk(x, y, z);
-                    for (int cx = 0; cx < Chunk.CHUNK_SIZE; cx++)
-                    {
-                        for (int cy = 0; cy < Chunk.CHUNK_SIZE; cy++)
-                        {
-                            for (int cz = 0; cz < Chunk.CHUNK_SIZE; cz++)
-                            {
-                                int voxel = chunk.getVoxel(cx, cy, cz);
-                                if (voxel == 0)
-                                {
-                                    continue;
-                                }
-                                DisplayBlock(x * Chunk.CHUNK_SIZE + cx, y * Chunk.CHUNK_SIZE + cy, z * Chunk.CHUNK_SIZE + cz);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     void HandlePacket(Packet packet)
     {
         MainThreadDispatcher.Enqueue(async () =>
@@ -194,7 +95,7 @@ public class PlayerUdpClient : MonoBehaviour
             switch (packet.type)
             {
                 case "allpositions":
-                    if (packet.data.Length / 4 != (connectedUsers.Count + 1))
+                    if (packet.data.Length / 4 != (People.GetCount()))
                     {
                         return;
                     }
@@ -208,12 +109,7 @@ public class PlayerUdpClient : MonoBehaviour
                         float positionX = float.Parse(packet.data[i + 1]);
                         float positionY = float.Parse(packet.data[i + 2]);
                         float positionZ = float.Parse(packet.data[i + 3]);
-                        GameObject positionUser = connectedUsers.Find(user => user.GetComponent<User>().index == positionIndex);
-                        if(positionUser == null)
-                        {
-                            continue;
-                        }
-                        positionUser.transform.position = new Vector3(positionX, positionY, positionZ);
+                        People.setPosition(positionIndex, positionX, positionY, positionZ);
                     }
                     break;
                 case "chatmessage":
@@ -225,7 +121,7 @@ public class PlayerUdpClient : MonoBehaviour
                         PrintChatMessage($"{chatUsername}: {chatMessage}");
                         return;
                     }
-                    GameObject chatUser = connectedUsers.Find(user => user.GetComponent<User>().index == chatIndex);
+                    GameObject chatUser = People.GetUserGameObject(chatIndex);
                     if (chatUser == null)
                     {
                         PrintChatMessage($"{chatUsername}: {chatMessage}");
@@ -244,28 +140,25 @@ public class PlayerUdpClient : MonoBehaviour
                             continue;
                         }
                         string firstUsername = packet.data[i + 1];
-                        GameObject firstUser = Instantiate(userPrefab);
-                        firstUser.GetComponent<User>().index = firstIndex;
-                        firstUser.GetComponent<User>().username = firstUsername;
-                        connectedUsers.Add(firstUser);
+                        People.AddUser(firstIndex, firstUsername);
                     }
                     Send($"region");
                     break;
                 case "confirmregion":
-                    region = new Region(packet.parseRegionData());
+                    World.SetRegion(packet.parseRegionData());
                     print($"First 3 Lines of Region Header:");
                     List<Task<string>> tasks = new List<Task<string>>();
                     for (int i = 0; i < 3; i++)
                     {
-                        print(region.getHeaderLine(i));
-                        tasks.Add(apiClient.GetResource("item", region.getHeaderLine(i)));
+                        print(World.GetRegion().getHeaderLine(i));
+                        tasks.Add(MainHttpClient.GetResource("item", World.GetRegion().getHeaderLine(i)));
                     }
                     string[] results = await Task.WhenAll(tasks);
-                    blockPalette = new BlockPalette(results, chunks);
-                    //DisplayBlockTexture(2);
-                    //DisplayBlock(100, 100, 100);
-                    //DisplayRegion();
-                    DisplayChunk(100, 100, 100);
+                    World.SetBlockPalette(results);
+                    //World.DisplayBlockTexture(2);
+                    //World.DisplayBlock(100, 100, 100);
+                    //World.DisplayRegion();
+                    World.DisplayChunk(100, 100, 100);
                     break;
                 case "conflict":
                     PrintChatMessage("Username already taken!");
@@ -282,10 +175,7 @@ public class PlayerUdpClient : MonoBehaviour
                         return;
                     }
                     string connectedUsername = packet.data[1];
-                    GameObject connectedUser = Instantiate(userPrefab);
-                    connectedUser.GetComponent<User>().index = connectedIndex;
-                    connectedUser.GetComponent<User>().username = connectedUsername;
-                    connectedUsers.Add(connectedUser);
+                    People.AddUser(connectedIndex, connectedUsername);
                     break;
                 case "userdisconnected":
                     int disconnectedIndex = int.Parse(packet.data[0]);
@@ -293,13 +183,7 @@ public class PlayerUdpClient : MonoBehaviour
                     {
                         return;
                     }
-                    GameObject disconnectedUser = connectedUsers.Find(user => user.GetComponent<User>().index == disconnectedIndex);
-                    if (disconnectedUser == null)
-                    {
-                        return;
-                    }
-                    connectedUsers.Remove(disconnectedUser);
-                    Destroy(disconnectedUser);
+                    People.RemoveUser(disconnectedIndex);
                     break;
                 default:
                     print($"Unknown packet type: {packet.type}");
@@ -308,7 +192,7 @@ public class PlayerUdpClient : MonoBehaviour
         });
     }
 
-    void SendChatMessage(string message)
+    public static void SendChatMessage(string message)
     {
         Send($"chat\t{index}\t{message}");
     }
@@ -318,18 +202,19 @@ public class PlayerUdpClient : MonoBehaviour
         print(message);
     }
 
-    void LogGameState()
+    public static void LogGameState()
     {
         print("Logging game state...");
         string log = "";
         log += $"index: {index}\n";
         log += $"username: {username}\n";
-        log += $"connectedUsers: {connectedUsers.Count}\n";
+        log += $"connectedUsers: {People.GetCount()}\n";
+        List<GameObject> connectedUsers = People.GetUsers();
         foreach (GameObject user in connectedUsers)
         {
             log += $"\t{user.GetComponent<User>().index} {user.GetComponent<User>().username}\n";
         }
-        log += $"position: {transform.position}\n";
+        log += $"position: {MainUser.GetPosition()}\n";
         print(log);
     }
 
