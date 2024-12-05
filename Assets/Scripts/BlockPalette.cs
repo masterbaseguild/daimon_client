@@ -11,6 +11,7 @@ public class BlockPalette
     static int TEXTURE_SIZE = 16;
     // texture atlas
     static Texture2D textureAtlas;
+    public static Material material = new Material(Shader.Find("Unlit/Texture"));
 
     static Action OnAllTexturesLoaded;
 
@@ -82,6 +83,7 @@ public class BlockPalette
             Debug.Log("All textures loaded");
             textureAtlas.Apply();
             saveTextureToDisk(textureAtlas);
+            material.mainTexture = textureAtlas;
         };
     }
 
@@ -105,16 +107,6 @@ public class BlockPalette
                 break;
             }
             yield return null;
-        }
-    }
-
-    void ApplyTextureToMaterial(ChunkMesh[] chunks)
-    {
-        Material material = new Material(Shader.Find("Unlit/Texture"));
-        material.mainTexture = textureAtlas;
-        foreach (ChunkMesh chunk in chunks)
-        {
-            chunk.SetMaterial(material);
         }
     }
     

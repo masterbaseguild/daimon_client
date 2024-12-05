@@ -14,7 +14,7 @@ public class ChunkMesh
         gameObject = new GameObject();
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find("Unlit/Texture"));
+        meshRenderer.material = BlockPalette.material;
         meshFilter.mesh = mesh;
     }
 
