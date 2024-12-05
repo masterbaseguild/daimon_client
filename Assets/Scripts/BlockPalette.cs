@@ -7,16 +7,18 @@ using UnityEngine.Networking;
 
 public class BlockPalette
 {
-    List<BlockType> blocks = new List<BlockType>();
+    static List<BlockType> blocks = new List<BlockType>();
     static int TEXTURE_SIZE = 16;
     // texture atlas
-    Texture2D textureAtlas;
+    static Texture2D textureAtlas;
+
+    static Action OnAllTexturesLoaded;
 
     public BlockPalette(string[] blocks, ChunkMesh[] chunks)
     {
         foreach (string block in blocks)
         {
-            this.blocks.Add(jsonToBlock(block));
+            BlockPalette.blocks.Add(jsonToBlock(block));
         }
         GenerateTextureAtlas(chunks);
     }
@@ -44,37 +46,65 @@ public class BlockPalette
         }
     }
 
-    void GenerateTextureAtlas(ChunkMesh[] chunks)
+    // debug function to save texture to disk
+    static void saveTextureToDisk(Texture2D texture)
     {
+        string macPath = "/Users/entity/Downloads/texture.png";
+        string winPath = "C:\\Users\\entity\\Downloads\\texture.png";
+        string path = Application.platform == RuntimePlatform.OSXEditor ? macPath : winPath;
+        byte[] bytes = texture.EncodeToPNG();
+        System.IO.File.WriteAllBytes(path, bytes);
+        Debug.Log("Saved texture to " + path);
+    }
+
+    static void GenerateTextureAtlas(ChunkMesh[] chunks)
+    {
+        Debug.Log("Generating texture atlas for " + blocks.Count + " blocks");
         textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE);
         textureAtlas.filterMode = FilterMode.Point;
         textureAtlas.wrapMode = TextureWrapMode.Clamp;
+        Debug.Log("Texture atlas size: " + textureAtlas.width + "x" + textureAtlas.height);
 
         int xOffset = 0;
         foreach (BlockType block in blocks)
         {
-            if (!string.IsNullOrEmpty(block.GetTexture()))
+            block.OnTextureLoaded += () =>
             {
-                LoadTexture(block.GetTexture(), (texture2D) =>
+                Debug.Log("Adding texture for block " + block.GetTexture());
+                textureAtlas.SetPixels(xOffset, 0, TEXTURE_SIZE, TEXTURE_SIZE, block.GetTexture2D().GetPixels());
+                xOffset += TEXTURE_SIZE;
+                Debug.Log("Done adding texture for block " + block.GetTexture());
+            };
+        }
+        MainThreadDispatcher.Instance.StartCoroutine(AllTexturesLoadedCoroutine());
+        OnAllTexturesLoaded += () =>
+        {
+            Debug.Log("All textures loaded");
+            textureAtlas.Apply();
+            saveTextureToDisk(textureAtlas);
+        };
+    }
+
+    static IEnumerator AllTexturesLoadedCoroutine() {
+        Debug.Log("Waiting for all textures to load");
+        while (true)
+        {
+            bool allLoaded = true;
+            foreach (BlockType block in blocks)
+            {
+                if (block.isLoaded == false)
                 {
-                    block.SetTexture2D(texture2D);
-
-                    if (xOffset + TEXTURE_SIZE > textureAtlas.width)
-                    {
-                        Debug.LogError("Texture atlas is full");
-                        return;
-                    }
-
-                    textureAtlas.SetPixels(xOffset, 0, TEXTURE_SIZE, TEXTURE_SIZE, texture2D.GetPixels());
-                    xOffset += TEXTURE_SIZE;
-                    textureAtlas.Apply();
-
-                    if (xOffset >= textureAtlas.width)
-                    {
-                        ApplyTextureToMaterial(chunks);
-                    }
-                });
+                    allLoaded = false;
+                    break;
+                }
             }
+            if (allLoaded)
+            {
+                Debug.Log("All textures loaded");
+                OnAllTexturesLoaded?.Invoke();
+                break;
+            }
+            yield return null;
         }
     }
 

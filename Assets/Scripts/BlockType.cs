@@ -10,6 +10,7 @@ public class BlockType
     string texture;
     Texture2D texture2D;
     public Action OnTextureLoaded;
+    public bool isLoaded = false;
 
     public BlockType(string id, string display, bool isOpaque, bool isConcrete, string texture)
     {
@@ -24,11 +25,13 @@ public class BlockType
             {
                 this.texture2D = texture2D;
                 OnTextureLoaded?.Invoke();
+                isLoaded = true;
             });
         }
         else
         {
             this.texture2D = null;
+            isLoaded = true;
         }
     }
 
