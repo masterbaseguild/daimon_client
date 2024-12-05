@@ -2,6 +2,12 @@ using UnityEngine;
 
 public class MainUser : MonoBehaviour
 {
+    Vector3 spawnPoint = new Vector3(100, 105, 100);
+
+    void Start()
+    {
+        transform.position = spawnPoint;
+    }
     void Update()
     {
         if (Input.GetKey(KeyCode.W)) transform.Translate(Vector3.forward * Time.deltaTime * 10);

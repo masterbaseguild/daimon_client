@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class World : MonoBehaviour
 {
@@ -67,6 +68,44 @@ public class World : MonoBehaviour
         chunks[0] = chunkMesh;
         int voxel = region.getVoxel(x, y, z);
         chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette);
+    }
+
+    public static void DisplayWorld()
+    {
+        List<Vector3> coordinates = new List<Vector3>();
+        coordinates.Add(new Vector3(100, 100, 100));
+        coordinates.Add(new Vector3(100, 100, 101));
+        coordinates.Add(new Vector3(100, 101, 100));
+        coordinates.Add(new Vector3(100, 101, 101));
+        coordinates.Add(new Vector3(101, 100, 100));
+        coordinates.Add(new Vector3(101, 100, 101));
+        coordinates.Add(new Vector3(101, 101, 100));
+        coordinates.Add(new Vector3(101, 101, 101));
+
+        List<Vector3> chunkPositions = new List<Vector3>();
+
+        foreach (Vector3 coordinate in coordinates)
+        {
+            Vector3 chunkPos = GetChunkCoordsFromBlockCoords(coordinate);
+            Debug.Log("Adding chunk at " + chunkPos);
+            if (!chunkPositions.Contains(chunkPos))
+            {
+                chunkPositions.Add(chunkPos);
+            }
+        }
+
+        foreach (Vector3 chunkPos in chunkPositions)
+        {
+            DisplayChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+        }
+    }
+
+    public static Vector3 GetChunkCoordsFromBlockCoords(Vector3 blockCoordinates)
+    {
+        int x = (int)blockCoordinates.x / Chunk.CHUNK_SIZE;
+        int y = (int)blockCoordinates.y / Chunk.CHUNK_SIZE;
+        int z = (int)blockCoordinates.z / Chunk.CHUNK_SIZE;
+        return new Vector3(x, y, z);
     }
 
     public static void DisplayRegion() {

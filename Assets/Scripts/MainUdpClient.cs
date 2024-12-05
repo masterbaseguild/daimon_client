@@ -158,7 +158,7 @@ public class MainUdpClient : MonoBehaviour
                     //World.DisplayBlockTexture(2);
                     //World.DisplayBlock(100, 100, 100);
                     //World.DisplayRegion();
-                    World.DisplayChunk(100, 100, 100);
+                    World.DisplayWorld();
                     break;
                 case "conflict":
                     PrintChatMessage("Username already taken!");

@@ -12,6 +12,8 @@ public class ChunkMesh
     public ChunkMesh()
     {
         gameObject = new GameObject();
+        gameObject.transform.parent = GameObject.Find("World").transform;
+        gameObject.name = "ChunkMesh";
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshRenderer.material = BlockPalette.material;
