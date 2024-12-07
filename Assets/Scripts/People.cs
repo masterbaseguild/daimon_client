@@ -4,7 +4,13 @@ using System.Collections.Generic;
 public class People : MonoBehaviour
 {
     static List<GameObject> connectedUsers = new List<GameObject>();
-    public static GameObject userPrefab;
+    static GameObject userPrefab;
+    public GameObject userPrefabObject;
+
+    void Start()
+    {
+        userPrefab = userPrefabObject;
+    }
 
     public static int GetCount()
     {
@@ -29,6 +35,8 @@ public class People : MonoBehaviour
     public static void AddUser(int index, string username)
     {
         GameObject user = Instantiate(userPrefab);
+        user.transform.parent = GameObject.Find("People").transform;
+        user.name = "User" + index;
         user.GetComponent<User>().index = index;
         user.GetComponent<User>().username = username;
         connectedUsers.Add(user);

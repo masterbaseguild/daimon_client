@@ -14,7 +14,7 @@ public class MainUdpClient : MonoBehaviour
 {
     static string ip = "127.0.0.1";
     static int serverPort = 4000;
-    static string username = "Entity";
+    static string username = "";
     int clientPort;
     static int index;
     static UdpClient client;
@@ -22,6 +22,7 @@ public class MainUdpClient : MonoBehaviour
 
     void Start()
     {
+        username = "user" + generateUserSuffix();
         try
         {
             clientPort = generateEphemeralPort();
@@ -36,6 +37,21 @@ public class MainUdpClient : MonoBehaviour
         }
     }
 
+    public static void SetUsername(string newUsername)
+    {
+        username = newUsername;
+    }
+
+    public static void SetIP(string newIP)
+    {
+        ip = newIP;
+    }
+
+    public static string GetIP()
+    {
+        return ip;
+    }
+
     void Update()
     {
         Vector3 position = MainUser.GetPosition();
@@ -48,6 +64,11 @@ public class MainUdpClient : MonoBehaviour
         int port = ((IPEndPoint)tempClient.Client.LocalEndPoint).Port;
         tempClient.Close();
         return port;
+    }
+
+    int generateUserSuffix()
+    {
+        return UnityEngine.Random.Range(1000, 9999);
     }
 
     // send function

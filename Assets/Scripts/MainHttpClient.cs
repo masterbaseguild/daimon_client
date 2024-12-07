@@ -19,7 +19,7 @@ public class MainHttpClient : MonoBehaviour
     }
 
     //the following method pings the server to check if it is online
-    public async Task<bool> Ping()
+    public static async Task<bool> Ping()
     {
         HttpResponseMessage response = await client.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();
@@ -35,7 +35,7 @@ public class MainHttpClient : MonoBehaviour
         }
     }
 
-    void Start()
+    public static void Connect()
     {
         try {
             Ping().ContinueWith(task =>

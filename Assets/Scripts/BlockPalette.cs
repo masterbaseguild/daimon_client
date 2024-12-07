@@ -10,7 +10,6 @@ public class BlockPalette
     static List<BlockType> blocks = new List<BlockType>();
     static int TEXTURE_SIZE = 16;
     static Texture2D textureAtlas;
-    public static Material material = new Material(Shader.Find("Unlit/Texture"));
     static Action OnAllTexturesLoaded;
 
     public BlockPalette(string[] blocks, ChunkMesh[] chunks)
@@ -77,7 +76,7 @@ public class BlockPalette
             }
             textureAtlas.Apply();
             //saveTextureToDisk(textureAtlas);
-            material.mainTexture = textureAtlas;
+            World.SetTexture(textureAtlas);
         };
     }
 

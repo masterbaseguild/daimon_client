@@ -5,6 +5,23 @@ public class World : MonoBehaviour
 {
     static BlockPalette blockPalette;
     static Region region;
+    public Material materialPrefab;
+    public static Material material;
+
+    void Start()
+    {
+        material = materialPrefab;
+    }
+
+    public static void SetTexture(Texture2D texture)
+    {
+        material.mainTexture = texture;
+    }
+
+    public static Material GetMaterial()
+    {
+        return material;
+    }
 
     static ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
 

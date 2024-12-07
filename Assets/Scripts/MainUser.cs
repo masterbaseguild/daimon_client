@@ -6,16 +6,19 @@ public class MainUser : MonoBehaviour
     GameObject playerCamera;
     float xRotation;
     float yRotation;
+    bool isEnabled = false;
 
-    void Start()
+    public void Enable()
     {
         playerCamera = transform.GetChild(0).gameObject;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         transform.position = spawnPoint;
+        isEnabled = true;
     }
     void Update()
     {
+        if (!isEnabled) return;
         if (Input.GetKey(KeyCode.W)) transform.Translate(Vector3.forward * Time.deltaTime * 10);
         if (Input.GetKey(KeyCode.S)) transform.Translate(Vector3.back * Time.deltaTime * 10);
         if (Input.GetKey(KeyCode.A)) transform.Translate(Vector3.left * Time.deltaTime * 10);
@@ -25,8 +28,8 @@ public class MainUser : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T)) MainUdpClient.SendChatMessage("Hello World!");
         if (Input.GetKeyDown(KeyCode.Y)) MainUdpClient.LogGameState();
 
-        float mouseX = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * 2048;
-        float mouseY = Input.GetAxisRaw("Mouse X") * Time.deltaTime * 2048;
+        float mouseX = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * 1024;
+        float mouseY = Input.GetAxisRaw("Mouse X") * Time.deltaTime * 1024;
 
         yRotation += mouseY;
         xRotation -= mouseX;
