@@ -9,14 +9,13 @@ public class BlockPalette
 {
     static List<BlockType> blocks = new List<BlockType>();
     static int TEXTURE_SIZE = 16;
-    // texture atlas
     static Texture2D textureAtlas;
     public static Material material = new Material(Shader.Find("Unlit/Texture"));
-
     static Action OnAllTexturesLoaded;
 
     public BlockPalette(string[] blocks, ChunkMesh[] chunks)
     {
+        Array.Sort(blocks);
         foreach (string block in blocks)
         {
             BlockPalette.blocks.Add(jsonToBlock(block));
@@ -51,7 +50,7 @@ public class BlockPalette
     static void saveTextureToDisk(Texture2D texture)
     {
         string macPath = "/Users/entity/Downloads/texture.png";
-        string winPath = "C:\\Users\\entity\\Downloads\\texture.png";
+        string winPath = "C:\\Users\\Dario\\Downloads\\texture.png";
         string path = Application.platform == RuntimePlatform.OSXEditor ? macPath : winPath;
         byte[] bytes = texture.EncodeToPNG();
         System.IO.File.WriteAllBytes(path, bytes);
@@ -60,35 +59,29 @@ public class BlockPalette
 
     static void GenerateTextureAtlas(ChunkMesh[] chunks)
     {
-        Debug.Log("Generating texture atlas for " + blocks.Count + " blocks");
         textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE);
         textureAtlas.filterMode = FilterMode.Point;
         textureAtlas.wrapMode = TextureWrapMode.Clamp;
-        Debug.Log("Texture atlas size: " + textureAtlas.width + "x" + textureAtlas.height);
 
         int xOffset = 0;
-        foreach (BlockType block in blocks)
-        {
-            block.OnTextureLoaded += () =>
-            {
-                Debug.Log("Adding texture for block " + block.GetTexture());
-                textureAtlas.SetPixels(xOffset, 0, TEXTURE_SIZE, TEXTURE_SIZE, block.GetTexture2D().GetPixels());
-                xOffset += TEXTURE_SIZE;
-                Debug.Log("Done adding texture for block " + block.GetTexture());
-            };
-        }
         MainThreadDispatcher.Instance.StartCoroutine(AllTexturesLoadedCoroutine());
         OnAllTexturesLoaded += () =>
         {
-            Debug.Log("All textures loaded");
+            foreach (BlockType block in blocks)
+            {
+                if (block.GetTexture2D() != null)
+                {
+                    textureAtlas.SetPixels(xOffset, 0, TEXTURE_SIZE, TEXTURE_SIZE, block.GetTexture2D().GetPixels());
+                }
+                xOffset += TEXTURE_SIZE;
+            }
             textureAtlas.Apply();
-            saveTextureToDisk(textureAtlas);
+            //saveTextureToDisk(textureAtlas);
             material.mainTexture = textureAtlas;
         };
     }
 
     static IEnumerator AllTexturesLoadedCoroutine() {
-        Debug.Log("Waiting for all textures to load");
         while (true)
         {
             bool allLoaded = true;
@@ -102,22 +95,21 @@ public class BlockPalette
             }
             if (allLoaded)
             {
-                Debug.Log("All textures loaded");
                 OnAllTexturesLoaded?.Invoke();
                 break;
             }
             yield return null;
         }
     }
-    
+
     BlockType jsonToBlock(string json)
     {
         return JsonConvert.DeserializeObject<BlockType>(json);
     }
 
-    public BlockType GetBlockType(int index)
+    public Vector2[] GetBlockUVs(int index)
     {
-        return blocks[index];
+        return GetBlockUVs(blocks[index]);
     }
 
     // get texture coordinates for a block
@@ -128,10 +120,10 @@ public class BlockPalette
         float atlasHeight = textureAtlas.height;
         return new Vector2[]
         {
-            new Vector2(x / atlasWidth, 0),
-            new Vector2((x + TEXTURE_SIZE) / atlasWidth, 0),
-            new Vector2((x + TEXTURE_SIZE) / atlasWidth, TEXTURE_SIZE / atlasHeight),
-            new Vector2(x / atlasWidth, TEXTURE_SIZE / atlasHeight)
+            new Vector2(x / atlasWidth, 0), // 0
+            new Vector2(x / atlasWidth, TEXTURE_SIZE / atlasHeight), // 3
+            new Vector2((x + TEXTURE_SIZE) / atlasWidth, TEXTURE_SIZE / atlasHeight), // 2
+            new Vector2((x + TEXTURE_SIZE) / atlasWidth, 0), // 1
         };
     }
 }

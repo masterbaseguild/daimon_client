@@ -40,13 +40,13 @@ public class BlockType
         return texture;
     }
 
-    public void SetTexture2D(Texture2D texture2D)
-    {
-        this.texture2D = texture2D;
-    }
-
     public Texture2D GetTexture2D()
     {
         return texture2D;
+    }
+
+    public string GetDisplay()
+    {
+        return display;
     }
 }

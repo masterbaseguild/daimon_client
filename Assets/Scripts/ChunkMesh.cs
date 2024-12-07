@@ -20,73 +20,101 @@ public class ChunkMesh
         meshFilter.mesh = mesh;
     }
 
-    public void SetMaterial(Material material)
+    enum Direction
     {
-        gameObject.GetComponent<MeshRenderer>().material = material;
+        foreward,  // z+ direction
+        right,  // +x direction
+        backwards,   // -z direction
+        left,   // -x direction
+        up,     // +y direction
+        down    // -y direction
+    };
+
+    static Direction[] directions =
+    {
+        Direction.backwards,
+        Direction.down,
+        Direction.foreward,
+        Direction.left,
+        Direction.right,
+        Direction.up
+    };
+
+    void AddVertices(Direction direction, int x, int y, int z)
+    {
+        //order of vertices matters for the normals and how we render the mesh
+        switch (direction)
+        {
+            case Direction.backwards:
+                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
+                break;
+            case Direction.foreward:
+                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
+                break;
+            case Direction.left:
+                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
+                break;
+
+            case Direction.right:
+                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
+                break;
+            case Direction.down:
+                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
+                break;
+            case Direction.up:
+                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
+                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
+                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
+                break;
+            default:
+                break;
+        }
+    }
+
+    void AddQuadTriangles()
+    {
+        triangles.Add(vertices.Count - 4);
+        triangles.Add(vertices.Count - 3);
+        triangles.Add(vertices.Count - 2);
+
+        triangles.Add(vertices.Count - 4);
+        triangles.Add(vertices.Count - 2);
+        triangles.Add(vertices.Count - 1);
     }
 
     public void AddBlockToMesh(int x, int y, int z, int voxel, BlockPalette BlockPalette)
     {
-        BlockType type = BlockPalette.GetBlockType(voxel);
-        Vector3[] cubeVertices = new Vector3[]
+        if(voxel == 0)
         {
-            new Vector3(x, y, z),
-            new Vector3(x + 1, y, z),
-            new Vector3(x + 1, y + 1, z),
-            new Vector3(x, y + 1, z),
-            new Vector3(x, y, z + 1),
-            new Vector3(x + 1, y, z + 1),
-            new Vector3(x + 1, y + 1, z + 1),
-            new Vector3(x, y + 1, z + 1)
-        };
-
-        int[] cubeTriangles = new int[]
-        {
-            0, 2, 1, 0, 3, 2,
-            4, 5, 6, 4, 6, 7,
-            3, 7, 6, 3, 6, 2,
-            0, 1, 5, 0, 5, 4,
-            0, 4, 7, 0, 7, 3,
-            1, 2, 6, 1, 6, 5
-        };
-
-        int offset = vertices.Count;
-        vertices.AddRange(cubeVertices);
-
-        foreach (int i in cubeTriangles)
-        {
-            triangles.Add(i + offset);
+            return;
         }
-
-        // get the block's texture coordinates in the texture atlas
-        Vector2[] blockUVs = BlockPalette.GetBlockUVs(type);
-
-        if(blockUVs.Length == 4)
+        for (int i = 0; i < directions.Length; i++)
         {
-            uvs.Add(blockUVs[0]);
-            uvs.Add(blockUVs[1]);
-            uvs.Add(blockUVs[2]);
-            uvs.Add(blockUVs[3]);
-            uvs.Add(blockUVs[0]);
-            uvs.Add(blockUVs[1]);
-            uvs.Add(blockUVs[2]);
-            uvs.Add(blockUVs[3]);
+            AddVertices(directions[i], x, y, z);
+            AddQuadTriangles();
+            uvs.AddRange(BlockPalette.GetBlockUVs(voxel));
         }
-        else
-        {
-            Debug.LogError("Block " + type + " has invalid UVs");
-        }
-
         UpdateMesh();
     }
 
     void UpdateMesh()
     {
-        if (vertices.Count != uvs.Count)
-        {
-            Debug.LogError("Mismatch between vertices and UVs count!");
-            return;
-        }
         mesh.Clear();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();

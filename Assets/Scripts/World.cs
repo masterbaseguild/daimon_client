@@ -23,74 +23,42 @@ public class World : MonoBehaviour
         return region;
     }
 
-    public static void DisplayBlockTexture(int index)
-    {
-        BlockType block = blockPalette.GetBlockType(index);
-        block.OnTextureLoaded += () =>
-        {
-            Texture2D texture = block.GetTexture2D();
-
-            if (texture != null)
-            {
-                // Create a Quad to display the texture
-                GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                quad.transform.position = new Vector3(0, 100, 0); // Position the Quad as needed
-                quad.transform.Rotate(90, 0, 0); // Rotate the Quad as needed
-                quad.GetComponent<Renderer>().material.mainTexture = texture;
-            }
-        };
-    }
-
-    public static void DisplayBlock(int x, int y, int z)
-    {
-        int voxel = region.getVoxel(x, y, z);
-        BlockType block = blockPalette.GetBlockType(voxel);
-        block.OnTextureLoaded += () =>
-        {
-            Texture2D texture = block.GetTexture2D();
-            // set filter to point to prevent blurring
-            texture.filterMode = FilterMode.Point;
-
-            if (texture != null)
-            {
-                GameObject blockObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                blockObject.transform.position = new Vector3(x, y, z);
-                blockObject.GetComponent<Renderer>().material.mainTexture = texture;
-                blockObject.GetComponent<Renderer>().material.mainTexture = block.GetTexture2D();
-            }
-        };
-    }
-
     public static void DisplayChunk(int x, int y, int z)
     {
-        Chunk chunk = region.getChunk(0, 0, 0);
+        Chunk chunk = region.getChunk(x, y, z);
         ChunkMesh chunkMesh = new ChunkMesh();
-        chunks[0] = chunkMesh;
-        int voxel = region.getVoxel(x, y, z);
-        chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette);
+        chunks[x + y * Region.REGION_SIZE + z * Region.REGION_SIZE * Region.REGION_SIZE] = chunkMesh;
+        for (int i = 0; i < Chunk.CHUNK_SIZE; i++)
+        {
+            for (int j = 0; j < Chunk.CHUNK_SIZE; j++)
+            {
+                for (int k = 0; k < Chunk.CHUNK_SIZE; k++)
+                {
+                    int voxel = chunk.getVoxel(i, j, k);
+                    if (voxel != 0)
+                    {
+                        chunkMesh.AddBlockToMesh(i + x * Chunk.CHUNK_SIZE, j + y * Chunk.CHUNK_SIZE, k + z * Chunk.CHUNK_SIZE, voxel, blockPalette);
+                    }
+                }
+            }
+        }
     }
 
     public static void DisplayWorld()
     {
-        List<Vector3> coordinates = new List<Vector3>();
-        coordinates.Add(new Vector3(100, 100, 100));
-        coordinates.Add(new Vector3(100, 100, 101));
-        coordinates.Add(new Vector3(100, 101, 100));
-        coordinates.Add(new Vector3(100, 101, 101));
-        coordinates.Add(new Vector3(101, 100, 100));
-        coordinates.Add(new Vector3(101, 100, 101));
-        coordinates.Add(new Vector3(101, 101, 100));
-        coordinates.Add(new Vector3(101, 101, 101));
-
         List<Vector3> chunkPositions = new List<Vector3>();
 
-        foreach (Vector3 coordinate in coordinates)
+        for (int x = 0; x < Region.REGION_SIZE; x++)
         {
-            Vector3 chunkPos = GetChunkCoordsFromBlockCoords(coordinate);
-            Debug.Log("Adding chunk at " + chunkPos);
-            if (!chunkPositions.Contains(chunkPos))
+            for (int y = 0; y < Region.REGION_SIZE; y++)
             {
-                chunkPositions.Add(chunkPos);
+                for (int z = 0; z < Region.REGION_SIZE; z++)
+                {
+                    if (!isChunkEmpty(region.getChunk(x, y, z)))
+                    {
+                        chunkPositions.Add(new Vector3(x, y, z));
+                    }
+                }
             }
         }
 
@@ -100,39 +68,21 @@ public class World : MonoBehaviour
         }
     }
 
-    public static Vector3 GetChunkCoordsFromBlockCoords(Vector3 blockCoordinates)
+    static bool isChunkEmpty(Chunk chunk)
     {
-        int x = (int)blockCoordinates.x / Chunk.CHUNK_SIZE;
-        int y = (int)blockCoordinates.y / Chunk.CHUNK_SIZE;
-        int z = (int)blockCoordinates.z / Chunk.CHUNK_SIZE;
-        return new Vector3(x, y, z);
-    }
-
-    public static void DisplayRegion() {
-        for (int x = 0; x < Region.REGION_SIZE; x++)
+        for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
         {
-            for (int y = 0; y < Region.REGION_SIZE; y++)
+            for (int y = 0; y < Chunk.CHUNK_SIZE; y++)
             {
-                for (int z = 0; z < Region.REGION_SIZE; z++)
+                for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
                 {
-                    Chunk chunk = region.getChunk(x, y, z);
-                    for (int cx = 0; cx < Chunk.CHUNK_SIZE; cx++)
+                    if (chunk.getVoxel(x, y, z) != 0)
                     {
-                        for (int cy = 0; cy < Chunk.CHUNK_SIZE; cy++)
-                        {
-                            for (int cz = 0; cz < Chunk.CHUNK_SIZE; cz++)
-                            {
-                                int voxel = chunk.getVoxel(cx, cy, cz);
-                                if (voxel == 0)
-                                {
-                                    continue;
-                                }
-                                DisplayBlock(x * Chunk.CHUNK_SIZE + cx, y * Chunk.CHUNK_SIZE + cy, z * Chunk.CHUNK_SIZE + cz);
-                            }
-                        }
+                        return false;
                     }
                 }
             }
         }
+        return true;
     }
 }

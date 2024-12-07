@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 public class Region
 {
@@ -38,7 +39,12 @@ public class Region
         // parse header
         for (int i = 0; i < HEADER_BLOCK_COUNT; i++)
         {
-            Header.Add(BitConverter.ToString(headerBuffer, i * HEADER_BLOCK_SIZE, HEADER_BLOCK_SIZE).Replace("-", "").ToLower());
+            string headerLine = BitConverter.ToString(headerBuffer, i * HEADER_BLOCK_SIZE, HEADER_BLOCK_SIZE).Replace("-", "").ToLower();
+            if (headerLine == "000000000000" && i != 0)
+            {
+                continue;
+            }
+            Header.Add(headerLine);
         }
 
         // parse chunks
@@ -70,6 +76,12 @@ public class Region
     public string getHeaderLine(int index)
     {
         return Header[index];
+    }
+
+    public int getHeaderCount()
+    {
+        Debug.Log(Header.Count);
+        return Header.Count;
     }
 
     public Chunk getChunk(int x, int y, int z)

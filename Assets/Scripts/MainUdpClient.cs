@@ -146,18 +146,14 @@ public class MainUdpClient : MonoBehaviour
                     break;
                 case "confirmregion":
                     World.SetRegion(packet.parseRegionData());
-                    print($"First 3 Lines of Region Header:");
                     List<Task<string>> tasks = new List<Task<string>>();
-                    for (int i = 0; i < 3; i++)
+                    int count = World.GetRegion().getHeaderCount();
+                    for (int i = 0; i < count; i++)
                     {
-                        print(World.GetRegion().getHeaderLine(i));
                         tasks.Add(MainHttpClient.GetResource("item", World.GetRegion().getHeaderLine(i)));
                     }
                     string[] results = await Task.WhenAll(tasks);
                     World.SetBlockPalette(results);
-                    //World.DisplayBlockTexture(2);
-                    //World.DisplayBlock(100, 100, 100);
-                    //World.DisplayRegion();
                     World.DisplayWorld();
                     break;
                 case "conflict":
