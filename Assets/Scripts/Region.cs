@@ -80,7 +80,6 @@ public class Region
 
     public int getHeaderCount()
     {
-        Debug.Log(Header.Count);
         return Header.Count;
     }
 
