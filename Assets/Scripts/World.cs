@@ -134,7 +134,6 @@ public class World : MonoBehaviour
 
         foreach (Vector3 chunkPos in chunkPositions)
         {
-            Debug.Log("Displaying chunk at " + chunkPos);
             DisplayChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
         }
     }
