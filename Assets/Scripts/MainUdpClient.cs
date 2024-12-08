@@ -18,7 +18,7 @@ public class MainUdpClient : MonoBehaviour
     int clientPort;
     static int index;
     static UdpClient client;
-    IPEndPoint remoteIpEndPoint;
+    static IPEndPoint remoteIpEndPoint;
 
     void Start()
     {
@@ -87,6 +87,7 @@ public class MainUdpClient : MonoBehaviour
 
     public static void Connect()
     {
+        remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
         Send($"connect\t0\t{username}");
     }
 
