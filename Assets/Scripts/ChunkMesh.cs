@@ -32,16 +32,6 @@ public class ChunkMesh
         meshFilter.mesh = mesh;
     }
 
-    enum Direction
-    {
-        foreward,  // z+ direction
-        right,  // +x direction
-        backwards,   // -z direction
-        left,   // -x direction
-        up,     // +y direction
-        down    // -y direction
-    };
-
     static Direction[] directions =
     {
         Direction.backwards,
@@ -124,9 +114,14 @@ public class ChunkMesh
         }
         for (int i = 0; i < directions.Length; i++)
         {
-            AddVertices(directions[i], x, y, z);
-            AddQuadTriangles();
-            uvs.AddRange(BlockPalette.GetBlockUVs(voxel));
+            var neighbour = World.GetNeighbourVoxel(x, y, z, directions[i]);
+            var neighbourBlockType = BlockPalette.GetBlockType(neighbour);
+            if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType.IsOpaque()))
+            {
+                AddVertices(directions[i], x, y, z);
+                AddQuadTriangles();
+                uvs.AddRange(BlockPalette.GetBlockUVs(voxel));
+            }
         }
         UpdateMesh();
     }

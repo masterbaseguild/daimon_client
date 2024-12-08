@@ -10,6 +10,16 @@ public class World : MonoBehaviour
     public Material nonOpaqueMaterialPrefab;
     public static Material nonOpaqueMaterial;
 
+    static Direction[] directions =
+    {
+        Direction.backwards,
+        Direction.down,
+        Direction.foreward,
+        Direction.left,
+        Direction.right,
+        Direction.up
+    };
+
     void Start()
     {
         material = materialPrefab;
@@ -47,6 +57,40 @@ public class World : MonoBehaviour
     public static Region GetRegion()
     {
         return region;
+    }
+
+    public static int GetVoxel(int x, int y, int z)
+    {
+        Vector3 chunkCoords = GetChunkCoords(new Vector3(x, y, z));
+        Chunk chunk = region.getChunk((int)chunkCoords.x, (int)chunkCoords.y, (int)chunkCoords.z);
+        return chunk.getVoxel(x % Chunk.CHUNK_SIZE, y % Chunk.CHUNK_SIZE, z % Chunk.CHUNK_SIZE);
+    }
+
+    public static int GetNeighbourVoxel(int x, int y, int z, Direction direction)
+    {
+        Vector3 neighbour = GetNeighbourCoords(x, y, z, direction);
+        return GetVoxel((int)neighbour.x, (int)neighbour.y, (int)neighbour.z);
+    }
+
+    public static Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.backwards:
+                return new Vector3(x, y, z - 1);
+            case Direction.down:
+                return new Vector3(x, y - 1, z);
+            case Direction.foreward:
+                return new Vector3(x, y, z + 1);
+            case Direction.left:
+                return new Vector3(x - 1, y, z);
+            case Direction.right:
+                return new Vector3(x + 1, y, z);
+            case Direction.up:
+                return new Vector3(x, y + 1, z);
+            default:
+                return new Vector3(x, y, z);
+        }
     }
 
     public static void DisplayChunk(int x, int y, int z)
