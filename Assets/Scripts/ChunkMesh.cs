@@ -8,15 +8,27 @@ public class ChunkMesh
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
     List<Vector2> uvs = new List<Vector2>();
+    ChunkMesh nonOpaqueMesh;
 
-    public ChunkMesh()
+    public ChunkMesh(bool isMainMesh)
     {
+        if (isMainMesh)
+        {
+            nonOpaqueMesh = new ChunkMesh(false);
+        }
         gameObject = new GameObject();
         gameObject.transform.parent = GameObject.Find("World").transform;
         gameObject.name = "ChunkMesh";
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = World.GetMaterial();
+        if (!isMainMesh)
+        {
+            meshRenderer.material = World.GetNonOpaqueMaterial();
+        }
+        else
+        {
+            meshRenderer.material = World.GetMaterial();
+        }
         meshFilter.mesh = mesh;
     }
 
@@ -102,6 +114,12 @@ public class ChunkMesh
     {
         if(voxel == 0)
         {
+            return;
+        }
+        var blockType = BlockPalette.GetBlockType(voxel);
+        if (!blockType.IsOpaque() && nonOpaqueMesh != null)
+        {
+            nonOpaqueMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette);
             return;
         }
         for (int i = 0; i < directions.Length; i++)

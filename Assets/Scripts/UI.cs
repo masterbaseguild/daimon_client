@@ -6,6 +6,7 @@ public class UI : MonoBehaviour
     [SerializeField] private Button playBtn;
     [SerializeField] private InputField usernameInput;
     [SerializeField] private InputField ipInput;
+    [SerializeField] private Text ChunkData;
     public GameObject mainUser;
 
     private void Awake()
@@ -21,6 +22,19 @@ public class UI : MonoBehaviour
         });
         usernameInput.onValueChanged.AddListener(delegate{editText();});
         ipInput.onValueChanged.AddListener(delegate{editIpText();});
+    }
+
+    void Update()
+    {
+        Vector3 coords = mainUser.transform.position;
+        var Xtext = "X: " + (int)coords.x;
+        var Ytext = "Y: " + (int)coords.y;
+        var Ztext = "Z: " + (int)coords.z;
+        Vector3 chunkCoords = World.GetChunkCoords(mainUser.transform.position);
+        var chunkXtext = "ChunkX: " + chunkCoords.x;
+        var chunkYtext = "ChunkY: " + chunkCoords.y;
+        var chunkZtext = "ChunkZ: " + chunkCoords.z;
+        ChunkData.text = Xtext + "\n" + Ytext + "\n" + Ztext + "\n" + chunkXtext + "\n" + chunkYtext + "\n" + chunkZtext;
     }
 
     private void editText()

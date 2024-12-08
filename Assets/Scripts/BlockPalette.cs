@@ -14,7 +14,6 @@ public class BlockPalette
 
     public BlockPalette(string[] blocks, ChunkMesh[] chunks)
     {
-        Array.Sort(blocks);
         foreach (string block in blocks)
         {
             BlockPalette.blocks.Add(jsonToBlock(block));
@@ -104,6 +103,11 @@ public class BlockPalette
     BlockType jsonToBlock(string json)
     {
         return JsonConvert.DeserializeObject<BlockType>(json);
+    }
+
+    public static BlockType GetBlockType(int index)
+    {
+        return blocks[index];
     }
 
     public Vector2[] GetBlockUVs(int index)

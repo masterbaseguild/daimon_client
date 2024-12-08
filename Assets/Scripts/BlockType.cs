@@ -49,4 +49,9 @@ public class BlockType
     {
         return display;
     }
+
+    public bool IsOpaque()
+    {
+        return isOpaque;
+    }
 }

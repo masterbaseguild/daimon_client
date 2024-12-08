@@ -7,20 +7,29 @@ public class World : MonoBehaviour
     static Region region;
     public Material materialPrefab;
     public static Material material;
+    public Material nonOpaqueMaterialPrefab;
+    public static Material nonOpaqueMaterial;
 
     void Start()
     {
         material = materialPrefab;
+        nonOpaqueMaterial = nonOpaqueMaterialPrefab;
     }
 
     public static void SetTexture(Texture2D texture)
     {
         material.mainTexture = texture;
+        nonOpaqueMaterial.mainTexture = texture;
     }
 
     public static Material GetMaterial()
     {
         return material;
+    }
+
+    public static Material GetNonOpaqueMaterial()
+    {
+        return nonOpaqueMaterial;
     }
 
     static ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
@@ -43,7 +52,7 @@ public class World : MonoBehaviour
     public static void DisplayChunk(int x, int y, int z)
     {
         Chunk chunk = region.getChunk(x, y, z);
-        ChunkMesh chunkMesh = new ChunkMesh();
+        ChunkMesh chunkMesh = new ChunkMesh(true);
         chunks[x + y * Region.REGION_SIZE + z * Region.REGION_SIZE * Region.REGION_SIZE] = chunkMesh;
         for (int i = 0; i < Chunk.CHUNK_SIZE; i++)
         {
@@ -81,6 +90,7 @@ public class World : MonoBehaviour
 
         foreach (Vector3 chunkPos in chunkPositions)
         {
+            Debug.Log("Displaying chunk at " + chunkPos);
             DisplayChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
         }
     }
@@ -101,5 +111,10 @@ public class World : MonoBehaviour
             }
         }
         return true;
+    }
+
+    static public Vector3 GetChunkCoords(Vector3 position)
+    {
+        return new Vector3(Mathf.FloorToInt(position.x / Chunk.CHUNK_SIZE), Mathf.FloorToInt(position.y / Chunk.CHUNK_SIZE), Mathf.FloorToInt(position.z / Chunk.CHUNK_SIZE));
     }
 }
