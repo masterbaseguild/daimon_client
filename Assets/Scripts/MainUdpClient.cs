@@ -15,26 +15,16 @@ public class MainUdpClient : MonoBehaviour
     static string ip = "127.0.0.1";
     static int serverPort = 4000;
     static string username = "";
-    int clientPort;
+    static int clientPort;
     static int index;
     static UdpClient client;
     static IPEndPoint remoteIpEndPoint;
+    static bool isEnabled = false;
 
     void Start()
     {
         username = "user" + generateUserSuffix();
-        try
-        {
-            clientPort = generateEphemeralPort();
-            client = new UdpClient(clientPort);
-            remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
-            client.Connect(remoteIpEndPoint);
-            client.BeginReceive(Get, null);
-        }
-        catch (Exception e)
-        {
-            print(e.ToString());
-        }
+        clientPort = generateEphemeralPort();
     }
 
     public static void SetUsername(string newUsername)
@@ -54,8 +44,11 @@ public class MainUdpClient : MonoBehaviour
 
     void Update()
     {
+        if (isEnabled)
+        {
         Vector3 position = MainUser.GetPosition();
         Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}");
+        }
     }
 
     int generateEphemeralPort()
@@ -88,11 +81,21 @@ public class MainUdpClient : MonoBehaviour
     public static void Connect()
     {
         remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
+        try {
+            client = new UdpClient(clientPort);
+            client.Connect(remoteIpEndPoint);
+            client.BeginReceive(Get, null);
+        }
+        catch (Exception e)
+        {
+            print(e.ToString());
+        }
         Send($"connect\t0\t{username}");
+        isEnabled = true;
     }
 
     // get callback
-    void Get(IAsyncResult result)
+    static void Get(IAsyncResult result)
     {
         try
         {
@@ -110,7 +113,7 @@ public class MainUdpClient : MonoBehaviour
         }
     }
 
-    void HandlePacket(Packet packet)
+    static void HandlePacket(Packet packet)
     {
         MainThreadDispatcher.Enqueue(async () =>
         {
@@ -215,7 +218,7 @@ public class MainUdpClient : MonoBehaviour
         Send($"chat\t{index}\t{message}");
     }
 
-    void PrintChatMessage(string message)
+    static void PrintChatMessage(string message)
     {
         print(message);
     }

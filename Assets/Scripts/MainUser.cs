@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MainUser : MonoBehaviour
 {
-    Vector3 spawnPoint = new Vector3(80, 60, 80);
+    Vector3 spawnPoint = new Vector3(80, 60, 94);
     GameObject playerCamera;
     float xRotation;
     float yRotation;
