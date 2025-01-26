@@ -25,6 +25,7 @@ public class ChunkMesh
         gameObject = new GameObject();
         gameObject.transform.parent = GameObject.Find("World").transform;
         gameObject.name = "ChunkMesh";
+        gameObject.layer = LayerMask.NameToLayer("Ground");
         meshFilter = gameObject.AddComponent<MeshFilter>();
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshCollider = gameObject.AddComponent<MeshCollider>();
