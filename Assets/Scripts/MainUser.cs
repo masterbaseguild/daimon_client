@@ -9,7 +9,7 @@ public class MainUser : MonoBehaviour
     float jumpHeight = 1f;
     float groundDistance = 0.25f;
     float gravity = -30f;
-    float sens = 1024f;
+    float sens = 512f;
     float delayBetweenPresses = 0.25f;
     int lowestY = -100;
 
@@ -52,6 +52,8 @@ public class MainUser : MonoBehaviour
         move = (transform.forward * move.z + transform.right * move.x + transform.up * move.y).normalized * moveSpeed * moveSpeedMultiplier;
         move.y += gravityAcceleration;
         rigidBody.velocity = move;
+
+        transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
 
     void Update()
@@ -91,9 +93,7 @@ public class MainUser : MonoBehaviour
         xRotation -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sens;
 
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
         playerCamera.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
-        transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
 
     private void checkDoublePressSpace()
