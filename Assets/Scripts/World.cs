@@ -9,6 +9,8 @@ public class World : MonoBehaviour
     public static Material material;
     public Material nonOpaqueMaterialPrefab;
     public static Material nonOpaqueMaterial;
+    public PhysicMaterial physicMaterialPrefab;
+    public static PhysicMaterial physicMaterial;
 
     static Direction[] directions =
     {
@@ -24,6 +26,7 @@ public class World : MonoBehaviour
     {
         material = materialPrefab;
         nonOpaqueMaterial = nonOpaqueMaterialPrefab;
+        physicMaterial = physicMaterialPrefab;
     }
 
     public static void SetTexture(Texture2D texture)
@@ -40,6 +43,11 @@ public class World : MonoBehaviour
     public static Material GetNonOpaqueMaterial()
     {
         return nonOpaqueMaterial;
+    }
+
+    public static PhysicMaterial GetPhysicMaterial()
+    {
+        return physicMaterial;
     }
 
     static ChunkMesh[] chunks = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];

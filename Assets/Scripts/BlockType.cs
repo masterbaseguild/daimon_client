@@ -58,4 +58,9 @@ public class BlockType
     {
         return isOpaque;
     }
+
+    public bool IsConcrete()
+    {
+        return isConcrete;
+    }
 }
