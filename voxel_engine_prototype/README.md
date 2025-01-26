@@ -1,3 +1,0 @@
-# MasterVerse Engine
-
-⏬ Take Over!
