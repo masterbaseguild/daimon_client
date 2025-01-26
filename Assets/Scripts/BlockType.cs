@@ -12,13 +12,17 @@ public class BlockType
     public Action OnTextureLoaded;
     public bool isLoaded = false;
 
-    public BlockType(string id, string display, bool isOpaque, bool isConcrete, string texture)
+    public BlockType(string id, string display, int type)
     {
         this.id = id;
         this.display = display;
-        this.isOpaque = isOpaque;
-        this.isConcrete = isConcrete;
-        this.texture = texture;
+        // type 1: opaque concrete
+        // type 2: transparent concrete
+        // type 3: transparent non-concrete
+        this.isOpaque = type == 1;
+        this.isConcrete = type == 1 || type == 2;
+        //set texture to https://media.projectdaimon.com/public/blocks/{id}.png
+        texture = $"https://media.projectdaimon.com/public/blocks/{this.id}.png";
         if (!string.IsNullOrEmpty(texture))
         {
             BlockPalette.LoadTexture(texture, (texture2D) =>
