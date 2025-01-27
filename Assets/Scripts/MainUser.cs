@@ -7,16 +7,19 @@ public class MainUser : MonoBehaviour
     Vector3 spawnPoint = new Vector3(80, 64, 94);
     float range = 5f;
     float moveSpeed = 5f;
-    float jumpHeight = 1f;
+    float jumpHeight = 0.75f;
     float groundDistance = 0.25f;
-    float gravity = -30f;
-    float sens = 512f;
+    float gravity = -25f;
+    float sens = 750f;
     float delayBetweenPresses = 0.25f;
     int lowestY = -100;
 
     bool canFly = true;
+    bool canRun = true;
+    bool canPhase = true;
     bool isFlying = true;
     bool isRunning = false;
+    bool isPhasing = false;
     bool isGrounded = false;
     bool pressedFirstTimeSpace = false;
     float lastPressedTimeSpace;
@@ -64,7 +67,7 @@ public class MainUser : MonoBehaviour
         gravityAcceleration += gravity * Time.deltaTime;
         if (isGrounded || isFlying) gravityAcceleration = 0;
         if (transform.position.y < lowestY) transform.position = spawnPoint;
-        if (isFlying && isGrounded) isFlying = false;
+        if (isFlying && isGrounded && !isPhasing) isFlying = false;
 
         move = Vector3.zero;
         moveSpeedMultiplier = 1f;
@@ -79,10 +82,10 @@ public class MainUser : MonoBehaviour
         if(Input.GetMouseButtonDown(0)) breakBlock();
         if(Input.GetMouseButtonDown(1)) placeBlock();
 
-        if(Input.GetKeyDown(KeyCode.LeftControl)&&Input.GetKey(KeyCode.W)) isRunning = true;
+        if(Input.GetKeyDown(KeyCode.LeftControl)&&canRun) isRunning = true;
         if(Input.GetKeyUp(KeyCode.W)&&isRunning) isRunning = false;
         if(isRunning) moveSpeedMultiplier *= 2f;
-        if(isFlying) moveSpeedMultiplier *= 1.5f;
+        if(isFlying) moveSpeedMultiplier *= 2f;
         if(Input.GetKey(KeyCode.LeftShift)&&!isFlying) moveSpeedMultiplier /= 2f;
 
         if (Input.GetKey(KeyCode.W)) move.z += 1f;
@@ -92,6 +95,11 @@ public class MainUser : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.T)) MainUdpClient.SendChatMessage("Hello World!");
         if (Input.GetKeyDown(KeyCode.Y)) MainUdpClient.LogGameState();
+        if (Input.GetKeyDown(KeyCode.U)&&canPhase) {
+            isPhasing = !isPhasing;
+            GetComponent<CapsuleCollider>().enabled = !isPhasing;
+            isFlying = true;
+        }
 
         yRotation += Input.GetAxisRaw("Mouse X") * Time.deltaTime * sens;
         xRotation -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sens;
@@ -102,11 +110,11 @@ public class MainUser : MonoBehaviour
 
     private void checkDoublePressSpace()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space)&&!isPhasing)
         {
             if (pressedFirstTimeSpace&&Time.time - lastPressedTimeSpace <= delayBetweenPresses)
             {
-                if(!isFlying&&canFly) isFlying = true;
+                if(canFly&&!isFlying) isFlying = true;
                 else if(isFlying) isFlying = false;
                 pressedFirstTimeSpace = false;
             }
@@ -118,7 +126,7 @@ public class MainUser : MonoBehaviour
     }
     private void checkDoublePressW()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        if (canRun&&Input.GetKeyDown(KeyCode.W))
         {
             if (pressedFirstTimeW&&Time.time - lastPressedTimeW <= delayBetweenPresses)
             {
@@ -129,7 +137,7 @@ public class MainUser : MonoBehaviour
     
             lastPressedTimeW = Time.time;
         }
-        if (pressedFirstTimeW && Time.time - lastPressedTimeW > delayBetweenPresses) pressedFirstTimeW = false;
+        if (canRun&&pressedFirstTimeW && Time.time - lastPressedTimeW > delayBetweenPresses) pressedFirstTimeW = false;
     }
 
     private void breakBlock()
