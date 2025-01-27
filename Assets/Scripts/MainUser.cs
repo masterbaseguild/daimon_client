@@ -5,6 +5,7 @@ public class MainUser : MonoBehaviour
     bool isEnabled = false;
 
     Vector3 spawnPoint = new Vector3(80, 64, 94);
+    float range = 5f;
     float moveSpeed = 5f;
     float jumpHeight = 1f;
     float groundDistance = 0.25f;
@@ -75,6 +76,9 @@ public class MainUser : MonoBehaviour
         checkDoublePressSpace();
         checkDoublePressW();
 
+        if(Input.GetMouseButtonDown(0)) breakBlock();
+        if(Input.GetMouseButtonDown(1)) placeBlock();
+
         if(Input.GetKeyDown(KeyCode.LeftControl)&&Input.GetKey(KeyCode.W)) isRunning = true;
         if(Input.GetKeyUp(KeyCode.W)&&isRunning) isRunning = false;
         if(isRunning) moveSpeedMultiplier *= 2f;
@@ -126,6 +130,26 @@ public class MainUser : MonoBehaviour
             lastPressedTimeW = Time.time;
         }
         if (pressedFirstTimeW && Time.time - lastPressedTimeW > delayBetweenPresses) pressedFirstTimeW = false;
+    }
+
+    private void breakBlock()
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, range))
+        {
+            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point - hit.normal/2);
+            Debug.Log("Break: from "+hit.point+" to "+placedBlockPos+"");
+        }
+    }
+
+    private void placeBlock()
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, range))
+        {
+            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point + hit.normal/2);
+            Debug.Log("Place: from "+hit.point+" to "+placedBlockPos+"");
+        }
     }
 
     public static Vector3 GetPosition()
