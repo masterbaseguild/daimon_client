@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 public class MainUdpClient : MonoBehaviour
 {
-    static string ip = "127.0.0.1";
+    static string ip = "arena.masterbaseguild.it";
     static int serverPort = 7689;
     static string username = "";
     static int clientPort;
