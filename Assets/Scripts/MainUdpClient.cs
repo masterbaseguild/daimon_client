@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 public class MainUdpClient : MonoBehaviour
 {
-    static string ip = "arena.masterbaseguild.it";
+    static string ip = "arena.projectdaimon.com";
     static int serverPort = 7689;
     static string username = "";
     static int clientPort;
@@ -80,7 +80,7 @@ public class MainUdpClient : MonoBehaviour
 
     public static void Connect()
     {
-        remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(ip), serverPort);
+        remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(Dns.GetHostAddresses(ip)[0].ToString()), serverPort);
         try {
             client = new UdpClient(clientPort);
             client.Connect(remoteIpEndPoint);
