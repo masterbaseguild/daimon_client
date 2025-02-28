@@ -17,7 +17,7 @@ public class People : MonoBehaviour
         return connectedUsers.Count + 1;
     }
 
-    public static void setPosition(int index, float x, float y, float z)
+    public static void setPosition(int index, float x, float y, float z, float rx, float ry, float rz, float cx)
     {
         GameObject user = connectedUsers.Find(user => user.GetComponent<User>().index == index);
         if(user == null)
@@ -25,6 +25,9 @@ public class People : MonoBehaviour
             return;
         }
         user.transform.position = new Vector3(x, y, z);
+        user.transform.rotation = Quaternion.Euler(rx, ry, rz);
+        GameObject camera = user.transform.GetChild(0).gameObject;
+        camera.transform.rotation = Quaternion.Euler(cx, ry, 0);
     }
 
     public static GameObject GetUserGameObject(int index)

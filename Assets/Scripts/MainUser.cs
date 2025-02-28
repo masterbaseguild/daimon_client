@@ -164,4 +164,14 @@ public class MainUser : MonoBehaviour
     {
         return GameObject.Find("MainUser").transform.position;
     }
+
+    public static Vector3 GetRotation()
+    {
+        return GameObject.Find("MainUser").transform.eulerAngles;
+    }
+
+    public static Vector3 GetCamera()
+    {
+        return GameObject.Find("MainUser").transform.GetChild(0).gameObject.transform.eulerAngles;
+    }
 }

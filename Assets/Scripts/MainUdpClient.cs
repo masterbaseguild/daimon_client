@@ -47,7 +47,9 @@ public class MainUdpClient : MonoBehaviour
         if (isEnabled)
         {
         Vector3 position = MainUser.GetPosition();
-        Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}");
+        Vector3 rotation = MainUser.GetRotation();
+        Vector3 camera = MainUser.GetCamera();
+        Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
         }
     }
 
@@ -120,11 +122,11 @@ public class MainUdpClient : MonoBehaviour
             switch (packet.type)
             {
                 case "allpositions":
-                    if (packet.data.Length / 4 != (People.GetCount()))
+                    if (packet.data.Length / 8 != (People.GetCount()))
                     {
                         return;
                     }
-                    for (int i = 0; i < packet.data.Length; i += 4)
+                    for (int i = 0; i < packet.data.Length; i += 8)
                     {
                         int positionIndex = int.Parse(packet.data[i]);
                         if (positionIndex == index)
@@ -134,7 +136,11 @@ public class MainUdpClient : MonoBehaviour
                         float positionX = float.Parse(packet.data[i + 1]);
                         float positionY = float.Parse(packet.data[i + 2]);
                         float positionZ = float.Parse(packet.data[i + 3]);
-                        People.setPosition(positionIndex, positionX, positionY, positionZ);
+                        float rotationX = float.Parse(packet.data[i + 4]);
+                        float rotationY = float.Parse(packet.data[i + 5]);
+                        float rotationZ = float.Parse(packet.data[i + 6]);
+                        float cameraX = float.Parse(packet.data[i + 7]);
+                        People.setPosition(positionIndex, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, cameraX);
                     }
                     break;
                 case "chatmessage":
@@ -250,7 +256,7 @@ public class MainUdpClient : MonoBehaviour
 
 // - connect username: this packet is sent to the server when the client connects
 // - disconnect index: this packet is sent to the server when the client disconnects
-// - position index x y z: this packet is sent to the server when the client moves
+// - position index x y z rx ry rz cx: this packet is sent to the server when the client moves
 // - chat index username message: this packet is sent to the server when the client sends a chat message
 // - region: this packet is sent to the server when the client connects, and requests the region data
 
@@ -260,6 +266,6 @@ public class MainUdpClient : MonoBehaviour
 // - conflict: this packet is sent to the connecting client if the username they chose is already taken
 // - userconnected index username: this packet is sent to all connected clients when a new client connects
 // - userdisconnected index: this packet is sent to all connected clients when a client disconnects
-// - allpositions [index x y z]: this packet is sent to all connected clients, and contains the positions of all connected clients
+// - allpositions [index x y z rx ry rz cx]: this packet is sent to all connected clients, and contains the positions of all connected clients
 // - confirmregion region(base64): this packet is sent to the connecting client, and contains the region data
 // - forcedisconnect: this packet is sent to the connecting client when the server wants to disconnect them
