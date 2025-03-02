@@ -9,7 +9,7 @@ public class MainUser : MonoBehaviour
     float moveSpeed = 5f;
     float jumpHeight = 0.75f;
     float groundDistance = 0.25f;
-    float gravity = -25f;
+    float gravityAcceleration = -25f;
     float sens = 750f;
     float delayBetweenPresses = 0.25f;
     int lowestY = -100;
@@ -33,9 +33,14 @@ public class MainUser : MonoBehaviour
 
     float xRotation;
     float yRotation;
-    float gravityAcceleration = 0f;
+    float gravityVelocity = 0f;
     float moveSpeedMultiplier = 1f;
     Vector3 move = Vector3.zero;
+    float hookRange = 512f;
+    bool isHookedL = false;
+    bool isHookedR = false;
+    Vector3 hookPosL;
+    Vector3 hookPosR;
 
     public void Enable()
     {
@@ -54,7 +59,17 @@ public class MainUser : MonoBehaviour
         if (!isEnabled) return;
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, ground);
         move = (transform.forward * move.z + transform.right * move.x + transform.up * move.y).normalized * moveSpeed * moveSpeedMultiplier;
-        move.y += gravityAcceleration;
+        Vector3 forceL = Vector3.zero;
+        Vector3 forceR = Vector3.zero;
+        if (isHookedL) {
+            Vector3 directionL = hookPosL - transform.position;
+            forceL = directionL.normalized * 20f;
+        }
+        if (isHookedR) {
+            Vector3 directionR = hookPosR - transform.position;
+            forceR = directionR.normalized * 20f;
+        }
+        move.y += gravityVelocity;
         rigidBody.velocity = move;
 
         transform.rotation = Quaternion.Euler(0, yRotation, 0);
@@ -64,8 +79,8 @@ public class MainUser : MonoBehaviour
     {
         if (!isEnabled) return;
 
-        gravityAcceleration += gravity * Time.deltaTime;
-        if (isGrounded || isFlying) gravityAcceleration = 0;
+        gravityVelocity += gravityAcceleration * Time.deltaTime;
+        if (isGrounded || isFlying) gravityVelocity = 0;
         if (transform.position.y < lowestY) transform.position = spawnPoint;
         if (isFlying && isGrounded && !isPhasing) isFlying = false;
 
@@ -74,7 +89,7 @@ public class MainUser : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space)&&isFlying) move.y += 1f;
         if (Input.GetKey(KeyCode.LeftShift)&&isFlying) move.y += -1f;
-        if(Input.GetKey(KeyCode.Space)&&isGrounded) gravityAcceleration = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        if(Input.GetKey(KeyCode.Space)&&isGrounded) gravityVelocity = Mathf.Sqrt(jumpHeight * -2f * gravityAcceleration);
 
         checkDoublePressSpace();
         checkDoublePressW();
@@ -92,6 +107,11 @@ public class MainUser : MonoBehaviour
         if (Input.GetKey(KeyCode.S)) move.z += -1f;
         if (Input.GetKey(KeyCode.A)) move.x += -1f;
         if (Input.GetKey(KeyCode.D)) move.x += 1f;
+
+        if (Input.GetKeyDown(KeyCode.Q)) StartHookL();
+        if (!Input.GetKey(KeyCode.Q)) isHookedL = false;
+        if (Input.GetKeyDown(KeyCode.E)) StartHookR();
+        if (!Input.GetKey(KeyCode.E)) isHookedR = false;
 
         if (Input.GetKeyDown(KeyCode.T)) MainUdpClient.SendChatMessage("Hello World!");
         if (Input.GetKeyDown(KeyCode.Y)) MainUdpClient.LogGameState();
@@ -146,7 +166,7 @@ public class MainUser : MonoBehaviour
         if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, range))
         {
             Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point - hit.normal/2);
-            Debug.Log("Break: from "+hit.point+" to "+placedBlockPos+"");
+            Debug.Log("Break: from "+playerCamera.transform.position+" to "+placedBlockPos+"");
         }
     }
 
@@ -156,7 +176,7 @@ public class MainUser : MonoBehaviour
         if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, range))
         {
             Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point + hit.normal/2);
-            Debug.Log("Place: from "+hit.point+" to "+placedBlockPos+"");
+            Debug.Log("Place: from "+playerCamera.transform.position+" to "+placedBlockPos+"");
         }
     }
 
@@ -173,5 +193,25 @@ public class MainUser : MonoBehaviour
     public static Vector3 GetCamera()
     {
         return GameObject.Find("MainUser").transform.GetChild(0).gameObject.transform.eulerAngles;
+    }
+    private void StartHookL()
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
+        {
+            hookPosL = hit.point;
+            Debug.Log("Hook Left: from "+playerCamera.transform.position+" to "+hookPosL+"");
+            isHookedL = true;
+        }
+    }
+    private void StartHookR()
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
+        {
+            hookPosR = hit.point;
+            Debug.Log("Hook Right: from "+playerCamera.transform.position+" to "+hookPosR+"");
+            isHookedR = true;
+        }
     }
 }
