@@ -70,10 +70,12 @@ public class MainUser : MonoBehaviour
             Vector3 directionR = hookPosR - transform.position;
             forceR = directionR.normalized * hookPower;
         }
+        rigidBody.AddForce(forceL, ForceMode.VelocityChange);
+        rigidBody.AddForce(forceR, ForceMode.VelocityChange);
         move.y += gravityVelocity;
         rigidBody.AddForce(move, ForceMode.VelocityChange);
 
-        transform.rotation = Quaternion.Euler(0, yRotation, 0);
+        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
     }
 
     void Update()
@@ -81,7 +83,7 @@ public class MainUser : MonoBehaviour
         if (!isEnabled) return;
 
         gravityVelocity += gravityAcceleration * Time.deltaTime;
-        if (isGrounded || isFlying) gravityVelocity = 0;
+        if (isGrounded || isFlying || isHookedL || isHookedR) gravityVelocity = 0f;
         if (transform.position.y < lowestY) transform.position = spawnPoint;
         if (isFlying && isGrounded && !isPhasing) isFlying = false;
 
@@ -100,6 +102,7 @@ public class MainUser : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.LeftControl)&&canRun) isRunning = true;
         if(Input.GetKeyUp(KeyCode.W)&&isRunning) isRunning = false;
+        if(isHookedL||isHookedR) moveSpeedMultiplier *= 2f;
         if(isRunning) moveSpeedMultiplier *= 2f;
         if(isFlying) moveSpeedMultiplier *= 2f;
         if(Input.GetKey(KeyCode.LeftShift)&&!isFlying) moveSpeedMultiplier /= 2f;
@@ -126,7 +129,7 @@ public class MainUser : MonoBehaviour
         xRotation -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sens;
 
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        playerCamera.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
+        playerCamera.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
     }
 
     private void checkDoublePressSpace()
