@@ -6,8 +6,8 @@ public class MainUser : MonoBehaviour
 
     Vector3 spawnPoint = new Vector3(80, 64, 94);
     float range = 5f;
-    float moveSpeed = 5f;
-    float jumpHeight = 0.75f;
+    float moveSpeed = 7.5f;
+    float jumpHeight = 1f;
     float groundDistance = 0.25f;
     float gravityAcceleration = -25f;
     float sens = 750f;
@@ -36,7 +36,8 @@ public class MainUser : MonoBehaviour
     float gravityVelocity = 0f;
     float moveSpeedMultiplier = 1f;
     Vector3 move = Vector3.zero;
-    float hookRange = 512f;
+    float hookRange = 125f;
+    float hookPower = 25f;
     bool isHookedL = false;
     bool isHookedR = false;
     Vector3 hookPosL;
@@ -63,14 +64,14 @@ public class MainUser : MonoBehaviour
         Vector3 forceR = Vector3.zero;
         if (isHookedL) {
             Vector3 directionL = hookPosL - transform.position;
-            forceL = directionL.normalized * 20f;
+            forceL = directionL.normalized * hookPower;
         }
         if (isHookedR) {
             Vector3 directionR = hookPosR - transform.position;
-            forceR = directionR.normalized * 20f;
+            forceR = directionR.normalized * hookPower;
         }
         move.y += gravityVelocity;
-        rigidBody.velocity = move;
+        rigidBody.AddForce(move, ForceMode.VelocityChange);
 
         transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
