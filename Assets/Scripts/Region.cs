@@ -1,16 +1,21 @@
 using System.Collections.Generic;
 using System;
-using System.IO;
-using System.Linq;
-using UnityEngine;
 
+// a region is a 16x16x16 grid of chunks
+
+// NOTE: the header data should be moved,
+// since it is only needed on region creation
+// and all headers should be fused into a single
+// block palette for the entire world
 public class Region
 {
     public static int REGION_SIZE = 16;
+    Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
+
+    // header data
     static int HEADER_BLOCK_SIZE = 6;
     static int HEADER_BLOCK_COUNT = 256;
     static int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
-    Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
     List<string> Header = new List<string>();
 
     public Region()

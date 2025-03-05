@@ -1,47 +1,33 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
-using System.IO;
-using System.IO.Compression;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
+// the udp client communicates with the server to send and receive state data
 public class MainUdpClient : MonoBehaviour
 {
-    static string ip = "arena.projectdaimon.com";
+    // the udp client won't be enabled until the user presses connect
+    static bool isEnabled = false;
+    static string serverAddress = "arena.projectdaimon.com";
     static int serverPort = 7689;
     static string username = "";
     static int clientPort;
-    static int index;
+    static int index; // user index in the server user list
     static UdpClient client;
     static IPEndPoint remoteIpEndPoint;
-    static bool isEnabled = false;
 
+    // this must only perform setup independent of the data the user will insert in the login form;
+    // all the remaining setup must be done on the connect method, since it is ran on connect button press
     void Start()
     {
         username = "user" + generateUserSuffix();
         clientPort = generateEphemeralPort();
     }
 
-    public static void SetUsername(string newUsername)
-    {
-        username = newUsername;
-    }
-
-    public static void SetIP(string newIP)
-    {
-        ip = newIP;
-    }
-
-    public static string GetIP()
-    {
-        return ip;
-    }
-
+    // send position data to the server every frame
     void Update()
     {
         if (isEnabled)
@@ -51,6 +37,21 @@ public class MainUdpClient : MonoBehaviour
         Vector3 camera = MainUser.GetCamera();
         Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
         }
+    }
+
+    public static void SetUsername(string newUsername)
+    {
+        username = newUsername;
+    }
+
+    public static void SetAddress(string newAddress)
+    {
+        serverAddress = newAddress;
+    }
+
+    public static string GetAddress()
+    {
+        return serverAddress;
     }
 
     int generateEphemeralPort()
@@ -66,7 +67,6 @@ public class MainUdpClient : MonoBehaviour
         return UnityEngine.Random.Range(1000, 9999);
     }
 
-    // send function
     static void Send(string data)
     {
         try
@@ -80,9 +80,10 @@ public class MainUdpClient : MonoBehaviour
         }
     }
 
+    // setup the connection and send the connect packet
     public static void Connect()
     {
-        remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(Dns.GetHostAddresses(ip)[0].ToString()), serverPort);
+        remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(Dns.GetHostAddresses(serverAddress)[0].ToString()), serverPort);
         try {
             client = new UdpClient(clientPort);
             client.Connect(remoteIpEndPoint);
@@ -115,14 +116,18 @@ public class MainUdpClient : MonoBehaviour
         }
     }
 
+    // packet handler
     static void HandlePacket(Packet packet)
     {
+        // since this function needs to interact with the unity object api, it must be run on the main thread
+        // TODO: we probably can only enqueue specific operations, not the whole packet handler
         MainThreadDispatcher.Enqueue(async () =>
         {
             switch (packet.type)
             {
+                // set positions of all connected users
                 case "allpositions":
-                    if (packet.data.Length / 8 != (People.GetCount()))
+                    if (packet.data.Length / 8 != People.GetCount())
                     {
                         return;
                     }
@@ -143,6 +148,7 @@ public class MainUdpClient : MonoBehaviour
                         People.setPosition(positionIndex, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, cameraX);
                     }
                     break;
+                // a chat message was sent by a user
                 case "chatmessage":
                     int chatIndex = int.Parse(packet.data[0]);
                     string chatUsername = packet.data[1];
@@ -160,6 +166,7 @@ public class MainUdpClient : MonoBehaviour
                     }
                     PrintChatMessage($"{chatUser.GetComponent<User>().username}: {chatMessage}");
                     break;
+                // the server has confirmed our connection
                 case "confirmconnect":
                     print($"Connected with index: {packet.data[0]}");
                     index = int.Parse(packet.data[0]);
@@ -175,6 +182,7 @@ public class MainUdpClient : MonoBehaviour
                     }
                     Send($"region");
                     break;
+                // the server has sent us the region data
                 case "confirmregion":
                     World.SetRegion(packet.parseRegionData());
                     List<Task<string>> tasks = new List<Task<string>>();
@@ -187,14 +195,17 @@ public class MainUdpClient : MonoBehaviour
                     World.SetBlockPalette(results);
                     World.DisplayWorld();
                     break;
+                // we cannot connect because our username is already taken
                 case "conflict":
                     PrintChatMessage("Username already taken!");
                     Application.Quit();
                     break;
+                // the server has forced us to disconnect
                 case "forcedisconnect":
                     Send($"disconnect\t{index}");
                     Application.Quit();
                     break;
+                // another user has connected
                 case "userconnected":
                     int connectedIndex = int.Parse(packet.data[0]);
                     if(connectedIndex == index)
@@ -204,6 +215,7 @@ public class MainUdpClient : MonoBehaviour
                     string connectedUsername = packet.data[1];
                     People.AddUser(connectedIndex, connectedUsername);
                     break;
+                // another user has disconnected
                 case "userdisconnected":
                     int disconnectedIndex = int.Parse(packet.data[0]);
                     if (disconnectedIndex == index)
@@ -212,6 +224,7 @@ public class MainUdpClient : MonoBehaviour
                     }
                     People.RemoveUser(disconnectedIndex);
                     break;
+                // catch-all: unknown packet type
                 default:
                     print($"Unknown packet type: {packet.type}");
                     break;
@@ -229,6 +242,7 @@ public class MainUdpClient : MonoBehaviour
         print(message);
     }
 
+    // debug function to current log game state
     public static void LogGameState()
     {
         print("Logging game state...");

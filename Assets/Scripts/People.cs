@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+// the people class stores and manages the data of all other connected users
 public class People : MonoBehaviour
 {
     static List<GameObject> connectedUsers = new List<GameObject>();

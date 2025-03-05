@@ -1,20 +1,25 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+// a chunk mesh is a physical representation of a chunk in the virtual world
+// it is composed of 3 meshes: the main mesh, the collider mesh and the transparent mesh
 public class ChunkMesh
 {
-    GameObject gameObject;
+    GameObject gameObject; // reference to the unity gameobject for this mesh
+    MeshRenderer meshRenderer; // component of the gameobject used to set the material
+    MeshFilter meshFilter; // component of the gameobject used to set the visual mesh
+    MeshCollider meshCollider; // component of the gameobject used to set the collision mesh
+
     Mesh mesh = new Mesh();
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
     List<Vector2> uvs = new List<Vector2>();
-    ChunkMesh nonOpaqueMesh;
+
     Mesh colliderMesh = new Mesh();
     List<Vector3> colliderVertices = new List<Vector3>();
     List<int> colliderTriangles = new List<int>();
-    MeshFilter meshFilter;
-    MeshRenderer meshRenderer;
-    MeshCollider meshCollider;
+
+    ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
 
     public ChunkMesh(bool isMainMesh)
     {
@@ -54,7 +59,7 @@ public class ChunkMesh
 
     void AddVertices(Direction direction, int x, int y, int z)
     {
-        //order of vertices matters for the normals and how we render the mesh
+        // order of vertices matters for the normals and how we render the mesh
         switch (direction)
         {
             case Direction.backwards:
@@ -101,7 +106,7 @@ public class ChunkMesh
 
     void AddColliderVertices(Direction direction, int x, int y, int z)
     {
-        //order of vertices matters for the normals and how we render the mesh
+        // order of vertices matters for the normals and how we render the mesh
         switch (direction)
         {
             case Direction.backwards:
@@ -200,6 +205,7 @@ public class ChunkMesh
         UpdateColliderMesh();
     }
 
+    // update the meshes every time a block in the chunk changes
     void UpdateMesh()
     {
         mesh.Clear();
@@ -210,6 +216,7 @@ public class ChunkMesh
         meshFilter.mesh = mesh;
     }
 
+    // update the meshes every time a block in the chunk changes
     void UpdateColliderMesh()
     {
         colliderMesh.Clear();

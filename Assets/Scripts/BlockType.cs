@@ -4,10 +4,10 @@ using System;
 public class BlockType
 {
     string id;
-    string display;
+    string display; // display name
     bool isOpaque;
     bool isConcrete;
-    string texture;
+    string texture; // texture url
     Texture2D texture2D;
     public Action OnTextureLoaded;
     public bool isLoaded = false;
@@ -16,11 +16,14 @@ public class BlockType
     {
         this.id = id;
         this.display = display;
-        // type 1: opaque concrete
-        // type 2: transparent concrete
-        // type 3: transparent non-concrete
-        this.isOpaque = type == 1;
-        this.isConcrete = type == 1 || type == 2;
+        // type 1: opaque concrete (e.g. minecraft stone)
+        // type 2: transparent concrete (e.g. minecraft glass)
+        // type 3: transparent non-concrete (e.g. minecraft water)
+        // type 4: opaque non-concrete (e.g. minecraft lava)
+
+        // NOTE: transparent does not mean it has no texture, it just means the texture has transparency
+        isOpaque = type == 1 || type == 4;
+        isConcrete = type == 1 || type == 2;
         //set texture to https://media.projectdaimon.com/public/blocks/{id}.png
         texture = $"https://media.projectdaimon.com/public/blocks/{this.id}.png";
         if (!string.IsNullOrEmpty(texture))
@@ -34,7 +37,7 @@ public class BlockType
         }
         else
         {
-            this.texture2D = null;
+            texture2D = null;
             isLoaded = true;
         }
     }

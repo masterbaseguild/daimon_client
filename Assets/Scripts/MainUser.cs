@@ -1,48 +1,55 @@
 using UnityEngine;
 
+// the main user controller
 public class MainUser : MonoBehaviour
 {
+    // the user controller won't be enabled until the user presses connect
     bool isEnabled = false;
 
-    Vector3 spawnPoint = new Vector3(80, 64, 94);
-    float range = 5f;
-    float moveSpeed = 7.5f;
-    float jumpHeight = 1f;
-    float groundDistance = 0.25f;
-    float gravityAcceleration = -25f;
-    float sens = 750f;
-    float delayBetweenPresses = 0.25f;
-    int lowestY = -100;
-
-    bool canFly = true;
-    bool canRun = true;
-    bool canPhase = true;
-    bool isFlying = true;
-    bool isRunning = false;
-    bool isPhasing = false;
-    bool isGrounded = false;
-    bool pressedFirstTimeSpace = false;
-    float lastPressedTimeSpace;
-    bool pressedFirstTimeW = false;
-    float lastPressedTimeW;
-
+    // unity api references
     GameObject playerCamera;
     Rigidbody rigidBody;
     Transform groundCheck;
     LayerMask ground;
 
-    float xRotation;
-    float yRotation;
-    float gravityVelocity = 0f;
-    float moveSpeedMultiplier = 1f;
-    Vector3 move = Vector3.zero;
-    float hookRange = 125f;
+    Vector3 spawnPoint = new Vector3(80, 64, 94);
+    float range = 5f; // break and place block range
+    float moveSpeed = 7.5f;
+    float jumpHeight = 1f;
+    float groundDistance = 0.25f; // ground check distance
+    float gravityAcceleration = -25f;
+    float sens = 750f; // mouse sensitivity
+    float delayBetweenPresses = 0.25f; // grace period for detecting double presses
+    int lowestY = -100; // if the player falls below this y value, they will be teleported to spawn
+    float hookRange = 125f; // hook range
     float hookPower = 25f;
+
+    // user abilities
+    bool canFly = true;
+    bool canRun = true;
+    bool canPhase = true;
+
+    // user state
+    bool isFlying = true;
+    bool isRunning = false;
+    bool isPhasing = false;
+    bool isGrounded = false;
     bool isHookedL = false;
     bool isHookedR = false;
+    bool pressedFirstTimeSpace = false;
+    float lastPressedTimeSpace;
+    bool pressedFirstTimeW = false;
+    float lastPressedTimeW;
+
+    float xRotation; // camera x rotation
+    float yRotation; // body y rotation
+    float gravityVelocity = 0f;
+    float moveSpeedMultiplier = 1f;
     Vector3 hookPosL;
     Vector3 hookPosR;
+    Vector3 move = Vector3.zero; // current movement vector
 
+    // setup components and cursor, then enable the user controller
     public void Enable()
     {
         playerCamera = transform.GetChild(0).gameObject;
@@ -55,11 +62,20 @@ public class MainUser : MonoBehaviour
         isEnabled = true;
     }
 
+    // run physics logic at a fixed interval
     void FixedUpdate()
     {
         if (!isEnabled) return;
+
+        // ground check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, ground);
+
+        // movement
         move = (transform.forward * move.z + transform.right * move.x + transform.up * move.y).normalized * moveSpeed * moveSpeedMultiplier;
+        move.y += gravityVelocity;
+        rigidBody.AddForce(move, ForceMode.VelocityChange);
+
+        // hook movement
         Vector3 forceL = Vector3.zero;
         Vector3 forceR = Vector3.zero;
         if (isHookedL) {
@@ -72,12 +88,9 @@ public class MainUser : MonoBehaviour
         }
         rigidBody.AddForce(forceL, ForceMode.VelocityChange);
         rigidBody.AddForce(forceR, ForceMode.VelocityChange);
-        move.y += gravityVelocity;
-        rigidBody.AddForce(move, ForceMode.VelocityChange);
-
-        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
     }
 
+    // run input logic every frame
     void Update()
     {
         if (!isEnabled) return;
@@ -112,9 +125,9 @@ public class MainUser : MonoBehaviour
         if (Input.GetKey(KeyCode.A)) move.x += -1f;
         if (Input.GetKey(KeyCode.D)) move.x += 1f;
 
-        if (Input.GetKeyDown(KeyCode.Q)) StartHookL();
+        if (Input.GetKeyDown(KeyCode.Q)) startHookL();
         if (!Input.GetKey(KeyCode.Q)) isHookedL = false;
-        if (Input.GetKeyDown(KeyCode.E)) StartHookR();
+        if (Input.GetKeyDown(KeyCode.E)) startHookR();
         if (!Input.GetKey(KeyCode.E)) isHookedR = false;
 
         if (Input.GetKeyDown(KeyCode.T)) MainUdpClient.SendChatMessage("Hello World!");
@@ -129,9 +142,11 @@ public class MainUser : MonoBehaviour
         xRotation -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sens;
 
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        playerCamera.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
+        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
+        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 
+    // double press logic
     private void checkDoublePressSpace()
     {
         if (Input.GetKeyDown(KeyCode.Space)&&!isPhasing)
@@ -148,6 +163,7 @@ public class MainUser : MonoBehaviour
         }
         if (pressedFirstTimeSpace && Time.time - lastPressedTimeSpace > delayBetweenPresses) pressedFirstTimeSpace = false;
     }
+
     private void checkDoublePressW()
     {
         if (canRun&&Input.GetKeyDown(KeyCode.W))
@@ -164,6 +180,8 @@ public class MainUser : MonoBehaviour
         if (canRun&&pressedFirstTimeW && Time.time - lastPressedTimeW > delayBetweenPresses) pressedFirstTimeW = false;
     }
 
+    // block placement and breaking logic
+    // NOTE: not implemented for now
     private void breakBlock()
     {
         RaycastHit hit;
@@ -184,6 +202,29 @@ public class MainUser : MonoBehaviour
         }
     }
 
+    // hook logic
+    private void startHookL()
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
+        {
+            hookPosL = hit.point;
+            Debug.Log("Hook Left: from "+playerCamera.transform.position+" to "+hookPosL+"");
+            isHookedL = true;
+        }
+    }
+    private void startHookR()
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
+        {
+            hookPosR = hit.point;
+            Debug.Log("Hook Right: from "+playerCamera.transform.position+" to "+hookPosR+"");
+            isHookedR = true;
+        }
+    }
+
+    // public methods
     public static Vector3 GetPosition()
     {
         return GameObject.Find("MainUser").transform.position;
@@ -197,25 +238,5 @@ public class MainUser : MonoBehaviour
     public static Vector3 GetCamera()
     {
         return GameObject.Find("MainUser").transform.GetChild(0).gameObject.transform.eulerAngles;
-    }
-    private void StartHookL()
-    {
-        RaycastHit hit;
-        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
-        {
-            hookPosL = hit.point;
-            Debug.Log("Hook Left: from "+playerCamera.transform.position+" to "+hookPosL+"");
-            isHookedL = true;
-        }
-    }
-    private void StartHookR()
-    {
-        RaycastHit hit;
-        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
-        {
-            hookPosR = hit.point;
-            Debug.Log("Hook Right: from "+playerCamera.transform.position+" to "+hookPosR+"");
-            isHookedR = true;
-        }
     }
 }
