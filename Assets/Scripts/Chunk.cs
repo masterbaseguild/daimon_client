@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using System;
-using System.IO;
-using System.Linq;
-
+// a chunk is a 16x16x16 grid of voxels
+// each voxel is stored as a number that maps to a block type in the block palette
 public class Chunk
 {
     public static int CHUNK_SIZE = 16;

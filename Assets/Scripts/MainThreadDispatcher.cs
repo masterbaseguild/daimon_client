@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+// the main thread dispatcher is a singleton that allows for the execution of code on the main thread
 public class MainThreadDispatcher : MonoBehaviour
 {
     public static MainThreadDispatcher Instance { get; private set; }

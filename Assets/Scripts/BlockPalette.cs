@@ -5,10 +5,14 @@ using System;
 using System.Collections;
 using UnityEngine.Networking;
 
+// the block palette stores and handles the complete list of block types
+// TODO: i don't remember how the async part of this works, need to document it and eventually refactor
 public class BlockPalette
 {
     static List<BlockType> blocks = new List<BlockType>();
     static int TEXTURE_SIZE = 16;
+    // texture atlas: a single big image containing all block textures,
+    // which the game extracts via UV mapping
     static Texture2D textureAtlas;
     static Action OnAllTexturesLoaded;
 
@@ -23,24 +27,23 @@ public class BlockPalette
 
     public static void LoadTexture(string url, Action<Texture2D> onTextureLoaded)
     {
+        // since this coroutine uses the unity networking api, it must be run on the main thread
         MainThreadDispatcher.Instance.StartCoroutine(LoadTextureCoroutine(url, onTextureLoaded));
     }
 
     static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)
     {
-        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(url))
-        {
-            yield return www.SendWebRequest();
+        using UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
+        yield return www.SendWebRequest();
 
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                onTextureLoaded?.Invoke(null);
-            }
-            else
-            {
-                Texture2D texture = DownloadHandlerTexture.GetContent(www);
-                onTextureLoaded?.Invoke(texture);
-            }
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            onTextureLoaded?.Invoke(null);
+        }
+        else
+        {
+            Texture2D texture = DownloadHandlerTexture.GetContent(www);
+            onTextureLoaded?.Invoke(texture);
         }
     }
 

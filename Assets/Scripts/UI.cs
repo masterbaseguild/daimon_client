@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+// a placeholder ui implementation
 public class UI : MonoBehaviour
 {
     [SerializeField] private Button playBtn;
@@ -11,7 +12,7 @@ public class UI : MonoBehaviour
 
     private void Awake()
     {
-        ipInput.text = MainUdpClient.GetIP();
+        ipInput.text = MainUdpClient.GetAddress();
         playBtn.onClick.AddListener(() =>
         {
             MainHttpClient.Connect();
@@ -21,7 +22,7 @@ public class UI : MonoBehaviour
             ipInput.gameObject.SetActive(false);
         });
         usernameInput.onValueChanged.AddListener(delegate{editText();});
-        ipInput.onValueChanged.AddListener(delegate{editIpText();});
+        ipInput.onValueChanged.AddListener(delegate{editAddressText();});
     }
 
     void Update()
@@ -42,8 +43,8 @@ public class UI : MonoBehaviour
         MainUdpClient.SetUsername(usernameInput.text);
     }
 
-    private void editIpText()
+    private void editAddressText()
     {
-        MainUdpClient.SetIP(ipInput.text);
+        MainUdpClient.SetAddress(ipInput.text);
     }
 }

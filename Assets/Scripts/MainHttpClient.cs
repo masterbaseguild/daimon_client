@@ -3,6 +3,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
+// the http client communicates with the api to retrieve assets and global data
 public class MainHttpClient : MonoBehaviour
 {
     static string endpoint = "https://api.projectdaimon.com/";
