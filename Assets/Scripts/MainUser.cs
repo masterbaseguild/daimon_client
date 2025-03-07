@@ -11,6 +11,10 @@ public class MainUser : MonoBehaviour
     Rigidbody rigidBody;
     Transform groundCheck;
     LayerMask ground;
+    LineRenderer lineRendererL1;
+    LineRenderer lineRendererR1;
+    LineRenderer lineRendererL2;
+    LineRenderer lineRendererR2;
 
     // parameters
     public Vector3 spawnPoint;
@@ -63,6 +67,10 @@ public class MainUser : MonoBehaviour
     public void Enable()
     {
         playerCamera = transform.GetChild(0).gameObject;
+        lineRendererL1 = transform.Find("HookL1").GetComponent<LineRenderer>();
+        lineRendererR1 = transform.Find("HookR1").GetComponent<LineRenderer>();
+        lineRendererL2 = transform.Find("HookL2").GetComponent<LineRenderer>();
+        lineRendererR2 = transform.Find("HookR2").GetComponent<LineRenderer>();
         groundCheck = transform.GetChild(2).gameObject.transform;
         rigidBody = GetComponent<Rigidbody>();
         ground = LayerMask.GetMask("Ground");
@@ -188,9 +196,29 @@ public class MainUser : MonoBehaviour
     private void HandleHooks()
     {
         if (Input.GetKeyDown(KeyCode.Q)) StartHookL();
-        if (!Input.GetKey(KeyCode.Q)) isHookedL = false;
+        if (!Input.GetKey(KeyCode.Q))
+        {
+            isHookedL = false;
+            lineRendererL1.enabled = false;
+            lineRendererL2.enabled = false;
+        }
         if (Input.GetKeyDown(KeyCode.E)) StartHookR();
-        if (!Input.GetKey(KeyCode.E)) isHookedR = false;
+        if (!Input.GetKey(KeyCode.E))
+        {
+            isHookedR = false;
+            lineRendererR1.enabled = false;
+            lineRendererR2.enabled = false;
+        }
+        if (isHookedL)
+        {
+            lineRendererL1.SetPosition(0, transform.position - transform.right * 0.5f + transform.up * 0.5f);
+            lineRendererL2.SetPosition(0, transform.position - transform.right * 0.5f - transform.up * 0.5f);
+        }
+        if (isHookedR)
+        {
+            lineRendererR1.SetPosition(0, transform.position + transform.right * 0.5f + transform.up * 0.5f);
+            lineRendererR2.SetPosition(0, transform.position + transform.right * 0.5f - transform.up * 0.5f);
+        }
     }
 
     private void HandleDoubleSpaceFlight()
@@ -287,22 +315,42 @@ public class MainUser : MonoBehaviour
     private void StartHookL()
     {
         RaycastHit hit;
-        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange, layerMask: ground))
         {
             hookPosL = hit.point;
             Debug.Log("Hook Left: from "+playerCamera.transform.position+" to "+hookPosL+"");
             isHookedL = true;
+            Vector3 startForce = (hookPosL - transform.position).normalized * hookPower * physicsMultiplier;
+            if (startForce.y < physicsMultiplier * hookPower * 0.5f) startForce += Vector3.up * (physicsMultiplier * hookPower * 0.5f - startForce.y);
+            if (hookPosL.y >= transform.position.y) startForce += Vector3.up * (hookPosL.y - transform.position.y) * physicsMultiplier;
+            rigidBody.AddForce(startForce, ForceMode.Force);
+            lineRendererL1.enabled = true;
+            lineRendererL1.SetPosition(0, transform.position - transform.right * 0.5f + transform.up * 0.5f);
+            lineRendererL1.SetPosition(1, hookPosL);
+            lineRendererL2.enabled = true;
+            lineRendererL2.SetPosition(0, transform.position - transform.right * 0.5f - transform.up * 0.5f);
+            lineRendererL2.SetPosition(1, hookPosL);
         }
     }
 
     private void StartHookR()
     {
         RaycastHit hit;
-        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange))
+        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, hookRange, layerMask: ground))
         {
             hookPosR = hit.point;
             Debug.Log("Hook Right: from "+playerCamera.transform.position+" to "+hookPosR+"");
             isHookedR = true;
+            Vector3 startForce = (hookPosR - transform.position).normalized * hookPower * physicsMultiplier;
+            if (startForce.y < physicsMultiplier * hookPower * 0.5f) startForce += Vector3.up * (physicsMultiplier * hookPower * 0.5f - startForce.y);
+            if (hookPosR.y >= transform.position.y) startForce += Vector3.up * (hookPosR.y - transform.position.y) * physicsMultiplier;
+            rigidBody.AddForce(startForce, ForceMode.Force);
+            lineRendererR1.enabled = true;
+            lineRendererR1.SetPosition(0, transform.position + transform.right * 0.5f + transform.up * 0.5f);
+            lineRendererR1.SetPosition(1, hookPosR);
+            lineRendererR2.enabled = true;
+            lineRendererR2.SetPosition(0, transform.position + transform.right * 0.5f - transform.up * 0.5f);
+            lineRendererR2.SetPosition(1, hookPosR);
         }
     }
 
@@ -314,7 +362,7 @@ public class MainUser : MonoBehaviour
 
     private void GravityForce()
     {
-        if (!(isGrounded || isFlying || isHookedL || isHookedR))
+        if (!(isGrounded || isFlying))
         {
             Vector3 gravity = Vector3.up * gravityAcceleration * physicsMultiplier * Time.fixedDeltaTime;
             rigidBody.AddForce(gravity, ForceMode.Acceleration);
@@ -323,18 +371,20 @@ public class MainUser : MonoBehaviour
 
     private void HookForce()
     {
-        Vector3 forceL = Vector3.zero;
-        Vector3 forceR = Vector3.zero;
         if (isHookedL) {
             Vector3 directionL = hookPosL - transform.position;
-            forceL = directionL.normalized * hookPower * physicsMultiplier;
+            Vector3 forceL = directionL.normalized * hookPower * physicsMultiplier;
+            rigidBody.AddForce(forceL, ForceMode.Force);
+            if (Vector3.Angle(rigidBody.velocity, forceL) > 90f)
+                rigidBody.AddForce(-rigidBody.velocity * physicsMultiplier, ForceMode.Acceleration);
         }
         if (isHookedR) {
             Vector3 directionR = hookPosR - transform.position;
-            forceR = directionR.normalized * hookPower * physicsMultiplier;
+            Vector3 forceR = directionR.normalized * hookPower * physicsMultiplier;
+            rigidBody.AddForce(forceR, ForceMode.Force);
+            if (Vector3.Angle(rigidBody.velocity, forceR) > 90f)
+                rigidBody.AddForce(-rigidBody.velocity * physicsMultiplier, ForceMode.Acceleration);
         }
-        rigidBody.AddForce(forceL, ForceMode.Force);
-        rigidBody.AddForce(forceR, ForceMode.Force);
     }
 
     // public methods

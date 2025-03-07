@@ -27,7 +27,7 @@ public class UI : MonoBehaviour
 
     void Update()
     {
-        Vector3 coords = mainUser.transform.position;
+        /* Vector3 coords = mainUser.transform.position;
         var Xtext = "X: " + (int)coords.x;
         var Ytext = "Y: " + (int)coords.y;
         var Ztext = "Z: " + (int)coords.z;
@@ -35,7 +35,7 @@ public class UI : MonoBehaviour
         var chunkXtext = "ChunkX: " + chunkCoords.x;
         var chunkYtext = "ChunkY: " + chunkCoords.y;
         var chunkZtext = "ChunkZ: " + chunkCoords.z;
-        ChunkData.text = Xtext + "\n" + Ytext + "\n" + Ztext + "\n" + chunkXtext + "\n" + chunkYtext + "\n" + chunkZtext;
+        ChunkData.text = Xtext + "\n" + Ytext + "\n" + Ztext + "\n" + chunkXtext + "\n" + chunkYtext + "\n" + chunkZtext; */
     }
 
     private void editText()
