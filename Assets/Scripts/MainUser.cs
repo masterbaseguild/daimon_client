@@ -112,6 +112,8 @@ public class MainUser : MonoBehaviour
     {
         if (!isEnabled) return;
 
+        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
+
         MovementForce();
         GravityForce();
         HookForce();
@@ -308,8 +310,7 @@ public class MainUser : MonoBehaviour
         yRotation += Input.GetAxisRaw("Mouse X") * Time.deltaTime * cameraSensitivity;
         xRotation -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * cameraSensitivity;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
-        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        playerCamera.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
     }
 
     private void StartHookL()

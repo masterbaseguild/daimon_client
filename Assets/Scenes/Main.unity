@@ -1462,7 +1462,7 @@ MonoBehaviour:
   jumpCooldown: 0.25
   groundCheckDistance: 0.25
   gravityAcceleration: -200
-  cameraSensitivity: 750
+  cameraSensitivity: 250
   delayBetweenDoublePresses: 0.25
   loopbackY: -100
   hookRange: 125
