@@ -1179,6 +1179,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdbed27a95f0f40cba10d6ef6a2b5233, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnPoint: {x: 80, y: 64, z: 94}
+  breakPlaceRange: 5
+  movementSpeed: 2
+  jumpPower: 1.5
+  jumpCooldown: 0.25
+  groundCheckDistance: 0.25
+  gravityAcceleration: -200
+  cameraSensitivity: 750
+  delayBetweenDoublePresses: 0.25
+  loopbackY: -100
+  hookRange: 125
+  hookPower: 10
+  groundDrag: 20
+  airDrag: 0
+  physicsMultiplier: 10
+  hookedSpeedMultiplier: 1.5
+  runningSpeedMultiplier: 1.5
+  flyingSpeedMultiplier: 1.5
+  fallingSpeedMultiplier: 0.25
+  sneakingSpeedMultiplier: 0.5
 --- !u!54 &1220779334
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1188,7 +1208,7 @@ Rigidbody:
   m_GameObject: {fileID: 1220779330}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 32
+  m_Drag: 20
   m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
