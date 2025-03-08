@@ -18,6 +18,7 @@ public class MainUdpClient : MonoBehaviour
     static int index; // user index in the server user list
     static UdpClient client;
     static IPEndPoint remoteIpEndPoint;
+    static bool hasReceivedRegion = false;
 
     // this must only perform setup independent of the data the user will insert in the login form;
     // all the remaining setup must be done on the connect method, since it is ran on connect button press
@@ -181,12 +182,25 @@ public class MainUdpClient : MonoBehaviour
                         People.AddUser(firstIndex, firstUsername);
                     }
                     Send($"region");
+                    // wait 5 seconds, then check if we have received the region data
+                    await Task.Delay(5000);
+                    if (!hasReceivedRegion)
+                    {
+                        print("Failed to receive region data, using fallback local packet...");
+                        // load packet from binary file in documents folder
+                        packet = new Packet("confirmregion\t" + Convert.ToBase64String(System.IO.File.ReadAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat")));
+                        HandlePacket(packet);
+                    }
                     break;
                 // the server has sent us the region data
                 case "confirmregion":
+                    hasReceivedRegion = true;
+                    // save packet to binary file in documents folder
+                    // System.IO.File.WriteAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat", Convert.FromBase64String(packet.data[0]));
                     World.SetRegion(packet.parseRegionData());
                     List<Task<string>> tasks = new List<Task<string>>();
                     int count = World.GetRegion().getHeaderCount();
+                    Debug.Log("Count: " + count);
                     for (int i = 0; i < count; i++)
                     {
                         tasks.Add(MainHttpClient.GetResource("item", World.GetRegion().getHeaderLine(i)));

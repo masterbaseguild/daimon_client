@@ -365,26 +365,29 @@ public class MainUser : MonoBehaviour
     {
         if (!(isGrounded || isFlying))
         {
-            Vector3 gravity = Vector3.up * gravityAcceleration * physicsMultiplier * Time.fixedDeltaTime;
+            Vector3 gravity = Vector3.up * gravityAcceleration * physicsMultiplier;
             rigidBody.AddForce(gravity, ForceMode.Acceleration);
         }
     }
 
     private void HookForce()
     {
+        Vector3 currentDirection = rigidBody.velocity.normalized;
         if (isHookedL) {
-            Vector3 directionL = hookPosL - transform.position;
-            Vector3 forceL = directionL.normalized * hookPower * physicsMultiplier;
+            Vector3 directionL = (hookPosL - transform.position).normalized;
+            Vector3 finalDirection = (directionL + currentDirection).normalized;
+            Vector3 forceL = directionL * hookPower * physicsMultiplier;
             rigidBody.AddForce(forceL, ForceMode.Force);
             if (Vector3.Angle(rigidBody.velocity, forceL) > 90f)
-                rigidBody.AddForce(-rigidBody.velocity * physicsMultiplier, ForceMode.Acceleration);
+                rigidBody.AddForce(-rigidBody.velocity * physicsMultiplier);
         }
         if (isHookedR) {
-            Vector3 directionR = hookPosR - transform.position;
-            Vector3 forceR = directionR.normalized * hookPower * physicsMultiplier;
+            Vector3 directionR = (hookPosL - transform.position).normalized;
+            Vector3 finalDirection = (directionR + currentDirection).normalized;
+            Vector3 forceR = directionR * hookPower * physicsMultiplier;
             rigidBody.AddForce(forceR, ForceMode.Force);
             if (Vector3.Angle(rigidBody.velocity, forceR) > 90f)
-                rigidBody.AddForce(-rigidBody.velocity * physicsMultiplier, ForceMode.Acceleration);
+                rigidBody.AddForce(-rigidBody.velocity * physicsMultiplier);
         }
     }
 
