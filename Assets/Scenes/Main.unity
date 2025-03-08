@@ -1461,7 +1461,7 @@ MonoBehaviour:
   jumpPower: 2
   jumpCooldown: 0.25
   groundCheckDistance: 0.25
-  gravityAcceleration: -200
+  gravityAcceleration: -5
   cameraSensitivity: 250
   delayBetweenDoublePresses: 0.25
   loopbackY: -100

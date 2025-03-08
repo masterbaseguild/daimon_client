@@ -382,7 +382,7 @@ public class MainUser : MonoBehaviour
                 rigidBody.AddForce(-rigidBody.velocity * physicsMultiplier);
         }
         if (isHookedR) {
-            Vector3 directionR = (hookPosL - transform.position).normalized;
+            Vector3 directionR = (hookPosR - transform.position).normalized;
             Vector3 finalDirection = (directionR + currentDirection).normalized;
             Vector3 forceR = directionR * hookPower * physicsMultiplier;
             rigidBody.AddForce(forceR, ForceMode.Force);
