@@ -11,7 +11,7 @@ public class MainUdpClient : MonoBehaviour
 {
     // the udp client won't be enabled until the user presses connect
     static bool isEnabled = false;
-    static string serverAddress = "arena.projectdaimon.com";
+    static string serverAddress = "arena.daimon.world";
     static int serverPort = 7689;
     static string username = "";
     static int clientPort;

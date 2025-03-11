@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 // the http client communicates with the api to retrieve assets and global data
 public class MainHttpClient : MonoBehaviour
 {
-    static string endpoint = "https://api.projectdaimon.com/";
+    static string endpoint = "https://api.daimon.world/";
     static HttpClient client = new HttpClient();
 
     //the following method requests a resource of given type and given id, and returns it as a json string

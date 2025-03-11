@@ -24,8 +24,8 @@ public class BlockType
         // NOTE: transparent does not mean it has no texture, it just means the texture has transparency
         isOpaque = type == 1 || type == 4;
         isConcrete = type == 1 || type == 2;
-        //set texture to https://media.projectdaimon.com/public/blocks/{id}.png
-        texture = $"https://media.projectdaimon.com/public/blocks/{this.id}.png";
+        //set texture to https://media.daimon.world/public/blocks/{id}.png
+        texture = $"https://media.daimon.world/public/blocks/{this.id}.png";
         if (!string.IsNullOrEmpty(texture))
         {
             BlockPalette.LoadTexture(texture, (texture2D) =>
