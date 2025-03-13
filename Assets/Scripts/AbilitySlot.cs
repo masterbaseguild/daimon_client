@@ -2,20 +2,13 @@ using UnityEngine;
 
 public class AbilitySlot
 {
-    public Ability csharpAbility;
-    public object javascriptAbility;
+    public Ability ability;
     public KeyCode key;
     public ScriptType type;
-    public AbilitySlot(Ability csharpAbility, KeyCode key)
+    public AbilitySlot(Ability ability, KeyCode key)
     {
-        this.csharpAbility = csharpAbility;
+        this.ability = ability;
         this.key = key;
         this.type = ScriptType.csharp;
-    }
-    public AbilitySlot(object javascriptAbility, KeyCode key)
-    {
-        this.javascriptAbility = javascriptAbility;
-        this.key = key;
-        this.type = ScriptType.javascript;
     }
 }
