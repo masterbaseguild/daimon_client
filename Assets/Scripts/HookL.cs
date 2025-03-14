@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class HookL : Ability
+public class HookL
 {
     
     // parameters
@@ -18,7 +18,7 @@ public class HookL : Ability
     bool isHooked = false;
     Vector3 hookPos;
 
-    public HookL(GameObject user) : base(user)
+    public HookL(GameObject user)
     {
         MainUser script = user.GetComponent<MainUser>();
         this.user = user.transform;
@@ -46,7 +46,7 @@ public class HookL : Ability
         lineRenderer2.endColor = Color.blue;
     }
 
-    public override void Start()
+    public void Start()
     {
         RaycastHit hit;
         if(Physics.Raycast(userCamera.position, userCamera.forward, out hit, hookRange, layerMask: ground))
@@ -67,7 +67,7 @@ public class HookL : Ability
         }
     }
 
-    public override void Frame()
+    public void Frame()
     {
         if (isHooked)
         {
@@ -76,7 +76,7 @@ public class HookL : Ability
         }
     }
 
-    public override void Tick()
+    public void Tick()
     {
         if (isHooked)
         {
@@ -87,7 +87,7 @@ public class HookL : Ability
         }
     }
 
-    public override void Stop()
+    public void Stop()
     {
         isHooked = false;
         lineRenderer1.enabled = false;
