@@ -7,7 +7,6 @@ using System.Reflection;
 public class Ability
 {
     private Script script;
-    private DynValue scriptObject;
 
     public Ability(string path, GameObject user)
     {
@@ -24,8 +23,7 @@ public class Ability
         // pass user
         script.Globals["user"] = DynValue.FromObject(script, user);
 
-        // set scriptObject
-        scriptObject = script.DoString(File.ReadAllText(path));
+        script.DoString(File.ReadAllText(path));
     }
 
     private void RegisterUnityEngineTypes()
@@ -43,23 +41,25 @@ public class Ability
     {
         Debug.Log("Ability started");
         // run start method of scriptObject
-        var startMethod = scriptObject.Table.Get("Start").Function;
-        script.Call(startMethod);
+        script.Call(script.Globals["Start"]);
     }
 
     public void Frame()
     {
         // run frame method of scriptObject
+        script.Call(script.Globals["Frame"]);
     }
 
     public void Tick()
     {
         // run tick method of scriptObject
+        script.Call(script.Globals["Tick"]);
     }
 
     public void Stop()
     {
         Debug.Log("Ability stopped");
         // run stop method of scriptObject
+        script.Call(script.Globals["Stop"]);
     }
 }

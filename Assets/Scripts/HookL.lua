@@ -1,32 +1,18 @@
-HookL = {}
-HookL.__index = HookL
 
-function HookL.new()
-    local self = setmetatable({}, HookL)
-    self.user = user
 
-    self.Start = HookL.Start
-    self.Frame = HookL.Frame
-    self.Tick = HookL.Tick
-    self.Stop = HookL.Stop
-    return self
-end
-
-function HookL:Start()
+function Start()
     Debug.Log("HookL started!")
-    Debug.Log("User position: " .. tostring(self.user.transform.position))
+    Debug.Log("User position: " .. tostring(user.transform.position))
 end
 
-function HookL:Frame()
+function Frame()
     Debug.Log("HookL running every frame")
 end
 
-function HookL:Tick()
+function Tick()
     Debug.Log("HookL physics update")
 end
 
-function HookL:Stop()
+function Stop()
     Debug.Log("HookL stopped!")
 end
-
-return HookL.new()
