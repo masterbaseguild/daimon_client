@@ -138,28 +138,28 @@ public class MainUser : MonoBehaviour
     {
         if(isFlying)
         {
-            Vector3 flatVel = new Vector3(rigidBody.velocity.x, rigidBody.velocity.y, rigidBody.velocity.z);
+            Vector3 flatVel = new Vector3(rigidBody.linearVelocity.x, rigidBody.linearVelocity.y, rigidBody.linearVelocity.z);
             if(flatVel.magnitude > movementSpeed * movementSpeedMultiplier * physicsMultiplier)
             {
                 Vector3 newVel = flatVel.normalized * movementSpeed * movementSpeedMultiplier * physicsMultiplier;
-                rigidBody.velocity = new Vector3(newVel.x, newVel.y, newVel.z);
+                rigidBody.linearVelocity = new Vector3(newVel.x, newVel.y, newVel.z);
             }
         }
         else
         {
-            Vector3 flatVel = new Vector3(rigidBody.velocity.x, 0f, rigidBody.velocity.z);
+            Vector3 flatVel = new Vector3(rigidBody.linearVelocity.x, 0f, rigidBody.linearVelocity.z);
             if(flatVel.magnitude > movementSpeed * movementSpeedMultiplier * physicsMultiplier)
             {
                 Vector3 newVel = flatVel.normalized * movementSpeed * movementSpeedMultiplier * physicsMultiplier;
-                rigidBody.velocity = new Vector3(newVel.x, rigidBody.velocity.y, newVel.z);
+                rigidBody.linearVelocity = new Vector3(newVel.x, rigidBody.linearVelocity.y, newVel.z);
             }
         }
     }
 
     private void HandleDrag()
     {
-        if (isGrounded||isFlying) rigidBody.drag = groundDrag;
-        else rigidBody.drag = airDrag;
+        if (isGrounded||isFlying) rigidBody.linearDamping = groundDrag;
+        else rigidBody.linearDamping = airDrag;
     }
 
     private void HandleJump()
@@ -167,7 +167,7 @@ public class MainUser : MonoBehaviour
         if(Input.GetKey(KeyCode.Space)&&isReadyToJump&&isGrounded)
         {
             isReadyToJump = false;
-            rigidBody.velocity = new Vector3(rigidBody.velocity.x, 0f, rigidBody.velocity.z);
+            rigidBody.linearVelocity = new Vector3(rigidBody.linearVelocity.x, 0f, rigidBody.linearVelocity.z);
             rigidBody.AddForce(Vector3.up * jumpPower * physicsMultiplier, ForceMode.Impulse);
             Invoke(nameof(ResetJump), jumpCooldown);
         }

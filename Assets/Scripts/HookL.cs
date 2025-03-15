@@ -83,7 +83,7 @@ public class HookL
             Vector3 direction = (hookPos - user.position).normalized;
             Vector3 force = direction * hookPower * physicsMultiplier;
             userRigidBody.AddForce(force, ForceMode.Force);
-            if (Vector3.Angle(userRigidBody.velocity, force) > 90f) userRigidBody.AddForce(-userRigidBody.velocity * physicsMultiplier);
+            if (Vector3.Angle(userRigidBody.linearVelocity, force) > 90f) userRigidBody.AddForce(-userRigidBody.linearVelocity * physicsMultiplier);
         }
     }
 

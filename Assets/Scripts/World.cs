@@ -16,8 +16,8 @@ public class World : MonoBehaviour
     public static Material material;
     public Material nonOpaqueMaterialPrefab;
     public static Material nonOpaqueMaterial;
-    public PhysicMaterial physicMaterialPrefab;
-    public static PhysicMaterial physicMaterial;
+    public PhysicsMaterial physicMaterialPrefab;
+    public static PhysicsMaterial physicMaterial;
 
     // list of all the chunk meshes in all regions
     static ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
@@ -46,7 +46,7 @@ public class World : MonoBehaviour
         return nonOpaqueMaterial;
     }
 
-    public static PhysicMaterial GetPhysicMaterial()
+    public static PhysicsMaterial GetPhysicMaterial()
     {
         return physicMaterial;
     }
