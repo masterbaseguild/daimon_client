@@ -12,8 +12,8 @@ public class InputManager : MonoBehaviour
         slots = new AbilitySlot[slotCount];
 
         // temp
-        SetSlot(0, new Ability("Assets/Scripts/HookL.lua", gameObject), KeyCode.Q);
-        //SetSlot(1, new Ability("Assets/Scripts/HookR.lua", gameObject), KeyCode.E);
+        SetSlot(0, new Ability("Assets/Scripts/Abilities/HookL.lua", gameObject), KeyCode.Q);
+        SetSlot(1, new Ability("Assets/Scripts/Abilities/HookR.lua", gameObject), KeyCode.E);
         isEnabled = true;
     }
 
