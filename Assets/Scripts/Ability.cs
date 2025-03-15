@@ -1,6 +1,5 @@
 using UnityEngine;
 using MoonSharp.Interpreter;
-using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
