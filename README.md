@@ -2,15 +2,8 @@
 
 1. Clone this repository
 2. Install Unity from https://unity.com
-3. Download Unity version 2022.3.6f1
+3. Download Unity version 6000.0.42f1
 4. Add the project to Unity Hub and open it
-
-# Prototypes
-
-This project also includes two old prototypes:
-
-- Voxel Engine Prototype (Unity version 2021.3.20f1)
-- Modify and Chunk Load Prototype (Unity version 2021.3.20f1)
 
 # Data Structures
 
