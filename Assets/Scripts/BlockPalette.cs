@@ -9,18 +9,20 @@ using UnityEngine.Networking;
 // TODO: i don't remember how the async part of this works, need to document it and eventually refactor
 public class BlockPalette
 {
-    static List<BlockType> blocks = new List<BlockType>();
-    static int TEXTURE_SIZE = 16;
+    World world;
+    List<BlockType> blocks = new List<BlockType>();
+    int TEXTURE_SIZE = 16;
     // texture atlas: a single big image containing all block textures,
     // which the game extracts via UV mapping
-    static Texture2D textureAtlas;
-    static Action OnAllTexturesLoaded;
+    Texture2D textureAtlas;
+    Action OnAllTexturesLoaded;
 
     public BlockPalette(string[] blocks, ChunkMesh[] chunks)
     {
+        world = GameObject.Find("World").GetComponent<World>();
         foreach (string block in blocks)
         {
-            BlockPalette.blocks.Add(jsonToBlock(block));
+            this.blocks.Add(jsonToBlock(block));
         }
         GenerateTextureAtlas(chunks);
     }
@@ -48,7 +50,7 @@ public class BlockPalette
     }
 
     // debug function to save texture to disk
-    static void saveTextureToDisk(Texture2D texture)
+    void saveTextureToDisk(Texture2D texture)
     {
         string macPath = "/Users/entity/Downloads/texture.png";
         string winPath = "C:\\Users\\Dario\\Downloads\\texture.png";
@@ -58,7 +60,7 @@ public class BlockPalette
         Debug.Log("Saved texture to " + path);
     }
 
-    static void GenerateTextureAtlas(ChunkMesh[] chunks)
+    void GenerateTextureAtlas(ChunkMesh[] chunks)
     {
         textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE);
         textureAtlas.filterMode = FilterMode.Point;
@@ -78,11 +80,11 @@ public class BlockPalette
             }
             textureAtlas.Apply();
             //saveTextureToDisk(textureAtlas);
-            World.SetTexture(textureAtlas);
+            world.SetTexture(textureAtlas);
         };
     }
 
-    static IEnumerator AllTexturesLoadedCoroutine() {
+    IEnumerator AllTexturesLoadedCoroutine() {
         while (true)
         {
             bool allLoaded = true;
@@ -108,7 +110,7 @@ public class BlockPalette
         return JsonConvert.DeserializeObject<BlockType>(json);
     }
 
-    public static BlockType GetBlockType(int index)
+    public BlockType GetBlockType(int index)
     {
         return blocks[index];
     }

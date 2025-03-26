@@ -9,7 +9,7 @@ public class BlockType
     bool isConcrete;
     string texture; // texture url
     Texture2D texture2D;
-    public Action OnTextureLoaded;
+    Action OnTextureLoaded;
     public bool isLoaded = false;
 
     public BlockType(string id, string display, int type)
@@ -42,19 +42,9 @@ public class BlockType
         }
     }
 
-    public string GetTexture()
-    {
-        return texture;
-    }
-
     public Texture2D GetTexture2D()
     {
         return texture2D;
-    }
-
-    public string GetDisplay()
-    {
-        return display;
     }
 
     public bool IsOpaque()

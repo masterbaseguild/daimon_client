@@ -1,3 +1,4 @@
+using UnityEngine;
 using System.Collections.Generic;
 using System;
 
@@ -9,13 +10,13 @@ using System;
 // block palette for the entire world
 public class Region
 {
-    public static int REGION_SIZE = 16;
+    public static readonly int REGION_SIZE = 16;
     Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
 
     // header data
-    static int HEADER_BLOCK_SIZE = 6;
-    static int HEADER_BLOCK_COUNT = 256;
-    static int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
+    static readonly int HEADER_BLOCK_SIZE = 6;
+    static readonly int HEADER_BLOCK_COUNT = 256;
+    static readonly int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
     List<string> Header = new List<string>();
 
     public Region()
@@ -93,6 +94,32 @@ public class Region
         return chunks[x, y, z];
     }
 
+    public Vector3 GetChunkCoords(Vector3 position)
+    {
+        int x = (int)Math.Floor(position.x / Chunk.CHUNK_SIZE);
+        int y = (int)Math.Floor(position.y / Chunk.CHUNK_SIZE);
+        int z = (int)Math.Floor(position.z / Chunk.CHUNK_SIZE);
+        return new Vector3(x, y, z);
+    }
+
+    public bool IsChunkEmpty(Chunk chunk)
+    {
+        for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
+        {
+            for (int y = 0; y < Chunk.CHUNK_SIZE; y++)
+            {
+                for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
+                {
+                    if (chunk.getVoxel(x, y, z) != 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     public int getVoxel(int x, int y, int z)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
@@ -104,7 +131,7 @@ public class Region
         return chunks[chunkX, chunkY, chunkZ].getVoxel(voxelX, voxelY, voxelZ);
     }
 
-    void setVoxel(int x, int y, int z, int voxel)
+    public void setVoxel(int x, int y, int z, int voxel)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;

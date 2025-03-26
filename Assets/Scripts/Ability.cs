@@ -7,41 +7,41 @@ using System;
 
 public class Ability
 {
-    private Script script;
+    Script script;
 
     // support functions
-    private static GameObject CreateGameObject(string name)
+    GameObject CreateGameObject(string name)
     {
         return new GameObject(name);
     }
-    private static Material CreateMaterial(Shader shader)
+    Material CreateMaterial(Shader shader)
     {
         return new Material(shader);
     }
-    private static LineRenderer AddLineRenderer(GameObject gameObject)
+    LineRenderer AddLineRenderer(GameObject gameObject)
     {
         return gameObject.AddComponent<LineRenderer>();;
     }
-    private static bool RaycastCheck(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
+    bool RaycastCheck(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
     {
         return Physics.Raycast(origin, direction, distance, layerMask);
     }
-    private static RaycastHit RaycastValue(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
+    RaycastHit RaycastValue(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
     {
         RaycastHit hit;
         Physics.Raycast(origin, direction, out hit, distance, layerMask);
         return hit;
     }
-    private static Vector3 Normalize(Vector3 vector)
+    Vector3 Normalize(Vector3 vector)
     {
         return vector.normalized;
     }
-    private static void AddForce(Rigidbody rigidbody, Vector3 force, string forceMode)
+    void AddForce(Rigidbody rigidbody, Vector3 force, string forceMode)
     {
         ForceMode mode = (ForceMode)Enum.Parse(typeof(ForceMode), forceMode);
         rigidbody.AddForce(force, mode);
     }
-    private static Vector3 CreateVector3(float x, float y, float z)
+    Vector3 CreateVector3(float x, float y, float z)
     {
         return new Vector3(x, y, z);
     }
@@ -81,7 +81,7 @@ public class Ability
         script.DoString(File.ReadAllText(path));
     }
 
-    private void RegisterUnityEngineTypes()
+    void RegisterUnityEngineTypes()
     {
         var assembly = Assembly.GetAssembly(typeof(GameObject));
         var types = assembly.GetTypes().Where(t => t.Namespace == "UnityEngine").ToArray();

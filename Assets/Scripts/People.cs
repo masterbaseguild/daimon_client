@@ -4,21 +4,15 @@ using System.Collections.Generic;
 // the people class stores and manages the data of all other connected users
 public class People : MonoBehaviour
 {
-    static List<GameObject> connectedUsers = new List<GameObject>();
-    static GameObject userPrefab;
-    public GameObject userPrefabObject;
+    public GameObject userPrefab;
+    List<GameObject> connectedUsers = new List<GameObject>();
 
-    void Start()
-    {
-        userPrefab = userPrefabObject;
-    }
-
-    public static int GetCount()
+    public int GetCount()
     {
         return connectedUsers.Count + 1;
     }
 
-    public static void setPosition(int index, float x, float y, float z, float rx, float ry, float rz, float cx)
+    public void setPosition(int index, float x, float y, float z, float rx, float ry, float rz, float cx)
     {
         GameObject user = connectedUsers.Find(user => user.GetComponent<User>().index == index);
         if(user == null)
@@ -31,12 +25,12 @@ public class People : MonoBehaviour
         camera.transform.rotation = Quaternion.Euler(cx, ry, 0);
     }
 
-    public static GameObject GetUserGameObject(int index)
+    public GameObject GetUserGameObject(int index)
     {
         return connectedUsers.Find(user => user.GetComponent<User>().index == index);
     }
 
-    public static void AddUser(int index, string username)
+    public void AddUser(int index, string username)
     {
         GameObject user = Instantiate(userPrefab);
         user.transform.parent = GameObject.Find("People").transform;
@@ -46,7 +40,7 @@ public class People : MonoBehaviour
         connectedUsers.Add(user);
     }
 
-    public static void RemoveUser(int index)
+    public void RemoveUser(int index)
     {
         GameObject user = connectedUsers.Find(user => user.GetComponent<User>().index == index);
         if(user != null)
@@ -56,7 +50,7 @@ public class People : MonoBehaviour
         }
     }
 
-    public static List<GameObject> GetUsers()
+    public List<GameObject> GetUsers()
     {
         return connectedUsers;
     }

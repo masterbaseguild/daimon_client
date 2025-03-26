@@ -9,16 +9,21 @@ using System.Threading.Tasks;
 // the udp client communicates with the server to send and receive state data
 public class MainUdpClient : MonoBehaviour
 {
+    public World world;
+    public MainHttpClient httpClient;
+    public MainUser user;
+    public People people;
+
     // the udp client won't be enabled until the user presses connect
-    static bool isEnabled = false;
-    static string serverAddress = "arena.daimon.world";
-    static int serverPort = 7689;
-    static string username = "";
-    static int clientPort;
-    static int index; // user index in the server user list
-    static UdpClient client;
-    static IPEndPoint remoteIpEndPoint;
-    static bool hasReceivedRegion = false;
+    bool isEnabled = false;
+    string serverAddress = "arena.daimon.world";
+    int serverPort = 7689;
+    string username = "";
+    int clientPort;
+    int index; // user index in the server user list
+    UdpClient client;
+    IPEndPoint remoteIpEndPoint;
+    bool hasReceivedRegion = false;
 
     // this must only perform setup independent of the data the user will insert in the login form;
     // all the remaining setup must be done on the connect method, since it is ran on connect button press
@@ -33,24 +38,29 @@ public class MainUdpClient : MonoBehaviour
     {
         if (isEnabled)
         {
-        Vector3 position = MainUser.GetPosition();
-        Vector3 rotation = MainUser.GetRotation();
-        Vector3 camera = MainUser.GetCamera();
+        Vector3 position = user.GetPosition();
+        Vector3 rotation = user.GetRotation();
+        Vector3 camera = user.GetCamera();
         Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
         }
     }
 
-    public static void SetUsername(string newUsername)
+    public void SetUsername(string newUsername)
     {
         username = newUsername;
     }
 
-    public static void SetAddress(string newAddress)
+    public void SetAddress(string newAddress)
     {
         serverAddress = newAddress;
     }
 
-    public static string GetAddress()
+    public string GetUsername()
+    {
+        return username;
+    }
+
+    public string GetAddress()
     {
         return serverAddress;
     }
@@ -68,7 +78,7 @@ public class MainUdpClient : MonoBehaviour
         return UnityEngine.Random.Range(1000, 9999);
     }
 
-    static void Send(string data)
+    void Send(string data)
     {
         try
         {
@@ -82,7 +92,7 @@ public class MainUdpClient : MonoBehaviour
     }
 
     // setup the connection and send the connect packet
-    public static void Connect()
+    public void Connect()
     {
         remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(Dns.GetHostAddresses(serverAddress)[0].ToString()), serverPort);
         try {
@@ -99,7 +109,7 @@ public class MainUdpClient : MonoBehaviour
     }
 
     // get callback
-    static void Get(IAsyncResult result)
+    void Get(IAsyncResult result)
     {
         try
         {
@@ -118,7 +128,7 @@ public class MainUdpClient : MonoBehaviour
     }
 
     // packet handler
-    static void HandlePacket(Packet packet)
+    void HandlePacket(Packet packet)
     {
         // since this function needs to interact with the unity object api, it must be run on the main thread
         // TODO: we probably can only enqueue specific operations, not the whole packet handler
@@ -128,7 +138,7 @@ public class MainUdpClient : MonoBehaviour
             {
                 // set positions of all connected users
                 case "allpositions":
-                    if (packet.data.Length / 8 != People.GetCount())
+                    if (packet.data.Length / 8 != people.GetCount())
                     {
                         return;
                     }
@@ -146,7 +156,7 @@ public class MainUdpClient : MonoBehaviour
                         float rotationY = float.Parse(packet.data[i + 5]);
                         float rotationZ = float.Parse(packet.data[i + 6]);
                         float cameraX = float.Parse(packet.data[i + 7]);
-                        People.setPosition(positionIndex, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, cameraX);
+                        people.setPosition(positionIndex, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, cameraX);
                     }
                     break;
                 // a chat message was sent by a user
@@ -159,7 +169,7 @@ public class MainUdpClient : MonoBehaviour
                         PrintChatMessage($"{chatUsername}: {chatMessage}");
                         return;
                     }
-                    GameObject chatUser = People.GetUserGameObject(chatIndex);
+                    GameObject chatUser = people.GetUserGameObject(chatIndex);
                     if (chatUser == null)
                     {
                         PrintChatMessage($"{chatUsername}: {chatMessage}");
@@ -179,7 +189,7 @@ public class MainUdpClient : MonoBehaviour
                             continue;
                         }
                         string firstUsername = packet.data[i + 1];
-                        People.AddUser(firstIndex, firstUsername);
+                        people.AddUser(firstIndex, firstUsername);
                     }
                     Send($"region");
                     // wait 5 seconds, then check if we have received the region data
@@ -197,17 +207,17 @@ public class MainUdpClient : MonoBehaviour
                     hasReceivedRegion = true;
                     // save packet to binary file in documents folder
                     // System.IO.File.WriteAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat", Convert.FromBase64String(packet.data[0]));
-                    World.SetRegion(packet.parseRegionData());
+                    world.SetRegion(packet.ParseRegionData());
                     List<Task<string>> tasks = new List<Task<string>>();
-                    int count = World.GetRegion().getHeaderCount();
+                    int count = world.GetRegion().getHeaderCount();
                     Debug.Log("Count: " + count);
                     for (int i = 0; i < count; i++)
                     {
-                        tasks.Add(MainHttpClient.GetResource("item", World.GetRegion().getHeaderLine(i)));
+                        tasks.Add(httpClient.GetResource("item", world.GetRegion().getHeaderLine(i)));
                     }
                     string[] results = await Task.WhenAll(tasks);
-                    World.SetBlockPalette(results);
-                    World.DisplayWorld();
+                    world.SetBlockPalette(results);
+                    world.DisplayWorld();
                     break;
                 // we cannot connect because our username is already taken
                 case "conflict":
@@ -227,7 +237,7 @@ public class MainUdpClient : MonoBehaviour
                         return;
                     }
                     string connectedUsername = packet.data[1];
-                    People.AddUser(connectedIndex, connectedUsername);
+                    people.AddUser(connectedIndex, connectedUsername);
                     break;
                 // another user has disconnected
                 case "userdisconnected":
@@ -236,7 +246,7 @@ public class MainUdpClient : MonoBehaviour
                     {
                         return;
                     }
-                    People.RemoveUser(disconnectedIndex);
+                    people.RemoveUser(disconnectedIndex);
                     break;
                 // catch-all: unknown packet type
                 default:
@@ -246,30 +256,30 @@ public class MainUdpClient : MonoBehaviour
         });
     }
 
-    public static void SendChatMessage(string message)
+    public void SendChatMessage(string message)
     {
         Send($"chat\t{index}\t{message}");
     }
 
-    static void PrintChatMessage(string message)
+    void PrintChatMessage(string message)
     {
         print(message);
     }
 
     // debug function to current log game state
-    public static void LogGameState()
+    public void LogGameState()
     {
         print("Logging game state...");
         string log = "";
         log += $"index: {index}\n";
         log += $"username: {username}\n";
-        log += $"connectedUsers: {People.GetCount()}\n";
-        List<GameObject> connectedUsers = People.GetUsers();
+        log += $"connectedUsers: {people.GetCount()}\n";
+        List<GameObject> connectedUsers = people.GetUsers();
         foreach (GameObject user in connectedUsers)
         {
             log += $"\t{user.GetComponent<User>().index} {user.GetComponent<User>().username}\n";
         }
-        log += $"position: {MainUser.GetPosition()}\n";
+        log += $"position: {user.GetPosition()}\n";
         print(log);
     }
 

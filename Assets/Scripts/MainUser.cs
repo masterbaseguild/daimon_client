@@ -3,6 +3,8 @@ using UnityEngine;
 // the main user controller
 public class MainUser : MonoBehaviour
 {
+    public MainUdpClient udpClient;
+
     // the user controller won't be enabled until the user presses connect
     bool isEnabled = false;
 
@@ -10,7 +12,7 @@ public class MainUser : MonoBehaviour
     public GameObject playerCamera;
     public Rigidbody rigidBody;
     public LayerMask ground;
-    Transform groundCheck;
+    public Transform groundCheck;
 
     // parameters
     public Vector3 spawnPoint;
@@ -55,10 +57,6 @@ public class MainUser : MonoBehaviour
     // setup components and cursor, then enable the user controller
     public void Enable()
     {
-        playerCamera = transform.GetChild(0).gameObject;
-        groundCheck = transform.GetChild(2).gameObject.transform;
-        rigidBody = GetComponent<Rigidbody>();
-        ground = LayerMask.GetMask("Ground");
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         transform.position = spawnPoint;
@@ -103,18 +101,18 @@ public class MainUser : MonoBehaviour
         GravityForce();
     }
 
-    private void HandleLoopback()
+    void HandleLoopback()
     {
         if (transform.position.y < loopbackY) transform.position = spawnPoint;
     }
 
-    private void HandleGrounded()
+    void HandleGrounded()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckDistance, ground);
         if (isFlying && isGrounded && !isPhasing) isFlying = false;
     }
 
-    private void HandleMovement()
+    void HandleMovement()
     {
         movement = Vector3.zero;
         if (Input.GetKey(KeyCode.W)) movement.z += 1f;
@@ -125,7 +123,7 @@ public class MainUser : MonoBehaviour
         if (Input.GetKey(KeyCode.LeftShift)&&isFlying) movement.y += -1f;
     }
 
-    private void HandleSpeedMultipliers()
+    void HandleSpeedMultipliers()
     {
         movementSpeedMultiplier = 1f;
         if(isRunning) movementSpeedMultiplier *= runningSpeedMultiplier;
@@ -134,7 +132,7 @@ public class MainUser : MonoBehaviour
         if(Input.GetKey(KeyCode.LeftShift)&&!isFlying) movementSpeedMultiplier *= sneakingSpeedMultiplier;
     }
 
-    private void HandleSpeedCap()
+    void HandleSpeedCap()
     {
         if(isFlying)
         {
@@ -156,13 +154,13 @@ public class MainUser : MonoBehaviour
         }
     }
 
-    private void HandleDrag()
+    void HandleDrag()
     {
         if (isGrounded||isFlying) rigidBody.linearDamping = groundDrag;
         else rigidBody.linearDamping = airDrag;
     }
 
-    private void HandleJump()
+    void HandleJump()
     {
         if(Input.GetKey(KeyCode.Space)&&isReadyToJump&&isGrounded)
         {
@@ -173,12 +171,12 @@ public class MainUser : MonoBehaviour
         }
     }
 
-    private void ResetJump()
+    void ResetJump()
     {
         isReadyToJump = true;
     }
 
-    private void HandleDoubleSpaceFlight()
+    void HandleDoubleSpaceFlight()
     {
         if (Input.GetKeyDown(KeyCode.Space)&&!isPhasing)
         {
@@ -195,7 +193,7 @@ public class MainUser : MonoBehaviour
         if (pressedFirstTimeSpace && Time.time - lastPressedTimeSpace > delayBetweenDoublePresses) pressedFirstTimeSpace = false;
     }
 
-    private void HandleDoubleWRun()
+    void HandleDoubleWRun()
     {
         if (canRun&&Input.GetKeyDown(KeyCode.W))
         {
@@ -211,14 +209,14 @@ public class MainUser : MonoBehaviour
         if (canRun&&pressedFirstTimeW && Time.time - lastPressedTimeW > delayBetweenDoublePresses) pressedFirstTimeW = false;
     }
 
-    private void HandleBreakPlace()
+    void HandleBreakPlace()
     {
         if(Input.GetMouseButtonDown(0)) BreakBlock();
         if(Input.GetMouseButtonDown(1)) PlaceBlock();
     }
 
     // NOTE: not implemented for now
-    private void BreakBlock()
+    void BreakBlock()
     {
         RaycastHit hit;
         if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, breakPlaceRange))
@@ -229,7 +227,7 @@ public class MainUser : MonoBehaviour
     }
 
     // NOTE: not implemented for now
-    private void PlaceBlock()
+    void PlaceBlock()
     {
         RaycastHit hit;
         if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, breakPlaceRange))
@@ -239,19 +237,19 @@ public class MainUser : MonoBehaviour
         }
     }
 
-    private void HandleRun()
+    void HandleRun()
     {
         if(Input.GetKeyDown(KeyCode.LeftControl)&&canRun) isRunning = true;
         if(Input.GetKeyUp(KeyCode.W)&&isRunning) isRunning = false;
     }
 
-    private void HandleDebug()
+    void HandleDebug()
     {
-        if (Input.GetKeyDown(KeyCode.T)) MainUdpClient.SendChatMessage("Hello World!");
-        if (Input.GetKeyDown(KeyCode.Y)) MainUdpClient.LogGameState();
+        if (Input.GetKeyDown(KeyCode.T)) udpClient.SendChatMessage("Hello World!");
+        if (Input.GetKeyDown(KeyCode.Y)) udpClient.LogGameState();
     }
 
-    private void HandlePhase()
+    void HandlePhase()
     {
         if (Input.GetKeyDown(KeyCode.U)&&canPhase) {
             isPhasing = !isPhasing;
@@ -260,7 +258,7 @@ public class MainUser : MonoBehaviour
         }
     }
 
-    private void HandleCamera()
+    void HandleCamera()
     {
         yRotation += Input.GetAxisRaw("Mouse X") * Time.deltaTime * cameraSensitivity;
         xRotation -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * cameraSensitivity;
@@ -268,13 +266,13 @@ public class MainUser : MonoBehaviour
         playerCamera.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
     }
 
-    private void MovementForce()
+    void MovementForce()
     {
         Vector3 moveVector = (transform.forward * movement.z + transform.right * movement.x + transform.up * movement.y).normalized * movementSpeed * 10f * movementSpeedMultiplier * physicsMultiplier;
         rigidBody.AddForce(moveVector, ForceMode.Force);
     }
 
-    private void GravityForce()
+    void GravityForce()
     {
         if (!(isGrounded || isFlying))
         {
@@ -285,17 +283,17 @@ public class MainUser : MonoBehaviour
 
     // public methods
 
-    public static Vector3 GetPosition()
+    public Vector3 GetPosition()
     {
         return GameObject.Find("MainUser").transform.position;
     }
 
-    public static Vector3 GetRotation()
+    public Vector3 GetRotation()
     {
         return GameObject.Find("MainUser").transform.eulerAngles;
     }
 
-    public static Vector3 GetCamera()
+    public Vector3 GetCamera()
     {
         return GameObject.Find("MainUser").transform.GetChild(0).gameObject.transform.eulerAngles;
     }

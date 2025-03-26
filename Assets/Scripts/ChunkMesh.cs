@@ -5,6 +5,7 @@ using System.Collections.Generic;
 // it is composed of 3 meshes: the main mesh, the collider mesh and the transparent mesh
 public class ChunkMesh
 {
+    World world;
     GameObject gameObject; // reference to the unity gameobject for this mesh
     MeshRenderer meshRenderer; // component of the gameobject used to set the material
     MeshFilter meshFilter; // component of the gameobject used to set the visual mesh
@@ -21,8 +22,19 @@ public class ChunkMesh
 
     ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
 
+    static Direction[] directions =
+    {
+        Direction.backwards,
+        Direction.down,
+        Direction.foreward,
+        Direction.left,
+        Direction.right,
+        Direction.up
+    };
+
     public ChunkMesh(bool isMainMesh)
     {
+        world = GameObject.Find("World").GetComponent<World>();
         if (isMainMesh)
         {
             nonOpaqueMesh = new ChunkMesh(false);
@@ -34,28 +46,18 @@ public class ChunkMesh
         meshFilter = gameObject.AddComponent<MeshFilter>();
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshCollider = gameObject.AddComponent<MeshCollider>();
-        meshCollider.sharedMaterial = World.GetPhysicMaterial();
+        meshCollider.sharedMaterial = world.GetPhysicMaterial();
         if (!isMainMesh)
         {
-            meshRenderer.material = World.GetNonOpaqueMaterial();
+            meshRenderer.material = world.GetNonOpaqueMaterial();
         }
         else
         {
-            meshRenderer.material = World.GetMaterial();
+            meshRenderer.material = world.GetMaterial();
         }
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = colliderMesh;
     }
-
-    static Direction[] directions =
-    {
-        Direction.backwards,
-        Direction.down,
-        Direction.foreward,
-        Direction.left,
-        Direction.right,
-        Direction.up
-    };
 
     void AddVertices(Direction direction, int x, int y, int z)
     {
@@ -187,7 +189,7 @@ public class ChunkMesh
         }
         for (int i = 0; i < directions.Length; i++)
         {
-            var neighbour = World.GetNeighbourVoxel(x, y, z, directions[i]);
+            var neighbour = world.GetNeighbourVoxel(x, y, z, directions[i]);
             var neighbourBlockType = BlockPalette.GetBlockType(neighbour);
             if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType.IsOpaque()))
             {

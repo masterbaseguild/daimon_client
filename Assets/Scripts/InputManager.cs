@@ -17,7 +17,7 @@ public class InputManager : MonoBehaviour
         isEnabled = true;
     }
 
-    public void SetSlot(int index, Ability ability, KeyCode key)
+    void SetSlot(int index, Ability ability, KeyCode key)
     {
         slots[index] = new AbilitySlot(ability, key);
     }

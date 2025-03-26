@@ -2,7 +2,7 @@
 // each voxel is stored as a number that maps to a block type in the block palette
 public class Chunk
 {
-    public static int CHUNK_SIZE = 16;
+    public static readonly int CHUNK_SIZE = 16;
     int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
 
     public Chunk()

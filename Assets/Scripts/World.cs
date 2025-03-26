@@ -4,83 +4,69 @@ using System.Collections.Generic;
 // the world class stores and manages the data of the entire world
 // at the moment, the world is composed of a single region
 
-// NOTE: the materials are handled badly, we should not
-// set both a dynamic and a static reference to them
 public class World : MonoBehaviour
 {
-    static BlockPalette blockPalette;
-    static Region region; // the single region
+    public BlockPalette blockPalette;
 
     // all materials are handled and exposed by the world class
-    public Material materialPrefab;
-    public static Material material;
-    public Material nonOpaqueMaterialPrefab;
-    public static Material nonOpaqueMaterial;
-    public PhysicsMaterial physicMaterialPrefab;
-    public static PhysicsMaterial physicMaterial;
+    public Material material;
+    public Material nonOpaqueMaterial;
+    public PhysicsMaterial physicMaterial;
+
+    Region region; // the single region
 
     // list of all the chunk meshes in all regions
-    static ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
+    ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
 
-    // methods to manage materials
-    void Start()
-    {
-        material = materialPrefab;
-        nonOpaqueMaterial = nonOpaqueMaterialPrefab;
-        physicMaterial = physicMaterialPrefab;
-    }
-
-    public static void SetTexture(Texture2D texture)
+    public void SetTexture(Texture2D texture)
     {
         material.mainTexture = texture;
         nonOpaqueMaterial.mainTexture = texture;
     }
 
-    public static Material GetMaterial()
+    public Material GetMaterial()
     {
         return material;
     }
 
-    public static Material GetNonOpaqueMaterial()
+    public Material GetNonOpaqueMaterial()
     {
         return nonOpaqueMaterial;
     }
 
-    public static PhysicsMaterial GetPhysicMaterial()
+    public PhysicsMaterial GetPhysicMaterial()
     {
         return physicMaterial;
     }
 
     // set block palette and region
-    public static void SetBlockPalette(string[] results)
+    public void SetBlockPalette(string[] results)
     {
         blockPalette = new BlockPalette(results, chunkMeshes);
     }
 
-    public static void SetRegion(byte[] regionData)
+    public void SetRegion(byte[] regionData)
     {
         region = new Region(regionData);
     }
 
-    public static Region GetRegion()
+    public Region GetRegion()
     {
         return region;
     }
 
     // methods to get neighbour voxel data
-    static public Vector3 GetChunkCoords(Vector3 position)
+    public Vector3 GetChunkCoords(Vector3 position)
     {
-        return new Vector3(Mathf.FloorToInt(position.x / Chunk.CHUNK_SIZE), Mathf.FloorToInt(position.y / Chunk.CHUNK_SIZE), Mathf.FloorToInt(position.z / Chunk.CHUNK_SIZE));
+        return region.GetChunkCoords(position);
     }
 
-    public static int GetVoxel(int x, int y, int z)
+    int GetVoxel(int x, int y, int z)
     {
-        Vector3 chunkCoords = GetChunkCoords(new Vector3(x, y, z));
-        Chunk chunk = region.getChunk((int)chunkCoords.x, (int)chunkCoords.y, (int)chunkCoords.z);
-        return chunk.getVoxel(x % Chunk.CHUNK_SIZE, y % Chunk.CHUNK_SIZE, z % Chunk.CHUNK_SIZE);
+        return region.getVoxel(x, y, z);
     }
 
-    public static Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
+    Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
     {
         switch (direction)
         {
@@ -101,14 +87,14 @@ public class World : MonoBehaviour
         }
     }
 
-    public static int GetNeighbourVoxel(int x, int y, int z, Direction direction)
+    public int GetNeighbourVoxel(int x, int y, int z, Direction direction)
     {
         Vector3 neighbour = GetNeighbourCoords(x, y, z, direction);
         return GetVoxel((int)neighbour.x, (int)neighbour.y, (int)neighbour.z);
     }
 
     // methods to render the world
-    public static void DisplayChunk(int x, int y, int z)
+    void DisplayChunk(int x, int y, int z)
     {
         Chunk chunk = region.getChunk(x, y, z);
         ChunkMesh chunkMesh = new ChunkMesh(true);
@@ -129,25 +115,12 @@ public class World : MonoBehaviour
         }
     }
 
-    static bool isChunkEmpty(Chunk chunk)
+    bool isChunkEmpty(Chunk chunk)
     {
-        for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
-        {
-            for (int y = 0; y < Chunk.CHUNK_SIZE; y++)
-            {
-                for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
-                {
-                    if (chunk.getVoxel(x, y, z) != 0)
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
+        return region.IsChunkEmpty(chunk);
     }
 
-    public static void DisplayWorld()
+    public void DisplayWorld()
     {
         List<Vector3> chunkPositions = new List<Vector3>();
 
