@@ -46,8 +46,8 @@ public class ChunkMesh
         meshFilter = gameObject.AddComponent<MeshFilter>();
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshCollider = gameObject.AddComponent<MeshCollider>();
-        meshCollider.sharedMaterial = world.GetPhysicMaterial();
-        meshRenderer.material = !isMainMesh ? world.GetNonOpaqueMaterial() : world.GetMaterial();
+        meshCollider.sharedMaterial = world.physicMaterial;
+        meshRenderer.material = !isMainMesh ? world.nonOpaqueMaterial : world.material;
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = colliderMesh;
     }

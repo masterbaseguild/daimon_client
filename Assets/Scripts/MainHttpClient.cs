@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 // the http client communicates with the api to retrieve assets and global data
 public class MainHttpClient : MonoBehaviour
 {
-    public MainUdpClient udpClient;
+    [SerializeField] private MainUdpClient udpClient;
     private readonly string endpoint = "https://api.daimon.world/";
     private readonly HttpClient client = new();
 

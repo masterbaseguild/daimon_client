@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    public int slotCount;
+    [SerializeField] private int slotCount;
     private bool isEnabled;
 
     private AbilitySlot[] slots;

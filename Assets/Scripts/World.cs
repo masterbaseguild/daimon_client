@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class World : MonoBehaviour
 {
-    public BlockPalette blockPalette;
+    private BlockPalette blockPalette;
 
     // all materials are handled and exposed by the world class
     public Material material;
@@ -22,21 +22,6 @@ public class World : MonoBehaviour
     {
         material.mainTexture = texture;
         nonOpaqueMaterial.mainTexture = texture;
-    }
-
-    public Material GetMaterial()
-    {
-        return material;
-    }
-
-    public Material GetNonOpaqueMaterial()
-    {
-        return nonOpaqueMaterial;
-    }
-
-    public PhysicsMaterial GetPhysicMaterial()
-    {
-        return physicMaterial;
     }
 
     // set block palette and region

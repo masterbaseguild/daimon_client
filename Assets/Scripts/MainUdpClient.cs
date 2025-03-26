@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 // the udp client communicates with the server to send and receive state data
 public class MainUdpClient : MonoBehaviour
 {
-    public World world;
-    public MainHttpClient httpClient;
-    public MainUser user;
-    public People people;
+    [SerializeField] private World world;
+    [SerializeField] private MainHttpClient httpClient;
+    [SerializeField] private MainUser user;
+    [SerializeField] private People people;
 
     // the udp client won't be enabled until the user presses connect
     private bool isEnabled = false;

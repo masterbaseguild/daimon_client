@@ -4,7 +4,7 @@ using System.Collections.Generic;
 // the people class stores and manages the data of all other connected users
 public class People : MonoBehaviour
 {
-    public GameObject userPrefab;
+    [SerializeField] private GameObject userPrefab;
     private readonly List<GameObject> connectedUsers = new();
 
     public int GetCount()

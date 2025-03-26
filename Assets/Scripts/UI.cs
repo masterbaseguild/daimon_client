@@ -4,12 +4,12 @@ using UnityEngine.UI;
 // a placeholder ui implementation
 public class UI : MonoBehaviour
 {
-    public MainHttpClient httpClient;
-    public MainUdpClient udpClient;
-    public GameObject mainUser;
-    public Button playBtn;
-    public InputField usernameInput;
-    public InputField ipInput;
+    [SerializeField] private MainHttpClient httpClient;
+    [SerializeField] private MainUdpClient udpClient;
+    [SerializeField] private GameObject mainUser;
+    [SerializeField] private Button playBtn;
+    [SerializeField] private InputField usernameInput;
+    [SerializeField] private InputField ipInput;
 
     private void Awake()
     {

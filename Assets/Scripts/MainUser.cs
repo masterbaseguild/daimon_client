@@ -3,35 +3,35 @@ using UnityEngine;
 // the main user controller
 public class MainUser : MonoBehaviour
 {
-    public MainUdpClient udpClient;
+    [SerializeField] private MainUdpClient udpClient;
 
     // the user controller won't be enabled until the user presses connect
     private bool isEnabled = false;
 
     // unity api references
-    public GameObject playerCamera;
-    public Rigidbody rigidBody;
-    public LayerMask ground;
-    public Transform groundCheck;
+    [SerializeField] public GameObject playerCamera;
+    [SerializeField] private Rigidbody rigidBody;
+    [SerializeField] public LayerMask ground;
+    [SerializeField] private Transform groundCheck;
 
     // parameters
-    public Vector3 spawnPoint;
-    public float breakPlaceRange;
-    public float movementSpeed;
-    public float jumpPower;
-    public float jumpCooldown;
-    public float groundCheckDistance;
-    public float gravityAcceleration;
-    public float cameraSensitivity;
-    public float delayBetweenDoublePresses;
-    public int loopbackY;
-    public float groundDrag;
-    public float airDrag;
-    public float physicsMultiplier;
-    public float runningSpeedMultiplier;
-    public float flyingSpeedMultiplier;
-    public float fallingSpeedMultiplier;
-    public float sneakingSpeedMultiplier;
+    [SerializeField] private Vector3 spawnPoint;
+    [SerializeField] private float breakPlaceRange;
+    [SerializeField] private float movementSpeed;
+    [SerializeField] private float jumpPower;
+    [SerializeField] private float jumpCooldown;
+    [SerializeField] private float groundCheckDistance;
+    [SerializeField] private float gravityAcceleration;
+    [SerializeField] private float cameraSensitivity;
+    [SerializeField] private float delayBetweenDoublePresses;
+    [SerializeField] private int loopbackY;
+    [SerializeField] private float groundDrag;
+    [SerializeField] private float airDrag;
+    [SerializeField] public float physicsMultiplier;
+    [SerializeField] private float runningSpeedMultiplier;
+    [SerializeField] private float flyingSpeedMultiplier;
+    [SerializeField] private float fallingSpeedMultiplier;
+    [SerializeField] private float sneakingSpeedMultiplier;
 
     // user abilities
     private readonly bool canFly = true;
