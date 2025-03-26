@@ -3,13 +3,13 @@ using System;
 
 public class BlockType
 {
-    string id;
-    string display; // display name
-    bool isOpaque;
-    bool isConcrete;
-    string texture; // texture url
+    readonly string id;
+    readonly string display; // display name
+    readonly bool isOpaque;
+    readonly bool isConcrete;
+    readonly string texture; // texture url
+    readonly Action OnTextureLoaded;
     Texture2D texture2D;
-    Action OnTextureLoaded;
     public bool isLoaded = false;
 
     public BlockType(string id, string display, int type)

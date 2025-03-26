@@ -5,14 +5,14 @@ using System.Collections.Generic;
 public class People : MonoBehaviour
 {
     public GameObject userPrefab;
-    List<GameObject> connectedUsers = new List<GameObject>();
+    readonly List<GameObject> connectedUsers = new List<GameObject>();
 
     public int GetCount()
     {
         return connectedUsers.Count + 1;
     }
 
-    public void setPosition(int index, float x, float y, float z, float rx, float ry, float rz, float cx)
+    public void SetPosition(int index, float x, float y, float z, float rx, float ry, float rz, float cx)
     {
         GameObject user = connectedUsers.Find(user => user.GetComponent<User>().index == index);
         if(user == null)

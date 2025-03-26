@@ -7,7 +7,7 @@ using System;
 
 public class Ability
 {
-    Script script;
+    readonly Script script;
 
     // support functions
     GameObject CreateGameObject(string name)
@@ -28,8 +28,7 @@ public class Ability
     }
     RaycastHit RaycastValue(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
     {
-        RaycastHit hit;
-        Physics.Raycast(origin, direction, out hit, distance, layerMask);
+        Physics.Raycast(origin, direction, out RaycastHit hit, distance, layerMask);
         return hit;
     }
     Vector3 Normalize(Vector3 vector)

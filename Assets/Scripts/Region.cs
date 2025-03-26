@@ -11,13 +11,13 @@ using System;
 public class Region
 {
     public static readonly int REGION_SIZE = 16;
-    Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
+    readonly Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
 
     // header data
     static readonly int HEADER_BLOCK_SIZE = 6;
     static readonly int HEADER_BLOCK_COUNT = 256;
     static readonly int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
-    List<string> Header = new List<string>();
+    readonly List<string> Header = new List<string>();
 
     public Region()
     {
@@ -70,7 +70,7 @@ public class Region
                             for (int voxelZ = 0; voxelZ < Chunk.CHUNK_SIZE; voxelZ++)
                             {
                                 byte voxelData = contentBuffer[index++];
-                                chunk.setVoxel(voxelX, voxelY, voxelZ, voxelData);
+                                chunk.SetVoxel(voxelX, voxelY, voxelZ, voxelData);
                             }
                         }
                     }
@@ -79,12 +79,12 @@ public class Region
         }
     }
 
-    public string getHeaderLine(int index)
+    public string GetHeaderLine(int index)
     {
         return Header[index];
     }
 
-    public int getHeaderCount()
+    public int GetHeaderCount()
     {
         return Header.Count;
     }
@@ -110,7 +110,7 @@ public class Region
             {
                 for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
                 {
-                    if (chunk.getVoxel(x, y, z) != 0)
+                    if (chunk.GetVoxel(x, y, z) != 0)
                     {
                         return false;
                     }
@@ -120,7 +120,7 @@ public class Region
         return true;
     }
 
-    public int getVoxel(int x, int y, int z)
+    public int GetVoxel(int x, int y, int z)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
@@ -128,10 +128,10 @@ public class Region
         int voxelX = x % Chunk.CHUNK_SIZE;
         int voxelY = y % Chunk.CHUNK_SIZE;
         int voxelZ = z % Chunk.CHUNK_SIZE;
-        return chunks[chunkX, chunkY, chunkZ].getVoxel(voxelX, voxelY, voxelZ);
+        return chunks[chunkX, chunkY, chunkZ].GetVoxel(voxelX, voxelY, voxelZ);
     }
 
-    public void setVoxel(int x, int y, int z, int voxel)
+    public void SetVoxel(int x, int y, int z, int voxel)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
@@ -139,6 +139,6 @@ public class Region
         int voxelX = x % Chunk.CHUNK_SIZE;
         int voxelY = y % Chunk.CHUNK_SIZE;
         int voxelZ = z % Chunk.CHUNK_SIZE;
-        chunks[chunkX, chunkY, chunkZ].setVoxel(voxelX, voxelY, voxelZ, voxel);
+        chunks[chunkX, chunkY, chunkZ].SetVoxel(voxelX, voxelY, voxelZ, voxel);
     }
 }

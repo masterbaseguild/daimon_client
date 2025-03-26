@@ -17,7 +17,7 @@ public class MainUdpClient : MonoBehaviour
     // the udp client won't be enabled until the user presses connect
     bool isEnabled = false;
     string serverAddress = "arena.daimon.world";
-    int serverPort = 7689;
+    readonly int serverPort = 7689;
     string username = "";
     int clientPort;
     int index; // user index in the server user list
@@ -29,8 +29,8 @@ public class MainUdpClient : MonoBehaviour
     // all the remaining setup must be done on the connect method, since it is ran on connect button press
     void Start()
     {
-        username = "user" + generateUserSuffix();
-        clientPort = generateEphemeralPort();
+        username = "user" + GenerateUserSuffix();
+        clientPort = GenerateEphemeralPort();
     }
 
     // send position data to the server every frame
@@ -65,15 +65,15 @@ public class MainUdpClient : MonoBehaviour
         return serverAddress;
     }
 
-    int generateEphemeralPort()
+    int GenerateEphemeralPort()
     {
-        UdpClient tempClient = new UdpClient(0);
+        UdpClient tempClient = new(0);
         int port = ((IPEndPoint)tempClient.Client.LocalEndPoint).Port;
         tempClient.Close();
         return port;
     }
 
-    int generateUserSuffix()
+    int GenerateUserSuffix()
     {
         return UnityEngine.Random.Range(1000, 9999);
     }
@@ -115,7 +115,7 @@ public class MainUdpClient : MonoBehaviour
         {
             byte[] bytes = client.EndReceive(result, ref remoteIpEndPoint);
             string data = Encoding.UTF8.GetString(bytes);
-            Packet message = new Packet(data);
+            Packet message = new(data);
             HandlePacket(message);
             client.BeginReceive(Get, null);
             return;
@@ -156,7 +156,7 @@ public class MainUdpClient : MonoBehaviour
                         float rotationY = float.Parse(packet.data[i + 5]);
                         float rotationZ = float.Parse(packet.data[i + 6]);
                         float cameraX = float.Parse(packet.data[i + 7]);
-                        people.setPosition(positionIndex, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, cameraX);
+                        people.SetPosition(positionIndex, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, cameraX);
                     }
                     break;
                 // a chat message was sent by a user
@@ -208,12 +208,12 @@ public class MainUdpClient : MonoBehaviour
                     // save packet to binary file in documents folder
                     // System.IO.File.WriteAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat", Convert.FromBase64String(packet.data[0]));
                     world.SetRegion(packet.ParseRegionData());
-                    List<Task<string>> tasks = new List<Task<string>>();
-                    int count = world.GetRegion().getHeaderCount();
+                    List<Task<string>> tasks = new();
+                    int count = world.GetRegion().GetHeaderCount();
                     Debug.Log("Count: " + count);
                     for (int i = 0; i < count; i++)
                     {
-                        tasks.Add(httpClient.GetResource("item", world.GetRegion().getHeaderLine(i)));
+                        tasks.Add(httpClient.GetResource("item", world.GetRegion().GetHeaderLine(i)));
                     }
                     string[] results = await Task.WhenAll(tasks);
                     world.SetBlockPalette(results);

@@ -3,7 +3,7 @@
 public class Chunk
 {
     public static readonly int CHUNK_SIZE = 16;
-    int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
+    readonly int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
 
     public Chunk()
     {
@@ -19,12 +19,12 @@ public class Chunk
         }
     }
 
-    public int getVoxel(int x, int y, int z)
+    public int GetVoxel(int x, int y, int z)
     {
         return voxels[x, y, z];
     }
 
-    public void setVoxel(int x, int y, int z, int voxel)
+    public void SetVoxel(int x, int y, int z, int voxel)
     {
         voxels[x, y, z] = voxel;
     }

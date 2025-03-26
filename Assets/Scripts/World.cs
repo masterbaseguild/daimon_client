@@ -16,7 +16,7 @@ public class World : MonoBehaviour
     Region region; // the single region
 
     // list of all the chunk meshes in all regions
-    ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
+    readonly ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
 
     public void SetTexture(Texture2D texture)
     {
@@ -42,7 +42,7 @@ public class World : MonoBehaviour
     // set block palette and region
     public void SetBlockPalette(string[] results)
     {
-        blockPalette = new BlockPalette(results, chunkMeshes);
+        blockPalette = new BlockPalette(results);
     }
 
     public void SetRegion(byte[] regionData)
@@ -63,28 +63,22 @@ public class World : MonoBehaviour
 
     int GetVoxel(int x, int y, int z)
     {
-        return region.getVoxel(x, y, z);
+        return region.GetVoxel(x, y, z);
     }
 
     Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
     {
-        switch (direction)
+        return direction switch
         {
-            case Direction.backwards:
-                return new Vector3(x, y, z - 1);
-            case Direction.down:
-                return new Vector3(x, y - 1, z);
-            case Direction.foreward:
-                return new Vector3(x, y, z + 1);
-            case Direction.left:
-                return new Vector3(x - 1, y, z);
-            case Direction.right:
-                return new Vector3(x + 1, y, z);
-            case Direction.up:
-                return new Vector3(x, y + 1, z);
-            default:
-                return new Vector3(x, y, z);
-        }
+            Direction.backwards => new Vector3(x, y, z - 1),
+            Direction.down => new Vector3(x, y - 1, z),
+            Direction.foreward => new Vector3(x, y, z + 1),
+            Direction.left => new Vector3(x - 1, y, z),
+            Direction.right => new Vector3(x + 1, y, z),
+            Direction.up => new Vector3(x, y + 1, z),
+            _ => new Vector3(x, y, z),
+        };
+
     }
 
     public int GetNeighbourVoxel(int x, int y, int z, Direction direction)
@@ -105,7 +99,7 @@ public class World : MonoBehaviour
             {
                 for (int k = 0; k < Chunk.CHUNK_SIZE; k++)
                 {
-                    int voxel = chunk.getVoxel(i, j, k);
+                    int voxel = chunk.GetVoxel(i, j, k);
                     if (voxel != 0)
                     {
                         chunkMesh.AddBlockToMesh(i + x * Chunk.CHUNK_SIZE, j + y * Chunk.CHUNK_SIZE, k + z * Chunk.CHUNK_SIZE, voxel, blockPalette);
@@ -115,7 +109,7 @@ public class World : MonoBehaviour
         }
     }
 
-    bool isChunkEmpty(Chunk chunk)
+    bool IsChunkEmpty(Chunk chunk)
     {
         return region.IsChunkEmpty(chunk);
     }
@@ -130,7 +124,7 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z < Region.REGION_SIZE; z++)
                 {
-                    if (!isChunkEmpty(region.getChunk(x, y, z)))
+                    if (!IsChunkEmpty(region.getChunk(x, y, z)))
                     {
                         chunkPositions.Add(new Vector3(x, y, z));
                     }

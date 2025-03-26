@@ -9,22 +9,22 @@ using UnityEngine.Networking;
 // TODO: i don't remember how the async part of this works, need to document it and eventually refactor
 public class BlockPalette
 {
-    World world;
-    List<BlockType> blocks = new List<BlockType>();
-    int TEXTURE_SIZE = 16;
+    readonly World world;
+    readonly List<BlockType> blocks = new();
+    readonly int TEXTURE_SIZE = 16;
     // texture atlas: a single big image containing all block textures,
     // which the game extracts via UV mapping
     Texture2D textureAtlas;
     Action OnAllTexturesLoaded;
 
-    public BlockPalette(string[] blocks, ChunkMesh[] chunks)
+    public BlockPalette(string[] blocks)
     {
         world = GameObject.Find("World").GetComponent<World>();
         foreach (string block in blocks)
         {
-            this.blocks.Add(jsonToBlock(block));
+            this.blocks.Add(JsonToBlock(block));
         }
-        GenerateTextureAtlas(chunks);
+        GenerateTextureAtlas();
     }
 
     public static void LoadTexture(string url, Action<Texture2D> onTextureLoaded)
@@ -50,7 +50,7 @@ public class BlockPalette
     }
 
     // debug function to save texture to disk
-    void saveTextureToDisk(Texture2D texture)
+    void SaveTextureToDisk(Texture2D texture)
     {
         string macPath = "/Users/entity/Downloads/texture.png";
         string winPath = "C:\\Users\\Dario\\Downloads\\texture.png";
@@ -60,11 +60,13 @@ public class BlockPalette
         Debug.Log("Saved texture to " + path);
     }
 
-    void GenerateTextureAtlas(ChunkMesh[] chunks)
+    void GenerateTextureAtlas()
     {
-        textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE);
-        textureAtlas.filterMode = FilterMode.Point;
-        textureAtlas.wrapMode = TextureWrapMode.Clamp;
+        textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE)
+        {
+            filterMode = FilterMode.Point,
+            wrapMode = TextureWrapMode.Clamp
+        };
 
         int xOffset = 0;
         MainThreadDispatcher.Instance.StartCoroutine(AllTexturesLoadedCoroutine());
@@ -79,7 +81,7 @@ public class BlockPalette
                 xOffset += TEXTURE_SIZE;
             }
             textureAtlas.Apply();
-            //saveTextureToDisk(textureAtlas);
+            //SaveTextureToDisk(textureAtlas);
             world.SetTexture(textureAtlas);
         };
     }
@@ -105,7 +107,7 @@ public class BlockPalette
         }
     }
 
-    BlockType jsonToBlock(string json)
+    BlockType JsonToBlock(string json)
     {
         return JsonConvert.DeserializeObject<BlockType>(json);
     }
@@ -128,10 +130,10 @@ public class BlockPalette
         float atlasHeight = textureAtlas.height;
         return new Vector2[]
         {
-            new Vector2(x / atlasWidth, 0), // 0
-            new Vector2(x / atlasWidth, TEXTURE_SIZE / atlasHeight), // 3
-            new Vector2((x + TEXTURE_SIZE) / atlasWidth, TEXTURE_SIZE / atlasHeight), // 2
-            new Vector2((x + TEXTURE_SIZE) / atlasWidth, 0), // 1
+            new(x / atlasWidth, 0), // 0
+            new(x / atlasWidth, TEXTURE_SIZE / atlasHeight), // 3
+            new((x + TEXTURE_SIZE) / atlasWidth, TEXTURE_SIZE / atlasHeight), // 2
+            new((x + TEXTURE_SIZE) / atlasWidth, 0), // 1
         };
     }
 }

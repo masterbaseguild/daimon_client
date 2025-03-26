@@ -10,7 +10,6 @@ public class UI : MonoBehaviour
     public Button playBtn;
     public InputField usernameInput;
     public InputField ipInput;
-    public Text ChunkData;
 
     void Awake()
     {
@@ -24,16 +23,16 @@ public class UI : MonoBehaviour
             usernameInput.gameObject.SetActive(false);
             ipInput.gameObject.SetActive(false);
         });
-        usernameInput.onValueChanged.AddListener(delegate{editText();});
-        ipInput.onValueChanged.AddListener(delegate{editAddressText();});
+        usernameInput.onValueChanged.AddListener(delegate{EditText();});
+        ipInput.onValueChanged.AddListener(delegate{EditAddressText();});
     }
 
-    void editText()
+    void EditText()
     {
         udpClient.SetUsername(usernameInput.text);
     }
 
-    void editAddressText()
+    void EditAddressText()
     {
         udpClient.SetAddress(ipInput.text);
     }

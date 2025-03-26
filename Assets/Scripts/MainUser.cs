@@ -34,9 +34,9 @@ public class MainUser : MonoBehaviour
     public float sneakingSpeedMultiplier;
 
     // user abilities
-    bool canFly = true;
-    bool canRun = true;
-    bool canPhase = true;
+    readonly bool canFly = true;
+    readonly bool canRun = true;
+    readonly bool canPhase = true;
 
     // user state
     bool isReadyToJump = true;

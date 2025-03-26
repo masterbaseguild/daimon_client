@@ -5,24 +5,24 @@ using System.Collections.Generic;
 // it is composed of 3 meshes: the main mesh, the collider mesh and the transparent mesh
 public class ChunkMesh
 {
-    World world;
-    GameObject gameObject; // reference to the unity gameobject for this mesh
-    MeshRenderer meshRenderer; // component of the gameobject used to set the material
-    MeshFilter meshFilter; // component of the gameobject used to set the visual mesh
-    MeshCollider meshCollider; // component of the gameobject used to set the collision mesh
+    readonly World world;
+    readonly GameObject gameObject; // reference to the unity gameobject for this mesh
+    readonly MeshRenderer meshRenderer; // component of the gameobject used to set the material
+    readonly MeshFilter meshFilter; // component of the gameobject used to set the visual mesh
+    readonly MeshCollider meshCollider; // component of the gameobject used to set the collision mesh
 
-    Mesh mesh = new Mesh();
-    List<Vector3> vertices = new List<Vector3>();
-    List<int> triangles = new List<int>();
-    List<Vector2> uvs = new List<Vector2>();
+    readonly Mesh mesh = new();
+    readonly List<Vector3> vertices = new();
+    readonly List<int> triangles = new();
+    readonly List<Vector2> uvs = new();
 
-    Mesh colliderMesh = new Mesh();
-    List<Vector3> colliderVertices = new List<Vector3>();
-    List<int> colliderTriangles = new List<int>();
+    readonly Mesh colliderMesh = new();
+    readonly List<Vector3> colliderVertices = new();
+    readonly List<int> colliderTriangles = new();
 
-    ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
+    readonly ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
 
-    static Direction[] directions =
+    static readonly Direction[] directions =
     {
         Direction.backwards,
         Direction.down,

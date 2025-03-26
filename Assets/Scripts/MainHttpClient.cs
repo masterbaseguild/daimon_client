@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 public class MainHttpClient : MonoBehaviour
 {
     public MainUdpClient udpClient;
-    string endpoint = "https://api.daimon.world/";
-    HttpClient client = new HttpClient();
+    readonly string endpoint = "https://api.daimon.world/";
+    readonly HttpClient client = new HttpClient();
 
     //the following method requests a resource of given type and given id, and returns it as a json string
     public async Task<string> GetResource(string type, string id)
