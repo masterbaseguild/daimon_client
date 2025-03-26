@@ -13,10 +13,10 @@ public class World : MonoBehaviour
     public Material nonOpaqueMaterial;
     public PhysicsMaterial physicMaterial;
 
-    Region region; // the single region
+    private Region region; // the single region
 
     // list of all the chunk meshes in all regions
-    readonly ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
+    private readonly ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
 
     public void SetTexture(Texture2D texture)
     {
@@ -61,12 +61,12 @@ public class World : MonoBehaviour
         return region.GetChunkCoords(position);
     }
 
-    int GetVoxel(int x, int y, int z)
+    private int GetVoxel(int x, int y, int z)
     {
         return region.GetVoxel(x, y, z);
     }
 
-    Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
+    private Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
     {
         return direction switch
         {
@@ -88,11 +88,11 @@ public class World : MonoBehaviour
     }
 
     // methods to render the world
-    void DisplayChunk(int x, int y, int z)
+    private void DisplayChunk(int x, int y, int z)
     {
-        Chunk chunk = region.getChunk(x, y, z);
-        ChunkMesh chunkMesh = new ChunkMesh(true);
-        chunkMeshes[x + y * Region.REGION_SIZE + z * Region.REGION_SIZE * Region.REGION_SIZE] = chunkMesh;
+        Chunk chunk = region.GetChunk(x, y, z);
+        ChunkMesh chunkMesh = new(true);
+        chunkMeshes[x + (y * Region.REGION_SIZE) + (z * Region.REGION_SIZE * Region.REGION_SIZE)] = chunkMesh;
         for (int i = 0; i < Chunk.CHUNK_SIZE; i++)
         {
             for (int j = 0; j < Chunk.CHUNK_SIZE; j++)
@@ -102,21 +102,21 @@ public class World : MonoBehaviour
                     int voxel = chunk.GetVoxel(i, j, k);
                     if (voxel != 0)
                     {
-                        chunkMesh.AddBlockToMesh(i + x * Chunk.CHUNK_SIZE, j + y * Chunk.CHUNK_SIZE, k + z * Chunk.CHUNK_SIZE, voxel, blockPalette);
+                        chunkMesh.AddBlockToMesh(i + (x * Chunk.CHUNK_SIZE), j + (y * Chunk.CHUNK_SIZE), k + (z * Chunk.CHUNK_SIZE), voxel, blockPalette);
                     }
                 }
             }
         }
     }
 
-    bool IsChunkEmpty(Chunk chunk)
+    private bool IsChunkEmpty(Chunk chunk)
     {
         return region.IsChunkEmpty(chunk);
     }
 
     public void DisplayWorld()
     {
-        List<Vector3> chunkPositions = new List<Vector3>();
+        List<Vector3> chunkPositions = new();
 
         for (int x = 0; x < Region.REGION_SIZE; x++)
         {
@@ -124,7 +124,7 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z < Region.REGION_SIZE; z++)
                 {
-                    if (!IsChunkEmpty(region.getChunk(x, y, z)))
+                    if (!IsChunkEmpty(region.GetChunk(x, y, z)))
                     {
                         chunkPositions.Add(new Vector3(x, y, z));
                     }

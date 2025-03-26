@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -38,13 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311992, g: 0.38074034, b: 0.35872713, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 1
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -67,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -167,9 +163,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c5558ba5f5ec4071a9a7b55f1a0fbe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materialPrefab: {fileID: 2100000, guid: f561ae1980cdbe9428b53ce1f936611f, type: 2}
-  nonOpaqueMaterialPrefab: {fileID: 2100000, guid: 91c75c1e0b25e194e98c2e0234479b31, type: 2}
-  physicMaterialPrefab: {fileID: 13400000, guid: 39cfb9b36270a134d940c2442b193651, type: 2}
+  material: {fileID: 2100000, guid: f561ae1980cdbe9428b53ce1f936611f, type: 2}
+  nonOpaqueMaterial: {fileID: 2100000, guid: 91c75c1e0b25e194e98c2e0234479b31, type: 2}
+  physicMaterial: {fileID: 13400000, guid: 39cfb9b36270a134d940c2442b193651, type: 2}
 --- !u!1 &240144133
 GameObject:
   m_ObjectHideFlags: 0
@@ -605,6 +601,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -682,6 +681,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e12f4ff9023f4134bfbbafb1bea7cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  world: {fileID: 92587896}
+  httpClient: {fileID: 1885752321}
+  user: {fileID: 1220779333}
+  people: {fileID: 729440718}
 --- !u!1 &526741443
 GameObject:
   m_ObjectHideFlags: 0
@@ -794,7 +797,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e67c53b212df42a792944d15c61b064, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  userPrefabObject: {fileID: 2669758423377814026, guid: b37daebf4b1630744a0668fc9c7b5029, type: 3}
+  userPrefab: {fileID: 2669758423377814026, guid: b37daebf4b1630744a0668fc9c7b5029, type: 3}
 --- !u!1 &744419132
 GameObject:
   m_ObjectHideFlags: 0
@@ -903,11 +906,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14d1ca44c8ccd8b43a86b42d73b6d805, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  httpClient: {fileID: 1885752321}
+  udpClient: {fileID: 371012553}
+  mainUser: {fileID: 1220779330}
   playBtn: {fileID: 1430451903}
   usernameInput: {fileID: 1856372014}
   ipInput: {fileID: 312380858}
-  ChunkData: {fileID: 744419134}
-  mainUser: {fileID: 1220779330}
 --- !u!4 &798923502
 Transform:
   m_ObjectHideFlags: 0
@@ -1180,11 +1184,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdbed27a95f0f40cba10d6ef6a2b5233, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 0}
-  rigidBody: {fileID: 0}
+  udpClient: {fileID: 371012553}
+  playerCamera: {fileID: 323020081}
+  rigidBody: {fileID: 1220779334}
   ground:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
+  groundCheck: {fileID: 1695691496}
   spawnPoint: {x: 80, y: 64, z: 94}
   breakPlaceRange: 5
   movementSpeed: 2
@@ -1541,6 +1547,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1874,6 +1883,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf44806dd98444d9a5276c562f1c5db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  udpClient: {fileID: 371012553}
 --- !u!1 &2023950020
 GameObject:
   m_ObjectHideFlags: 0
@@ -2003,6 +2013,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

@@ -6,7 +6,7 @@ public class MainUser : MonoBehaviour
     public MainUdpClient udpClient;
 
     // the user controller won't be enabled until the user presses connect
-    bool isEnabled = false;
+    private bool isEnabled = false;
 
     // unity api references
     public GameObject playerCamera;
@@ -34,25 +34,25 @@ public class MainUser : MonoBehaviour
     public float sneakingSpeedMultiplier;
 
     // user abilities
-    readonly bool canFly = true;
-    readonly bool canRun = true;
-    readonly bool canPhase = true;
+    private readonly bool canFly = true;
+    private readonly bool canRun = true;
+    private readonly bool canPhase = true;
 
     // user state
-    bool isReadyToJump = true;
-    bool isFlying = true;
-    bool isRunning = false;
-    bool isPhasing = false;
-    bool isGrounded = false;
-    bool pressedFirstTimeSpace = false;
-    float lastPressedTimeSpace;
-    bool pressedFirstTimeW = false;
-    float lastPressedTimeW;
+    private bool isReadyToJump = true;
+    private bool isFlying = true;
+    private bool isRunning = false;
+    private bool isPhasing = false;
+    private bool isGrounded = false;
+    private bool pressedFirstTimeSpace = false;
+    private float lastPressedTimeSpace;
+    private bool pressedFirstTimeW = false;
+    private float lastPressedTimeW;
 
-    float xRotation;
-    float yRotation;
-    float movementSpeedMultiplier;
-    Vector3 movement;
+    private float xRotation;
+    private float yRotation;
+    private float movementSpeedMultiplier;
+    private Vector3 movement;
 
     // setup components and cursor, then enable the user controller
     public void Enable()
@@ -65,9 +65,13 @@ public class MainUser : MonoBehaviour
     }
 
     // run input logic every frame
-    void Update()
+    private void Update()
     {
-        if (!isEnabled) return;
+        if (!isEnabled)
+        {
+            return;
+        }
+
 
         HandleMovement();
         HandleSpeedMultipliers();
@@ -91,9 +95,13 @@ public class MainUser : MonoBehaviour
     }
 
     // run physics logic at a fixed interval
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (!isEnabled) return;
+        if (!isEnabled)
+        {
+            return;
+        }
+
 
         transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
 
@@ -101,164 +109,256 @@ public class MainUser : MonoBehaviour
         GravityForce();
     }
 
-    void HandleLoopback()
+    private void HandleLoopback()
     {
-        if (transform.position.y < loopbackY) transform.position = spawnPoint;
+        if (transform.position.y < loopbackY)
+        {
+            transform.position = spawnPoint;
+        }
+
     }
 
-    void HandleGrounded()
+    private void HandleGrounded()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckDistance, ground);
-        if (isFlying && isGrounded && !isPhasing) isFlying = false;
+        if (isFlying && isGrounded && !isPhasing)
+        {
+            isFlying = false;
+        }
+
     }
 
-    void HandleMovement()
+    private void HandleMovement()
     {
         movement = Vector3.zero;
-        if (Input.GetKey(KeyCode.W)) movement.z += 1f;
-        if (Input.GetKey(KeyCode.S)) movement.z += -1f;
-        if (Input.GetKey(KeyCode.A)) movement.x += -1f;
-        if (Input.GetKey(KeyCode.D)) movement.x += 1f;
-        if (Input.GetKey(KeyCode.Space)&&isFlying) movement.y += 1f;
-        if (Input.GetKey(KeyCode.LeftShift)&&isFlying) movement.y += -1f;
+        if (Input.GetKey(KeyCode.W))
+        {
+            movement.z += 1f;
+        }
+
+        if (Input.GetKey(KeyCode.S))
+        {
+            movement.z += -1f;
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            movement.x += -1f;
+        }
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            movement.x += 1f;
+        }
+
+        if (Input.GetKey(KeyCode.Space) && isFlying)
+        {
+            movement.y += 1f;
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && isFlying)
+        {
+            movement.y += -1f;
+        }
+
     }
 
-    void HandleSpeedMultipliers()
+    private void HandleSpeedMultipliers()
     {
         movementSpeedMultiplier = 1f;
-        if(isRunning) movementSpeedMultiplier *= runningSpeedMultiplier;
-        if(isFlying) movementSpeedMultiplier *= flyingSpeedMultiplier;
-        else if(!isGrounded) movementSpeedMultiplier *= fallingSpeedMultiplier;
-        if(Input.GetKey(KeyCode.LeftShift)&&!isFlying) movementSpeedMultiplier *= sneakingSpeedMultiplier;
+        if (isRunning)
+        {
+            movementSpeedMultiplier *= runningSpeedMultiplier;
+        }
+
+        if (isFlying)
+        {
+            movementSpeedMultiplier *= flyingSpeedMultiplier;
+        }
+        else if (!isGrounded)
+        {
+            movementSpeedMultiplier *= fallingSpeedMultiplier;
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && !isFlying)
+        {
+            movementSpeedMultiplier *= sneakingSpeedMultiplier;
+        }
+
     }
 
-    void HandleSpeedCap()
+    private void HandleSpeedCap()
     {
-        if(isFlying)
+        if (isFlying)
         {
-            Vector3 flatVel = new Vector3(rigidBody.linearVelocity.x, rigidBody.linearVelocity.y, rigidBody.linearVelocity.z);
-            if(flatVel.magnitude > movementSpeed * movementSpeedMultiplier * physicsMultiplier)
+            Vector3 flatVel = new(rigidBody.linearVelocity.x, rigidBody.linearVelocity.y, rigidBody.linearVelocity.z);
+            if (flatVel.magnitude > movementSpeed * movementSpeedMultiplier * physicsMultiplier)
             {
-                Vector3 newVel = flatVel.normalized * movementSpeed * movementSpeedMultiplier * physicsMultiplier;
+                Vector3 newVel = movementSpeed * movementSpeedMultiplier * physicsMultiplier * flatVel.normalized;
                 rigidBody.linearVelocity = new Vector3(newVel.x, newVel.y, newVel.z);
             }
         }
         else
         {
-            Vector3 flatVel = new Vector3(rigidBody.linearVelocity.x, 0f, rigidBody.linearVelocity.z);
-            if(flatVel.magnitude > movementSpeed * movementSpeedMultiplier * physicsMultiplier)
+            Vector3 flatVel = new(rigidBody.linearVelocity.x, 0f, rigidBody.linearVelocity.z);
+            if (flatVel.magnitude > movementSpeed * movementSpeedMultiplier * physicsMultiplier)
             {
-                Vector3 newVel = flatVel.normalized * movementSpeed * movementSpeedMultiplier * physicsMultiplier;
+                Vector3 newVel = movementSpeed * movementSpeedMultiplier * physicsMultiplier * flatVel.normalized;
                 rigidBody.linearVelocity = new Vector3(newVel.x, rigidBody.linearVelocity.y, newVel.z);
             }
         }
     }
 
-    void HandleDrag()
+    private void HandleDrag()
     {
-        if (isGrounded||isFlying) rigidBody.linearDamping = groundDrag;
-        else rigidBody.linearDamping = airDrag;
+        rigidBody.linearDamping = isGrounded || isFlying ? groundDrag : airDrag;
+
     }
 
-    void HandleJump()
+    private void HandleJump()
     {
-        if(Input.GetKey(KeyCode.Space)&&isReadyToJump&&isGrounded)
+        if (Input.GetKey(KeyCode.Space) && isReadyToJump && isGrounded)
         {
             isReadyToJump = false;
             rigidBody.linearVelocity = new Vector3(rigidBody.linearVelocity.x, 0f, rigidBody.linearVelocity.z);
-            rigidBody.AddForce(Vector3.up * jumpPower * physicsMultiplier, ForceMode.Impulse);
+            rigidBody.AddForce(jumpPower * physicsMultiplier * Vector3.up, ForceMode.Impulse);
             Invoke(nameof(ResetJump), jumpCooldown);
         }
     }
 
-    void ResetJump()
+    private void ResetJump()
     {
         isReadyToJump = true;
     }
 
-    void HandleDoubleSpaceFlight()
+    private void HandleDoubleSpaceFlight()
     {
-        if (Input.GetKeyDown(KeyCode.Space)&&!isPhasing)
+        if (Input.GetKeyDown(KeyCode.Space) && !isPhasing)
         {
-            if (pressedFirstTimeSpace&&Time.time - lastPressedTimeSpace <= delayBetweenDoublePresses)
+            if (pressedFirstTimeSpace && Time.time - lastPressedTimeSpace <= delayBetweenDoublePresses)
             {
-                if(canFly&&!isFlying) isFlying = true;
-                else if(isFlying) isFlying = false;
+                if (canFly && !isFlying)
+                {
+                    isFlying = true;
+                }
+                else if (isFlying)
+                {
+                    isFlying = false;
+                }
+
+
                 pressedFirstTimeSpace = false;
             }
-            else pressedFirstTimeSpace = true;
-    
+            else
+            {
+                pressedFirstTimeSpace = true;
+            }
+
             lastPressedTimeSpace = Time.time;
         }
-        if (pressedFirstTimeSpace && Time.time - lastPressedTimeSpace > delayBetweenDoublePresses) pressedFirstTimeSpace = false;
+        if (pressedFirstTimeSpace && Time.time - lastPressedTimeSpace > delayBetweenDoublePresses)
+        {
+            pressedFirstTimeSpace = false;
+        }
+
     }
 
-    void HandleDoubleWRun()
+    private void HandleDoubleWRun()
     {
-        if (canRun&&Input.GetKeyDown(KeyCode.W))
+        if (canRun && Input.GetKeyDown(KeyCode.W))
         {
-            if (pressedFirstTimeW&&Time.time - lastPressedTimeW <= delayBetweenDoublePresses)
+            if (pressedFirstTimeW && Time.time - lastPressedTimeW <= delayBetweenDoublePresses)
             {
                 isRunning = true;
                 pressedFirstTimeW = false;
             }
-            else pressedFirstTimeW = true;
-    
+            else
+            {
+                pressedFirstTimeW = true;
+            }
+
             lastPressedTimeW = Time.time;
         }
-        if (canRun&&pressedFirstTimeW && Time.time - lastPressedTimeW > delayBetweenDoublePresses) pressedFirstTimeW = false;
+        if (canRun && pressedFirstTimeW && Time.time - lastPressedTimeW > delayBetweenDoublePresses)
+        {
+            pressedFirstTimeW = false;
+        }
+
     }
 
-    void HandleBreakPlace()
+    private void HandleBreakPlace()
     {
-        if(Input.GetMouseButtonDown(0)) BreakBlock();
-        if(Input.GetMouseButtonDown(1)) PlaceBlock();
+        if (Input.GetMouseButtonDown(0))
+        {
+            BreakBlock();
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            PlaceBlock();
+        }
+
     }
 
     // NOTE: not implemented for now
-    void BreakBlock()
+    private void BreakBlock()
     {
-        RaycastHit hit;
-        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, breakPlaceRange))
+        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
-            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point - hit.normal/2);
-            Debug.Log("Break: from "+playerCamera.transform.position+" to "+placedBlockPos+"");
+            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point - (hit.normal / 2));
+            Debug.Log("Break: from " + playerCamera.transform.position + " to " + placedBlockPos + "");
         }
     }
 
     // NOTE: not implemented for now
-    void PlaceBlock()
+    private void PlaceBlock()
     {
-        RaycastHit hit;
-        if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, breakPlaceRange))
+        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
-            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point + hit.normal/2);
-            Debug.Log("Place: from "+playerCamera.transform.position+" to "+placedBlockPos+"");
+            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point + (hit.normal / 2));
+            Debug.Log("Place: from " + playerCamera.transform.position + " to " + placedBlockPos + "");
         }
     }
 
-    void HandleRun()
+    private void HandleRun()
     {
-        if(Input.GetKeyDown(KeyCode.LeftControl)&&canRun) isRunning = true;
-        if(Input.GetKeyUp(KeyCode.W)&&isRunning) isRunning = false;
+        if (Input.GetKeyDown(KeyCode.LeftControl) && canRun)
+        {
+            isRunning = true;
+        }
+
+        if (Input.GetKeyUp(KeyCode.W) && isRunning)
+        {
+            isRunning = false;
+        }
+
     }
 
-    void HandleDebug()
+    private void HandleDebug()
     {
-        if (Input.GetKeyDown(KeyCode.T)) udpClient.SendChatMessage("Hello World!");
-        if (Input.GetKeyDown(KeyCode.Y)) udpClient.LogGameState();
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            udpClient.SendChatMessage("Hello World!");
+        }
+
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            udpClient.LogGameState();
+        }
+
     }
 
-    void HandlePhase()
+    private void HandlePhase()
     {
-        if (Input.GetKeyDown(KeyCode.U)&&canPhase) {
+        if (Input.GetKeyDown(KeyCode.U) && canPhase)
+        {
             isPhasing = !isPhasing;
             GetComponent<CapsuleCollider>().enabled = !isPhasing;
             isFlying = true;
         }
     }
 
-    void HandleCamera()
+    private void HandleCamera()
     {
         yRotation += Input.GetAxisRaw("Mouse X") * Time.deltaTime * cameraSensitivity;
         xRotation -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * cameraSensitivity;
@@ -266,17 +366,17 @@ public class MainUser : MonoBehaviour
         playerCamera.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
     }
 
-    void MovementForce()
+    private void MovementForce()
     {
-        Vector3 moveVector = (transform.forward * movement.z + transform.right * movement.x + transform.up * movement.y).normalized * movementSpeed * 10f * movementSpeedMultiplier * physicsMultiplier;
+        Vector3 moveVector = 10f * movementSpeed * movementSpeedMultiplier * physicsMultiplier * ((transform.forward * movement.z) + (transform.right * movement.x) + (transform.up * movement.y)).normalized;
         rigidBody.AddForce(moveVector, ForceMode.Force);
     }
 
-    void GravityForce()
+    private void GravityForce()
     {
         if (!(isGrounded || isFlying))
         {
-            Vector3 gravity = Vector3.up * gravityAcceleration * physicsMultiplier;
+            Vector3 gravity = gravityAcceleration * physicsMultiplier * Vector3.up;
             rigidBody.AddForce(gravity, ForceMode.Acceleration);
         }
     }

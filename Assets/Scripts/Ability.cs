@@ -7,40 +7,40 @@ using System;
 
 public class Ability
 {
-    readonly Script script;
+    private readonly Script script;
 
     // support functions
-    GameObject CreateGameObject(string name)
+    private GameObject CreateGameObject(string name)
     {
         return new GameObject(name);
     }
-    Material CreateMaterial(Shader shader)
+    private Material CreateMaterial(Shader shader)
     {
         return new Material(shader);
     }
-    LineRenderer AddLineRenderer(GameObject gameObject)
+    private LineRenderer AddLineRenderer(GameObject gameObject)
     {
-        return gameObject.AddComponent<LineRenderer>();;
+        return gameObject.AddComponent<LineRenderer>();
     }
-    bool RaycastCheck(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
+    private bool RaycastCheck(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
     {
         return Physics.Raycast(origin, direction, distance, layerMask);
     }
-    RaycastHit RaycastValue(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
+    private RaycastHit RaycastValue(Vector3 origin, Vector3 direction, float distance, LayerMask layerMask)
     {
-        Physics.Raycast(origin, direction, out RaycastHit hit, distance, layerMask);
+        _ = Physics.Raycast(origin, direction, out RaycastHit hit, distance, layerMask);
         return hit;
     }
-    Vector3 Normalize(Vector3 vector)
+    private Vector3 Normalize(Vector3 vector)
     {
         return vector.normalized;
     }
-    void AddForce(Rigidbody rigidbody, Vector3 force, string forceMode)
+    private void AddForce(Rigidbody rigidbody, Vector3 force, string forceMode)
     {
         ForceMode mode = (ForceMode)Enum.Parse(typeof(ForceMode), forceMode);
         rigidbody.AddForce(force, mode);
     }
-    Vector3 CreateVector3(float x, float y, float z)
+    private Vector3 CreateVector3(float x, float y, float z)
     {
         return new Vector3(x, y, z);
     }
@@ -52,9 +52,9 @@ public class Ability
 
         // register unity namespace
         RegisterUnityEngineTypes();
-        UserData.RegisterType<MainUser>();
-        UserData.RegisterType<RaycastHit>();
-        UserData.RegisterType<Rigidbody>();
+        _ = UserData.RegisterType<MainUser>();
+        _ = UserData.RegisterType<RaycastHit>();
+        _ = UserData.RegisterType<Rigidbody>();
 
         // pass objects
         script.Globals["Debug"] = DynValue.FromObject(script, new Debug());
@@ -77,17 +77,17 @@ public class Ability
         script.Globals["user"] = DynValue.FromObject(script, user);
 
         // run script
-        script.DoString(File.ReadAllText(path));
+        _ = script.DoString(File.ReadAllText(path));
     }
 
-    void RegisterUnityEngineTypes()
+    private void RegisterUnityEngineTypes()
     {
-        var assembly = Assembly.GetAssembly(typeof(GameObject));
-        var types = assembly.GetTypes().Where(t => t.Namespace == "UnityEngine").ToArray();
+        Assembly assembly = Assembly.GetAssembly(typeof(GameObject));
+        Type[] types = assembly.GetTypes().Where(static t => t.Namespace == "UnityEngine").ToArray();
 
-        foreach (var type in types)
+        foreach (Type type in types)
         {
-            UserData.RegisterType(type);
+            _ = UserData.RegisterType(type);
         }
     }
 
@@ -98,7 +98,7 @@ public class Ability
         {
             return;
         }
-        script.Call(script.Globals["Start"]);
+        _ = script.Call(script.Globals["Start"]);
     }
 
     public void Frame()
@@ -108,7 +108,7 @@ public class Ability
         {
             return;
         }
-        script.Call(script.Globals["Frame"]);
+        _ = script.Call(script.Globals["Frame"]);
     }
 
     public void Tick()
@@ -118,7 +118,7 @@ public class Ability
         {
             return;
         }
-        script.Call(script.Globals["Tick"]);
+        _ = script.Call(script.Globals["Tick"]);
     }
 
     public void Stop()
@@ -128,6 +128,6 @@ public class Ability
         {
             return;
         }
-        script.Call(script.Globals["Stop"]);
+        _ = script.Call(script.Globals["Stop"]);
     }
 }

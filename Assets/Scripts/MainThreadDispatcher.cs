@@ -7,7 +7,7 @@ public class MainThreadDispatcher : MonoBehaviour
 {
     public static MainThreadDispatcher Instance { get; private set; }
 
-    void Awake()
+    private void Awake()
     {
         if (Instance != null)
         {
@@ -18,7 +18,7 @@ public class MainThreadDispatcher : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-    static readonly Queue<Action> _executionQueue = new Queue<Action>();
+    private static readonly Queue<Action> _executionQueue = new();
 
     public static void Enqueue(Action action)
     {
@@ -28,7 +28,7 @@ public class MainThreadDispatcher : MonoBehaviour
         }
     }
 
-    void Update()
+    private void Update()
     {
         lock (_executionQueue)
         {

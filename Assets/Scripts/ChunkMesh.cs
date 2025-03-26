@@ -5,24 +5,24 @@ using System.Collections.Generic;
 // it is composed of 3 meshes: the main mesh, the collider mesh and the transparent mesh
 public class ChunkMesh
 {
-    readonly World world;
-    readonly GameObject gameObject; // reference to the unity gameobject for this mesh
-    readonly MeshRenderer meshRenderer; // component of the gameobject used to set the material
-    readonly MeshFilter meshFilter; // component of the gameobject used to set the visual mesh
-    readonly MeshCollider meshCollider; // component of the gameobject used to set the collision mesh
+    private readonly World world;
+    private readonly GameObject gameObject; // reference to the unity gameobject for this mesh
+    private readonly MeshRenderer meshRenderer; // component of the gameobject used to set the material
+    private readonly MeshFilter meshFilter; // component of the gameobject used to set the visual mesh
+    private readonly MeshCollider meshCollider; // component of the gameobject used to set the collision mesh
 
-    readonly Mesh mesh = new();
-    readonly List<Vector3> vertices = new();
-    readonly List<int> triangles = new();
-    readonly List<Vector2> uvs = new();
+    private readonly Mesh mesh = new();
+    private readonly List<Vector3> vertices = new();
+    private readonly List<int> triangles = new();
+    private readonly List<Vector2> uvs = new();
 
-    readonly Mesh colliderMesh = new();
-    readonly List<Vector3> colliderVertices = new();
-    readonly List<int> colliderTriangles = new();
+    private readonly Mesh colliderMesh = new();
+    private readonly List<Vector3> colliderVertices = new();
+    private readonly List<int> colliderTriangles = new();
 
-    readonly ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
+    private readonly ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
 
-    static readonly Direction[] directions =
+    private static readonly Direction[] directions =
     {
         Direction.backwards,
         Direction.down,
@@ -47,19 +47,12 @@ public class ChunkMesh
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshCollider = gameObject.AddComponent<MeshCollider>();
         meshCollider.sharedMaterial = world.GetPhysicMaterial();
-        if (!isMainMesh)
-        {
-            meshRenderer.material = world.GetNonOpaqueMaterial();
-        }
-        else
-        {
-            meshRenderer.material = world.GetMaterial();
-        }
+        meshRenderer.material = !isMainMesh ? world.GetNonOpaqueMaterial() : world.GetMaterial();
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = colliderMesh;
     }
 
-    void AddVertices(Direction direction, int x, int y, int z)
+    private void AddVertices(Direction direction, int x, int y, int z)
     {
         // order of vertices matters for the normals and how we render the mesh
         switch (direction)
@@ -106,7 +99,7 @@ public class ChunkMesh
         }
     }
 
-    void AddColliderVertices(Direction direction, int x, int y, int z)
+    private void AddColliderVertices(Direction direction, int x, int y, int z)
     {
         // order of vertices matters for the normals and how we render the mesh
         switch (direction)
@@ -153,7 +146,7 @@ public class ChunkMesh
         }
     }
 
-    void AddQuadTriangles()
+    private void AddQuadTriangles()
     {
         triangles.Add(vertices.Count - 4);
         triangles.Add(vertices.Count - 3);
@@ -164,7 +157,7 @@ public class ChunkMesh
         triangles.Add(vertices.Count - 1);
     }
 
-    void AddColliderQuadTriangles()
+    private void AddColliderQuadTriangles()
     {
         colliderTriangles.Add(colliderVertices.Count - 4);
         colliderTriangles.Add(colliderVertices.Count - 3);
@@ -177,11 +170,11 @@ public class ChunkMesh
 
     public void AddBlockToMesh(int x, int y, int z, int voxel, BlockPalette BlockPalette)
     {
-        if(voxel == 0)
+        if (voxel == 0)
         {
             return;
         }
-        var blockType = BlockPalette.GetBlockType(voxel);
+        BlockType blockType = BlockPalette.GetBlockType(voxel);
         if (!blockType.IsOpaque() && nonOpaqueMesh != null)
         {
             nonOpaqueMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette);
@@ -189,8 +182,8 @@ public class ChunkMesh
         }
         for (int i = 0; i < directions.Length; i++)
         {
-            var neighbour = world.GetNeighbourVoxel(x, y, z, directions[i]);
-            var neighbourBlockType = BlockPalette.GetBlockType(neighbour);
+            int neighbour = world.GetNeighbourVoxel(x, y, z, directions[i]);
+            BlockType neighbourBlockType = BlockPalette.GetBlockType(neighbour);
             if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType.IsOpaque()))
             {
                 AddVertices(directions[i], x, y, z);
@@ -208,7 +201,7 @@ public class ChunkMesh
     }
 
     // update the meshes every time a block in the chunk changes
-    void UpdateMesh()
+    private void UpdateMesh()
     {
         mesh.Clear();
         mesh.vertices = vertices.ToArray();
@@ -219,7 +212,7 @@ public class ChunkMesh
     }
 
     // update the meshes every time a block in the chunk changes
-    void UpdateColliderMesh()
+    private void UpdateColliderMesh()
     {
         colliderMesh.Clear();
         colliderMesh.vertices = colliderVertices.ToArray();

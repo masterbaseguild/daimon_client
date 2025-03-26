@@ -3,7 +3,7 @@
 public class Chunk
 {
     public static readonly int CHUNK_SIZE = 16;
-    readonly int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
+    private readonly int[,,] voxels = new int[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE];
 
     public Chunk()
     {

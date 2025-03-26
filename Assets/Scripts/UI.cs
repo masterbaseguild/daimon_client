@@ -11,7 +11,7 @@ public class UI : MonoBehaviour
     public InputField usernameInput;
     public InputField ipInput;
 
-    void Awake()
+    private void Awake()
     {
         usernameInput.text = udpClient.GetUsername();
         ipInput.text = udpClient.GetAddress();
@@ -23,16 +23,16 @@ public class UI : MonoBehaviour
             usernameInput.gameObject.SetActive(false);
             ipInput.gameObject.SetActive(false);
         });
-        usernameInput.onValueChanged.AddListener(delegate{EditText();});
-        ipInput.onValueChanged.AddListener(delegate{EditAddressText();});
+        usernameInput.onValueChanged.AddListener(delegate { EditText(); });
+        ipInput.onValueChanged.AddListener(delegate { EditAddressText(); });
     }
 
-    void EditText()
+    private void EditText()
     {
         udpClient.SetUsername(usernameInput.text);
     }
 
-    void EditAddressText()
+    private void EditAddressText()
     {
         udpClient.SetAddress(ipInput.text);
     }

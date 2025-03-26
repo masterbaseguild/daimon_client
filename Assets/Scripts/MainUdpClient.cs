@@ -15,33 +15,33 @@ public class MainUdpClient : MonoBehaviour
     public People people;
 
     // the udp client won't be enabled until the user presses connect
-    bool isEnabled = false;
-    string serverAddress = "arena.daimon.world";
-    readonly int serverPort = 7689;
-    string username = "";
-    int clientPort;
-    int index; // user index in the server user list
-    UdpClient client;
-    IPEndPoint remoteIpEndPoint;
-    bool hasReceivedRegion = false;
+    private bool isEnabled = false;
+    private string serverAddress = "arena.daimon.world";
+    private readonly int serverPort = 7689;
+    private string username = "";
+    private int clientPort;
+    private int index; // user index in the server user list
+    private UdpClient client;
+    private IPEndPoint remoteIpEndPoint;
+    private bool hasReceivedRegion = false;
 
     // this must only perform setup independent of the data the user will insert in the login form;
     // all the remaining setup must be done on the connect method, since it is ran on connect button press
-    void Start()
+    private void Start()
     {
         username = "user" + GenerateUserSuffix();
         clientPort = GenerateEphemeralPort();
     }
 
     // send position data to the server every frame
-    void Update()
+    private void Update()
     {
         if (isEnabled)
         {
-        Vector3 position = user.GetPosition();
-        Vector3 rotation = user.GetRotation();
-        Vector3 camera = user.GetCamera();
-        Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
+            Vector3 position = user.GetPosition();
+            Vector3 rotation = user.GetRotation();
+            Vector3 camera = user.GetCamera();
+            Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
         }
     }
 
@@ -65,7 +65,7 @@ public class MainUdpClient : MonoBehaviour
         return serverAddress;
     }
 
-    int GenerateEphemeralPort()
+    private int GenerateEphemeralPort()
     {
         UdpClient tempClient = new(0);
         int port = ((IPEndPoint)tempClient.Client.LocalEndPoint).Port;
@@ -73,17 +73,17 @@ public class MainUdpClient : MonoBehaviour
         return port;
     }
 
-    int GenerateUserSuffix()
+    private int GenerateUserSuffix()
     {
         return UnityEngine.Random.Range(1000, 9999);
     }
 
-    void Send(string data)
+    private void Send(string data)
     {
         try
         {
             byte[] bytes = Encoding.UTF8.GetBytes(data);
-            client.Send(bytes, bytes.Length);
+            _ = client.Send(bytes, bytes.Length);
         }
         catch (Exception e)
         {
@@ -95,10 +95,11 @@ public class MainUdpClient : MonoBehaviour
     public void Connect()
     {
         remoteIpEndPoint = new IPEndPoint(IPAddress.Parse(Dns.GetHostAddresses(serverAddress)[0].ToString()), serverPort);
-        try {
+        try
+        {
             client = new UdpClient(clientPort);
             client.Connect(remoteIpEndPoint);
-            client.BeginReceive(Get, null);
+            _ = client.BeginReceive(Get, null);
         }
         catch (Exception e)
         {
@@ -109,7 +110,7 @@ public class MainUdpClient : MonoBehaviour
     }
 
     // get callback
-    void Get(IAsyncResult result)
+    private void Get(IAsyncResult result)
     {
         try
         {
@@ -117,7 +118,7 @@ public class MainUdpClient : MonoBehaviour
             string data = Encoding.UTF8.GetString(bytes);
             Packet message = new(data);
             HandlePacket(message);
-            client.BeginReceive(Get, null);
+            _ = client.BeginReceive(Get, null);
             return;
         }
         catch (Exception e)
@@ -128,7 +129,7 @@ public class MainUdpClient : MonoBehaviour
     }
 
     // packet handler
-    void HandlePacket(Packet packet)
+    private void HandlePacket(Packet packet)
     {
         // since this function needs to interact with the unity object api, it must be run on the main thread
         // TODO: we probably can only enqueue specific operations, not the whole packet handler
@@ -184,7 +185,7 @@ public class MainUdpClient : MonoBehaviour
                     for (int i = 1; i < packet.data.Length; i += 2)
                     {
                         int firstIndex = int.Parse(packet.data[i]);
-                        if(firstIndex == index)
+                        if (firstIndex == index)
                         {
                             continue;
                         }
@@ -232,7 +233,7 @@ public class MainUdpClient : MonoBehaviour
                 // another user has connected
                 case "userconnected":
                     int connectedIndex = int.Parse(packet.data[0]);
-                    if(connectedIndex == index)
+                    if (connectedIndex == index)
                     {
                         return;
                     }
@@ -261,7 +262,7 @@ public class MainUdpClient : MonoBehaviour
         Send($"chat\t{index}\t{message}");
     }
 
-    void PrintChatMessage(string message)
+    private void PrintChatMessage(string message)
     {
         print(message);
     }
@@ -284,7 +285,7 @@ public class MainUdpClient : MonoBehaviour
     }
 
     // disconnect on application quit
-    void OnApplicationQuit()
+    private void OnApplicationQuit()
     {
         Send($"disconnect\t{index}");
     }

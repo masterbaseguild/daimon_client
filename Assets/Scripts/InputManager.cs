@@ -3,9 +3,9 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     public int slotCount;
-    bool isEnabled;
+    private bool isEnabled;
 
-    AbilitySlot[] slots;
+    private AbilitySlot[] slots;
 
     public void Enable()
     {
@@ -17,17 +17,27 @@ public class InputManager : MonoBehaviour
         isEnabled = true;
     }
 
-    void SetSlot(int index, Ability ability, KeyCode key)
+    private void SetSlot(int index, Ability ability, KeyCode key)
     {
         slots[index] = new AbilitySlot(ability, key);
     }
 
-    void Update()
+    private void Update()
     {
-        if (!isEnabled) return;
+        if (!isEnabled)
+        {
+            return;
+        }
+
+
         for (int i = 0; i < slotCount; i++)
         {
-            if (slots[i] == null) continue;
+            if (slots[i] == null)
+            {
+                continue;
+            }
+
+
             if (Input.GetKeyDown(slots[i].key))
             {
                 slots[i].ability.Start();
@@ -43,12 +53,22 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (!isEnabled) return;
+        if (!isEnabled)
+        {
+            return;
+        }
+
+
         for (int i = 0; i < slotCount; i++)
         {
-            if (slots[i] == null) continue;
+            if (slots[i] == null)
+            {
+                continue;
+            }
+
+
             if (Input.GetKey(slots[i].key))
             {
                 slots[i].ability.Tick();

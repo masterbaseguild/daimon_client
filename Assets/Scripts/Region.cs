@@ -11,13 +11,13 @@ using System;
 public class Region
 {
     public static readonly int REGION_SIZE = 16;
-    readonly Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
+    private readonly Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
 
     // header data
-    static readonly int HEADER_BLOCK_SIZE = 6;
-    static readonly int HEADER_BLOCK_COUNT = 256;
-    static readonly int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
-    readonly List<string> Header = new List<string>();
+    private static readonly int HEADER_BLOCK_SIZE = 6;
+    private static readonly int HEADER_BLOCK_COUNT = 256;
+    private static readonly int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
+    private readonly List<string> Header = new();
 
     public Region()
     {
@@ -89,7 +89,7 @@ public class Region
         return Header.Count;
     }
 
-    public Chunk getChunk(int x, int y, int z)
+    public Chunk GetChunk(int x, int y, int z)
     {
         return chunks[x, y, z];
     }

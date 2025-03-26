@@ -7,40 +7,34 @@ using System.Threading.Tasks;
 public class MainHttpClient : MonoBehaviour
 {
     public MainUdpClient udpClient;
-    readonly string endpoint = "https://api.daimon.world/";
-    readonly HttpClient client = new HttpClient();
+    private readonly string endpoint = "https://api.daimon.world/";
+    private readonly HttpClient client = new();
 
     //the following method requests a resource of given type and given id, and returns it as a json string
     public async Task<string> GetResource(string type, string id)
     {
         string url = endpoint + type + "/" + id;
         HttpResponseMessage response = await client.GetAsync(url);
-        response.EnsureSuccessStatusCode();
+        _ = response.EnsureSuccessStatusCode();
         string responseBody = await response.Content.ReadAsStringAsync();
         return responseBody;
     }
 
     //the following method pings the server to check if it is online
-    async Task<bool> Ping()
+    private async Task<bool> Ping()
     {
         HttpResponseMessage response = await client.GetAsync(endpoint);
-        response.EnsureSuccessStatusCode();
+        _ = response.EnsureSuccessStatusCode();
         string responseBody = await response.Content.ReadAsStringAsync();
         // if response body is empty, server is offline
-        if (responseBody == "")
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return responseBody != "";
     }
 
     public void Connect()
     {
-        try {
-            Ping().ContinueWith(task =>
+        try
+        {
+            _ = Ping().ContinueWith(task =>
             {
                 print("Attempting to connect to API...");
                 if (task.Result)

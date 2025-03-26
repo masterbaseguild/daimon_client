@@ -24,13 +24,13 @@ public class Packet
         return decompressed;
     }
 
-    byte[] ZlibDecompress(byte[] data)
+    private byte[] ZlibDecompress(byte[] data)
     {
-        using MemoryStream input = new MemoryStream(data);
+        using MemoryStream input = new(data);
         // skip zlib header
-        input.Seek(2, SeekOrigin.Begin);
-        using MemoryStream output = new MemoryStream();
-        using DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress);
+        _ = input.Seek(2, SeekOrigin.Begin);
+        using MemoryStream output = new();
+        using DeflateStream dstream = new(input, CompressionMode.Decompress);
         dstream.CopyTo(output);
         return output.ToArray();
     }

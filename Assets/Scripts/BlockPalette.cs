@@ -9,13 +9,13 @@ using UnityEngine.Networking;
 // TODO: i don't remember how the async part of this works, need to document it and eventually refactor
 public class BlockPalette
 {
-    readonly World world;
-    readonly List<BlockType> blocks = new();
-    readonly int TEXTURE_SIZE = 16;
+    private readonly World world;
+    private readonly List<BlockType> blocks = new();
+    private readonly int TEXTURE_SIZE = 16;
     // texture atlas: a single big image containing all block textures,
     // which the game extracts via UV mapping
-    Texture2D textureAtlas;
-    Action OnAllTexturesLoaded;
+    private Texture2D textureAtlas;
+    private Action OnAllTexturesLoaded;
 
     public BlockPalette(string[] blocks)
     {
@@ -30,10 +30,10 @@ public class BlockPalette
     public static void LoadTexture(string url, Action<Texture2D> onTextureLoaded)
     {
         // since this coroutine uses the unity networking api, it must be run on the main thread
-        MainThreadDispatcher.Instance.StartCoroutine(LoadTextureCoroutine(url, onTextureLoaded));
+        _ = MainThreadDispatcher.Instance.StartCoroutine(LoadTextureCoroutine(url, onTextureLoaded));
     }
 
-    static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)
+    private static IEnumerator LoadTextureCoroutine(string url, Action<Texture2D> onTextureLoaded)
     {
         using UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
         yield return www.SendWebRequest();
@@ -50,7 +50,7 @@ public class BlockPalette
     }
 
     // debug function to save texture to disk
-    void SaveTextureToDisk(Texture2D texture)
+    private void SaveTextureToDisk(Texture2D texture)
     {
         string macPath = "/Users/entity/Downloads/texture.png";
         string winPath = "C:\\Users\\Dario\\Downloads\\texture.png";
@@ -60,7 +60,7 @@ public class BlockPalette
         Debug.Log("Saved texture to " + path);
     }
 
-    void GenerateTextureAtlas()
+    private void GenerateTextureAtlas()
     {
         textureAtlas = new Texture2D(TEXTURE_SIZE * blocks.Count, TEXTURE_SIZE)
         {
@@ -69,7 +69,7 @@ public class BlockPalette
         };
 
         int xOffset = 0;
-        MainThreadDispatcher.Instance.StartCoroutine(AllTexturesLoadedCoroutine());
+        _ = MainThreadDispatcher.Instance.StartCoroutine(AllTexturesLoadedCoroutine());
         OnAllTexturesLoaded += () =>
         {
             foreach (BlockType block in blocks)
@@ -86,13 +86,14 @@ public class BlockPalette
         };
     }
 
-    IEnumerator AllTexturesLoadedCoroutine() {
+    private IEnumerator AllTexturesLoadedCoroutine()
+    {
         while (true)
         {
             bool allLoaded = true;
             foreach (BlockType block in blocks)
             {
-                if (block.isLoaded == false)
+                if (!block.isLoaded)
                 {
                     allLoaded = false;
                     break;
@@ -107,7 +108,7 @@ public class BlockPalette
         }
     }
 
-    BlockType JsonToBlock(string json)
+    private BlockType JsonToBlock(string json)
     {
         return JsonConvert.DeserializeObject<BlockType>(json);
     }

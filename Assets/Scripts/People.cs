@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class People : MonoBehaviour
 {
     public GameObject userPrefab;
-    readonly List<GameObject> connectedUsers = new List<GameObject>();
+    private readonly List<GameObject> connectedUsers = new();
 
     public int GetCount()
     {
@@ -15,12 +15,12 @@ public class People : MonoBehaviour
     public void SetPosition(int index, float x, float y, float z, float rx, float ry, float rz, float cx)
     {
         GameObject user = connectedUsers.Find(user => user.GetComponent<User>().index == index);
-        if(user == null)
+        if (user == null)
         {
             return;
         }
-        user.transform.position = new Vector3(x, y, z);
-        user.transform.rotation = Quaternion.Euler(rx, ry, rz);
+        user.transform.SetPositionAndRotation(new Vector3(x, y, z), Quaternion.Euler(rx, ry, rz));
+
         GameObject camera = user.transform.GetChild(0).gameObject;
         camera.transform.rotation = Quaternion.Euler(cx, ry, 0);
     }
@@ -43,9 +43,9 @@ public class People : MonoBehaviour
     public void RemoveUser(int index)
     {
         GameObject user = connectedUsers.Find(user => user.GetComponent<User>().index == index);
-        if(user != null)
+        if (user != null)
         {
-            connectedUsers.Remove(user);
+            _ = connectedUsers.Remove(user);
             Destroy(user);
         }
     }

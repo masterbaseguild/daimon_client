@@ -3,13 +3,13 @@ using System;
 
 public class BlockType
 {
-    readonly string id;
-    readonly string display; // display name
-    readonly bool isOpaque;
-    readonly bool isConcrete;
-    readonly string texture; // texture url
-    readonly Action OnTextureLoaded;
-    Texture2D texture2D;
+    private readonly string id;
+    private readonly string display; // display name
+    private readonly bool isOpaque;
+    private readonly bool isConcrete;
+    private readonly string texture; // texture url
+    private readonly Action OnTextureLoaded;
+    private Texture2D texture2D;
     public bool isLoaded = false;
 
     public BlockType(string id, string display, int type)
@@ -22,8 +22,8 @@ public class BlockType
         // type 4: opaque non-concrete (e.g. minecraft lava)
 
         // NOTE: transparent does not mean it has no texture, it just means the texture has transparency
-        isOpaque = type == 1 || type == 4;
-        isConcrete = type == 1 || type == 2;
+        isOpaque = type is 1 or 4;
+        isConcrete = type is 1 or 2;
         //set texture to https://media.daimon.world/public/blocks/{id}.png
         texture = $"https://media.daimon.world/public/blocks/{this.id}.png";
         if (!string.IsNullOrEmpty(texture))
