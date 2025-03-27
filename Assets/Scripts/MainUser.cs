@@ -29,6 +29,7 @@ public class MainUser : MonoBehaviour
     [SerializeField] private float airDrag;
     [SerializeField] public float physicsMultiplier;
     [SerializeField] private float runningSpeedMultiplier;
+    [SerializeField] private float walkingSpeedMultiplier;
     [SerializeField] private float flyingSpeedMultiplier;
     [SerializeField] private float fallingSpeedMultiplier;
     [SerializeField] private float sneakingSpeedMultiplier;
@@ -169,6 +170,10 @@ public class MainUser : MonoBehaviour
         if (isRunning)
         {
             movementSpeedMultiplier *= runningSpeedMultiplier;
+        }
+        if (Input.GetKey(KeyCode.LeftAlt))
+        {
+            movementSpeedMultiplier *= walkingSpeedMultiplier;
         }
 
         if (isFlying)

@@ -1205,6 +1205,7 @@ MonoBehaviour:
   airDrag: 0
   physicsMultiplier: 10
   runningSpeedMultiplier: 1.5
+  walkingSpeedMultiplier: 0.75
   flyingSpeedMultiplier: 1.5
   fallingSpeedMultiplier: 0.25
   sneakingSpeedMultiplier: 0.5
