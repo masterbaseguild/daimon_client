@@ -10,6 +10,7 @@ public class UI : MonoBehaviour
     [SerializeField] private Button playBtn;
     [SerializeField] private InputField usernameInput;
     [SerializeField] private InputField ipInput;
+    [SerializeField] private Text loadingText;
 
     private void Awake()
     {
@@ -35,5 +36,15 @@ public class UI : MonoBehaviour
     private void EditAddressText()
     {
         udpClient.SetAddress(ipInput.text);
+    }
+
+    public void ToggleLoadingText(bool toggle)
+    {
+        loadingText.gameObject.SetActive(toggle);
+    }
+
+    public void SetLoadingText(string text)
+    {
+        loadingText.text = text;
     }
 }

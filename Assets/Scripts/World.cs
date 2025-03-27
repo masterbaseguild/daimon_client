@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 public class World : MonoBehaviour
 {
+    [SerializeField] private UI ui;
     private BlockPalette blockPalette;
 
     // all materials are handled and exposed by the world class
@@ -101,6 +102,12 @@ public class World : MonoBehaviour
 
     public void DisplayWorld()
     {
+        StartCoroutine(DisplayWorldCoroutine());
+    }
+
+    private IEnumerator<string> DisplayWorldCoroutine()
+    {
+        ui.ToggleLoadingText(true);
         List<Vector3> chunkPositions = new();
 
         for (int x = 0; x < Region.REGION_SIZE; x++)
@@ -117,9 +124,16 @@ public class World : MonoBehaviour
             }
         }
 
+        int displayedChunks = 0;
         foreach (Vector3 chunkPos in chunkPositions)
         {
             DisplayChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+            displayedChunks++;
+            string loadingText = "Loading world: " + displayedChunks + "/" + chunkPositions.Count + " chunks";
+            ui.SetLoadingText(loadingText);
+
+            yield return null;
         }
+        ui.ToggleLoadingText(false);
     }
 }
