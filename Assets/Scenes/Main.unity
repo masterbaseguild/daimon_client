@@ -682,6 +682,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e12f4ff9023f4134bfbbafb1bea7cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiGameObject: {fileID: 798923500}
   world: {fileID: 92587896}
   httpClient: {fileID: 1885752321}
   user: {fileID: 1220779333}
@@ -894,7 +895,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &798923501
 MonoBehaviour:
   m_ObjectHideFlags: 0
