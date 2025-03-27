@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 // the udp client communicates with the server to send and receive state data
 public class MainUdpClient : MonoBehaviour
 {
+    [SerializeField] private GameObject uiGameObject;
     [SerializeField] private World world;
     [SerializeField] private MainHttpClient httpClient;
     [SerializeField] private MainUser user;
@@ -31,6 +32,8 @@ public class MainUdpClient : MonoBehaviour
     {
         username = "user" + GenerateUserSuffix();
         clientPort = GenerateEphemeralPort();
+        // enable UI game object
+        uiGameObject.SetActive(true);
     }
 
     // send position data to the server every frame

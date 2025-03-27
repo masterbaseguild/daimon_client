@@ -12,7 +12,7 @@ public class UI : MonoBehaviour
     [SerializeField] private InputField ipInput;
     [SerializeField] private Text loadingText;
 
-    private void Awake()
+    private void OnEnable()
     {
         usernameInput.text = udpClient.GetUsername();
         ipInput.text = udpClient.GetAddress();
