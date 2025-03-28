@@ -44,7 +44,7 @@ public class MainUdpClient : MonoBehaviour
             Vector3 position = user.GetPosition();
             Vector3 rotation = user.GetRotation();
             Vector3 camera = user.GetCamera();
-            Send($"position\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
+            Send($"{Packet.Server.NEWPOSITION}\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
         }
     }
 
@@ -108,7 +108,7 @@ public class MainUdpClient : MonoBehaviour
         {
             print(e.ToString());
         }
-        Send($"connect\t0\t{username}");
+        Send($"{Packet.Server.CONNECT}\t0\t{username}");
         isEnabled = true;
     }
 
@@ -141,7 +141,7 @@ public class MainUdpClient : MonoBehaviour
             switch (packet.type)
             {
                 // set positions of all connected users
-                case "allpositions":
+                case Packet.Client.NEWPOSITION:
                     if (packet.data.Length / 8 != people.GetCount())
                     {
                         return;
@@ -164,7 +164,7 @@ public class MainUdpClient : MonoBehaviour
                     }
                     break;
                 // a chat message was sent by a user
-                case "chatmessage":
+                case Packet.Client.CHAT:
                     int chatIndex = int.Parse(packet.data[0]);
                     string chatUsername = packet.data[1];
                     string chatMessage = packet.data[2];
@@ -182,7 +182,7 @@ public class MainUdpClient : MonoBehaviour
                     PrintChatMessage($"{chatUser.GetComponent<User>().username}: {chatMessage}");
                     break;
                 // the server has confirmed our connection
-                case "confirmconnect":
+                case Packet.Client.CONNECT:
                     print($"Connected with index: {packet.data[0]}");
                     index = int.Parse(packet.data[0]);
                     for (int i = 1; i < packet.data.Length; i += 2)
@@ -195,7 +195,7 @@ public class MainUdpClient : MonoBehaviour
                         string firstUsername = packet.data[i + 1];
                         people.AddUser(firstIndex, firstUsername);
                     }
-                    Send($"region");
+                    Send($"{Packet.Server.WORLD}");
                     // wait 5 seconds, then check if we have received the region data
                     await Task.Delay(5000);
                     if (!hasReceivedRegion)
@@ -207,7 +207,7 @@ public class MainUdpClient : MonoBehaviour
                     }
                     break;
                 // the server has sent us the region data
-                case "confirmregion":
+                case Packet.Client.WORLD:
                     hasReceivedRegion = true;
                     // save packet to binary file in documents folder
                     // System.IO.File.WriteAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat", Convert.FromBase64String(packet.data[0]));
@@ -223,18 +223,13 @@ public class MainUdpClient : MonoBehaviour
                     world.SetBlockPalette(results);
                     world.DisplayWorld();
                     break;
-                // we cannot connect because our username is already taken
-                case "conflict":
-                    PrintChatMessage("Username already taken!");
-                    Application.Quit();
-                    break;
                 // the server has forced us to disconnect
-                case "forcedisconnect":
-                    Send($"disconnect\t{index}");
+                case Packet.Client.DISCONNECT:
+                    Send($"{Packet.Server.DISCONNECT}\t{index}");
                     Application.Quit();
                     break;
                 // another user has connected
-                case "userconnected":
+                case Packet.Client.USERCONNECT:
                     int connectedIndex = int.Parse(packet.data[0]);
                     if (connectedIndex == index)
                     {
@@ -244,7 +239,7 @@ public class MainUdpClient : MonoBehaviour
                     people.AddUser(connectedIndex, connectedUsername);
                     break;
                 // another user has disconnected
-                case "userdisconnected":
+                case Packet.Client.USERDISCONNECT:
                     int disconnectedIndex = int.Parse(packet.data[0]);
                     if (disconnectedIndex == index)
                     {
@@ -262,7 +257,7 @@ public class MainUdpClient : MonoBehaviour
 
     public void SendChatMessage(string message)
     {
-        Send($"chat\t{index}\t{message}");
+        Send($"{Packet.Server.CHAT}\t{index}\t{message}");
     }
 
     private void PrintChatMessage(string message)
@@ -290,7 +285,7 @@ public class MainUdpClient : MonoBehaviour
     // disconnect on application quit
     private void OnApplicationQuit()
     {
-        Send($"disconnect\t{index}");
+        Send($"{Packet.Server.DISCONNECT}\t{index}");
     }
 }
 
