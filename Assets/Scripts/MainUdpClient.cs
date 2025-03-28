@@ -37,7 +37,7 @@ public class MainUdpClient : MonoBehaviour
     }
 
     // send position data to the server every frame
-    private void Update()
+    private void FixedUpdate()
     {
         if (isEnabled)
         {
