@@ -168,7 +168,7 @@ public class MainUdpClient : MonoBehaviour
     {
         try
         {
-            byte[] bytes = new byte[1024];
+            byte[] bytes = new byte[65536];
             while (!token.IsCancellationRequested)
             {
                 int bytesRead = await tcpStream.ReadAsync(bytes, 0, bytes.Length, token);
@@ -274,33 +274,6 @@ public class MainUdpClient : MonoBehaviour
                         string firstUsername = packet.data[i + 1];
                         people.AddUser(firstIndex, firstUsername);
                     }
-                    Send($"{Packet.Server.WORLD}");
-                    // wait 5 seconds, then check if we have received the region data
-                    await Task.Delay(5000);
-                    if (!hasReceivedRegion)
-                    {
-                        print("Failed to receive region data, using fallback local packet...");
-                        // load packet from binary file in documents folder
-                        packet = new Packet("confirmregion\t" + Convert.ToBase64String(System.IO.File.ReadAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat")));
-                        HandlePacket(packet);
-                    }
-                    break;
-                // the server has sent us the region data
-                case Packet.Client.WORLD:
-                    hasReceivedRegion = true;
-                    // save packet to binary file in documents folder
-                    // System.IO.File.WriteAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat", Convert.FromBase64String(packet.data[0]));
-                    world.SetRegion(packet.ParseRegionData());
-                    List<Task<string>> tasks = new();
-                    int count = world.GetRegion().GetHeaderCount();
-                    Debug.Log("Count: " + count);
-                    for (int i = 0; i < count; i++)
-                    {
-                        tasks.Add(httpClient.GetResource("item", world.GetRegion().GetHeaderLine(i)));
-                    }
-                    string[] results = await Task.WhenAll(tasks);
-                    world.SetBlockPalette(results);
-                    world.DisplayWorld();
                     break;
                 // the server has forced us to disconnect
                 case Packet.Client.DISCONNECT:
@@ -341,8 +314,36 @@ public class MainUdpClient : MonoBehaviour
         {
             switch (packet.type)
             {
-                case 69:
-                    Debug.Log("Nice.");
+                // the server has confirmed our connection
+                case Packet.Client.CONNECT:
+                    print($"Connected via TCP");
+                    TcpSend($"{Packet.Server.WORLD}");
+                    // wait 5 seconds, then check if we have received the region data
+                    await Task.Delay(5000);
+                    if (!hasReceivedRegion)
+                    {
+                        print("Failed to receive region data, using fallback local packet...");
+                        // load packet from binary file in documents folder
+                        packet = new Packet($"{Packet.Client.WORLD}" + Convert.ToBase64String(System.IO.File.ReadAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat")));
+                        TcpHandlePacket(packet);
+                    }
+                    break;
+                // the server has sent us the region data
+                case Packet.Client.WORLD:
+                    hasReceivedRegion = true;
+                    // save packet to binary file in documents folder
+                    // System.IO.File.WriteAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat", Convert.FromBase64String(packet.data[0]));
+                    world.SetRegion(packet.ParseRegionData());
+                    List<Task<string>> tasks = new();
+                    int count = world.GetRegion().GetHeaderCount();
+                    Debug.Log("Count: " + count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        tasks.Add(httpClient.GetResource("item", world.GetRegion().GetHeaderLine(i)));
+                    }
+                    string[] results = await Task.WhenAll(tasks);
+                    world.SetBlockPalette(results);
+                    world.DisplayWorld();
                     break;
                 // catch-all: unknown packet type
                 default:
