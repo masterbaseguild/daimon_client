@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
+using System.Threading;
 using System.Threading.Tasks;
 
 // the udp client communicates with the server to send and receive state data
@@ -25,6 +26,9 @@ public class MainUdpClient : MonoBehaviour
     private UdpClient client;
     private IPEndPoint remoteIpEndPoint;
     private bool hasReceivedRegion = false;
+    private TcpClient tcpClient;
+    private NetworkStream tcpStream;
+    private CancellationTokenSource cancellationTokenSource;
 
     // this must only perform setup independent of the data the user will insert in the login form;
     // all the remaining setup must be done on the connect method, since it is ran on connect button press
@@ -94,6 +98,19 @@ public class MainUdpClient : MonoBehaviour
         }
     }
 
+    private void TcpSend(string data)
+    {
+        try
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+            tcpStream.Write(bytes, 0, bytes.Length);
+        }
+        catch (Exception e)
+        {
+            print(e.ToString());
+        }
+    }
+
     // setup the connection and send the connect packet
     public void Connect()
     {
@@ -110,6 +127,67 @@ public class MainUdpClient : MonoBehaviour
         }
         Send($"{Packet.Server.CONNECT}\t0\t{username}");
         isEnabled = true;
+    }
+
+    private async Task TcpConnect(int index)
+    {
+        cancellationTokenSource = new CancellationTokenSource();
+        try
+        {
+            tcpClient = new TcpClient();
+            await tcpClient.ConnectAsync(serverAddress, serverPort);
+            tcpStream = tcpClient.GetStream();
+            Debug.Log("Connected to server via TCP");
+            // send the connect packet to the server
+            TcpSend($"{Packet.Server.CONNECT}\t{index}");
+            // start listening for packets from the server
+            _ = TcpListen(cancellationTokenSource.Token);
+        }
+        catch (Exception e)
+        {
+            print(e.ToString());
+        }
+    }
+
+    private void TcpDisconnect()
+    {
+        try
+        {
+            tcpStream.Close();
+            tcpClient.Close();
+            cancellationTokenSource.Cancel();
+            Debug.Log("Disconnected from server via TCP");
+        }
+        catch (Exception e)
+        {
+            print(e.ToString());
+        }
+    }
+
+    private async Task TcpListen(CancellationToken token)
+    {
+        try
+        {
+            byte[] bytes = new byte[1024];
+            while (!token.IsCancellationRequested)
+            {
+                int bytesRead = await tcpStream.ReadAsync(bytes, 0, bytes.Length, token);
+                if (bytesRead == 0)
+                {
+                    break;
+                }
+                string data = Encoding.UTF8.GetString(bytes, 0, bytesRead);
+                Packet message = new(data);
+                TcpHandlePacket(message);
+            }
+        }
+        catch (Exception e)
+        {
+            if (!token.IsCancellationRequested)
+            {
+                print(e.ToString());
+            }
+        }
     }
 
     // get callback
@@ -185,6 +263,7 @@ public class MainUdpClient : MonoBehaviour
                 case Packet.Client.CONNECT:
                     print($"Connected with index: {packet.data[0]}");
                     index = int.Parse(packet.data[0]);
+                    await TcpConnect(index);
                     for (int i = 1; i < packet.data.Length; i += 2)
                     {
                         int firstIndex = int.Parse(packet.data[i]);
@@ -226,6 +305,7 @@ public class MainUdpClient : MonoBehaviour
                 // the server has forced us to disconnect
                 case Packet.Client.DISCONNECT:
                     Send($"{Packet.Server.DISCONNECT}\t{index}");
+                    TcpDisconnect();
                     Application.Quit();
                     break;
                 // another user has connected
@@ -246,6 +326,23 @@ public class MainUdpClient : MonoBehaviour
                         return;
                     }
                     people.RemoveUser(disconnectedIndex);
+                    break;
+                // catch-all: unknown packet type
+                default:
+                    print($"Unknown packet type: {packet.type}");
+                    break;
+            }
+        });
+    }
+
+    private void TcpHandlePacket(Packet packet)
+    {
+        MainThreadDispatcher.Enqueue(async () =>
+        {
+            switch (packet.type)
+            {
+                case 69:
+                    Debug.Log("Nice.");
                     break;
                 // catch-all: unknown packet type
                 default:
@@ -286,6 +383,7 @@ public class MainUdpClient : MonoBehaviour
     private void OnApplicationQuit()
     {
         Send($"{Packet.Server.DISCONNECT}\t{index}");
+        TcpDisconnect();
     }
 }
 
