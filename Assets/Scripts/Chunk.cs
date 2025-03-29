@@ -24,8 +24,11 @@ public class Chunk
         return voxels[x, y, z];
     }
 
-    public void SetVoxel(int x, int y, int z, int voxel)
+    public void SetVoxel(int x, int y, int z, int block)
     {
-        voxels[x, y, z] = voxel;
+        int voxelX = x % CHUNK_SIZE;
+        int voxelY = y % CHUNK_SIZE;
+        int voxelZ = z % CHUNK_SIZE;
+        voxels[voxelX, voxelY, voxelZ] = block;
     }
 }

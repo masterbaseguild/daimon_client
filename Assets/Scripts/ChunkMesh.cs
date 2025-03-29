@@ -52,6 +52,17 @@ public class ChunkMesh
         meshCollider.sharedMesh = colliderMesh;
     }
 
+    public void DeleteMesh(bool isMainMesh)
+    {
+        if (isMainMesh)
+        {
+            nonOpaqueMesh.DeleteMesh(false);
+        }
+        Object.Destroy(gameObject);
+        Object.Destroy(mesh);
+        Object.Destroy(colliderMesh);
+    }
+
     private void AddVertices(Direction direction, int x, int y, int z)
     {
         // order of vertices matters for the normals and how we render the mesh

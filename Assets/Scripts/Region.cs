@@ -131,7 +131,7 @@ public class Region
         return chunks[chunkX, chunkY, chunkZ].GetVoxel(voxelX, voxelY, voxelZ);
     }
 
-    public void SetVoxel(int x, int y, int z, int voxel)
+    public void SetVoxel(int x, int y, int z, int block)
     {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
@@ -139,6 +139,6 @@ public class Region
         int voxelX = x % Chunk.CHUNK_SIZE;
         int voxelY = y % Chunk.CHUNK_SIZE;
         int voxelZ = z % Chunk.CHUNK_SIZE;
-        chunks[chunkX, chunkY, chunkZ].SetVoxel(voxelX, voxelY, voxelZ, voxel);
+        chunks[chunkX, chunkY, chunkZ].SetVoxel(voxelX, voxelY, voxelZ, block);
     }
 }

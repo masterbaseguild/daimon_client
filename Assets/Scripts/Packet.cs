@@ -13,8 +13,9 @@ public class Packet
         public const byte NEWPOSITION = 3;
         public const byte KEEPALIVE = 4;
         public const byte CHAT = 5;
-        public const byte USERCONNECT = 6;
-        public const byte USERDISCONNECT = 7;
+        public const byte SETBLOCK = 6;
+        public const byte USERCONNECT = 7;
+        public const byte USERDISCONNECT = 8;
     }
     public static class Server
     {
@@ -24,6 +25,7 @@ public class Packet
         public const byte NEWPOSITION = 3;
         public const byte KEEPALIVE = 4;
         public const byte CHAT = 5;
+        public const byte SETBLOCK = 6;
     }
     public byte type;
     public string[] data;

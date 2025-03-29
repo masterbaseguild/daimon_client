@@ -52,6 +52,21 @@ public class World : MonoBehaviour
         return region.GetVoxel(x, y, z);
     }
 
+    public void SetVoxel(int x, int y, int z, int block)
+    {
+        region.SetVoxel(x, y, z, block);
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        ChunkMesh chunkMesh = chunkMeshes[chunkX + (chunkY * Region.REGION_SIZE) + (chunkZ * Region.REGION_SIZE * Region.REGION_SIZE)];
+        if (chunkMesh != null)
+        {
+            // delete the chunk mesh
+            chunkMesh.DeleteMesh(true);
+        }
+            DisplayChunk(chunkX, chunkY, chunkZ);
+    }
+
     private Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
     {
         return direction switch

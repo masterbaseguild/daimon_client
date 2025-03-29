@@ -98,7 +98,7 @@ public class MainUdpClient : MonoBehaviour
         }
     }
 
-    private void TcpSend(string data)
+    public void TcpSend(string data)
     {
         try
         {
@@ -178,6 +178,10 @@ public class MainUdpClient : MonoBehaviour
                 }
                 string data = Encoding.UTF8.GetString(bytes, 0, bytesRead);
                 Packet message = new(data);
+                if (message.type == Packet.Client.SETBLOCK)
+                {
+                    Debug.Log("RECEIVE: "+data);
+                }
                 TcpHandlePacket(message);
             }
         }
@@ -344,6 +348,13 @@ public class MainUdpClient : MonoBehaviour
                     string[] results = await Task.WhenAll(tasks);
                     world.SetBlockPalette(results);
                     world.DisplayWorld();
+                    break;
+                case Packet.Client.SETBLOCK:
+                    int x = int.Parse(packet.data[0]);
+                    int y = int.Parse(packet.data[1]);
+                    int z = int.Parse(packet.data[2]);
+                    int blockIndex = int.Parse(packet.data[3]);
+                    world.SetVoxel(x, y, z, blockIndex);
                     break;
                 // catch-all: unknown packet type
                 default:
