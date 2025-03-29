@@ -311,7 +311,6 @@ public class MainUser : MonoBehaviour
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
             Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point - (hit.normal / 2));
-            Debug.Log("SEND: "+$"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t0");
             udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t0");
         }
     }
@@ -322,7 +321,6 @@ public class MainUser : MonoBehaviour
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
             Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point + (hit.normal / 2));
-            Debug.Log("SEND: "+$"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t1");
             udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t1");
         }
     }

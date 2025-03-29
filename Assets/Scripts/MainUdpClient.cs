@@ -178,10 +178,6 @@ public class MainUdpClient : MonoBehaviour
                 }
                 string data = Encoding.UTF8.GetString(bytes, 0, bytesRead);
                 Packet message = new(data);
-                if (message.type == Packet.Client.SETBLOCK)
-                {
-                    Debug.Log("RECEIVE: "+data);
-                }
                 TcpHandlePacket(message);
             }
         }
