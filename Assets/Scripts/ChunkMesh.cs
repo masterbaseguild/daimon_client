@@ -2,7 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 
 // a chunk mesh is a physical representation of a chunk in the virtual world
-// it is composed of 3 meshes: the main mesh, the collider mesh and the transparent mesh
+// it is composed of 4 meshes: the main mesh, the collider mesh, the transparent mesh and the non concrete mesh
+// NOTE: for the moment we do not have any non concrete opaque block, so the non concrete mesh can only use the transparent material
 public class ChunkMesh
 {
     private readonly World world;
@@ -21,6 +22,7 @@ public class ChunkMesh
     private readonly List<int> colliderTriangles = new();
 
     private readonly ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
+    private readonly ChunkMesh nonConcreteMesh; // the non concrete mesh is another instance of chunkmesh and a child of the main mesh
 
     private static readonly Direction[] directions =
     {
@@ -32,31 +34,43 @@ public class ChunkMesh
         Direction.up
     };
 
-    public ChunkMesh(bool isMainMesh)
+    public ChunkMesh(int meshType) // 0 = main mesh, 1 = non opaque mesh, 2 = non concrete mesh
     {
         world = GameObject.Find("World").GetComponent<World>();
-        if (isMainMesh)
+        if (meshType == 0)
         {
-            nonOpaqueMesh = new ChunkMesh(false);
+            nonOpaqueMesh = new ChunkMesh(1);
+            nonConcreteMesh = new ChunkMesh(2);
         }
         gameObject = new GameObject();
         gameObject.transform.parent = GameObject.Find("World").transform;
         gameObject.name = "ChunkMesh";
+        if (meshType != 2)
+        {
         gameObject.layer = LayerMask.NameToLayer("Ground");
-        meshFilter = gameObject.AddComponent<MeshFilter>();
-        meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshCollider = gameObject.AddComponent<MeshCollider>();
         meshCollider.sharedMaterial = world.physicMaterial;
-        meshRenderer.material = !isMainMesh ? world.nonOpaqueMaterial : world.material;
-        meshFilter.mesh = mesh;
         meshCollider.sharedMesh = colliderMesh;
+        }
+        meshFilter = gameObject.AddComponent<MeshFilter>();
+        meshRenderer = gameObject.AddComponent<MeshRenderer>();
+        if (meshType != 0)
+        {
+            meshRenderer.material = world.nonOpaqueMaterial;
+        }
+        else
+        {
+            meshRenderer.material = world.material;
+        }
+        meshFilter.mesh = mesh;
     }
 
-    public void DeleteMesh(bool isMainMesh)
+    public void DeleteMesh(int meshType)
     {
-        if (isMainMesh)
+        if (meshType == 0)
         {
-            nonOpaqueMesh.DeleteMesh(false);
+            nonOpaqueMesh.DeleteMesh(1);
+            nonConcreteMesh.DeleteMesh(2);
         }
         Object.Destroy(gameObject);
         Object.Destroy(mesh);
@@ -186,6 +200,11 @@ public class ChunkMesh
             return;
         }
         BlockType blockType = BlockPalette.GetBlockType(voxel);
+        if (!blockType.IsConcrete() && nonConcreteMesh != null)
+        {
+            nonConcreteMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette);
+            return;
+        }
         if (!blockType.IsOpaque() && nonOpaqueMesh != null)
         {
             nonOpaqueMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette);
@@ -208,7 +227,10 @@ public class ChunkMesh
             }
         }
         UpdateMesh();
-        UpdateColliderMesh();
+        if(blockType.IsConcrete())
+        {
+            UpdateColliderMesh();
+        }
     }
 
     // update the meshes every time a block in the chunk changes

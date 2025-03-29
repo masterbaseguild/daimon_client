@@ -62,7 +62,7 @@ public class World : MonoBehaviour
         if (chunkMesh != null)
         {
             // delete the chunk mesh
-            chunkMesh.DeleteMesh(true);
+            chunkMesh.DeleteMesh(0);
         }
             DisplayChunk(chunkX, chunkY, chunkZ);
     }
@@ -92,7 +92,7 @@ public class World : MonoBehaviour
     private void DisplayChunk(int x, int y, int z)
     {
         Chunk chunk = region.GetChunk(x, y, z);
-        ChunkMesh chunkMesh = new(true);
+        ChunkMesh chunkMesh = new(0);
         chunkMeshes[x + (y * Region.REGION_SIZE) + (z * Region.REGION_SIZE * Region.REGION_SIZE)] = chunkMesh;
         for (int i = 0; i < Chunk.CHUNK_SIZE; i++)
         {
