@@ -49,6 +49,7 @@ public class MainUser : MonoBehaviour
     private float lastPressedTimeSpace;
     private bool pressedFirstTimeW = false;
     private float lastPressedTimeW;
+    private int voxel = 1;
 
     private float xRotation;
     private float yRotation;
@@ -321,7 +322,7 @@ public class MainUser : MonoBehaviour
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
             Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point + (hit.normal / 2));
-            udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t3");
+            udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t{voxel}");
         }
     }
 
@@ -349,6 +350,24 @@ public class MainUser : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Y))
         {
             udpClient.LogGameState();
+        }
+
+        // if user presses 1, set voxel to 1
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            voxel = 1;
+        }
+
+        // if user presses 2, set voxel to 2
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            voxel = 2;
+        }
+
+        // if user presses 3, set voxel to 3
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            voxel = 3;
         }
 
     }
