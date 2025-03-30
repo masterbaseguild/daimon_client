@@ -168,16 +168,35 @@ public class MainUdpClient : MonoBehaviour
     {
         try
         {
-            byte[] bytes = new byte[65536];
+            byte[] lengthBytes = new byte[4];
             while (!token.IsCancellationRequested)
             {
-                int bytesRead = await tcpStream.ReadAsync(bytes, 0, bytes.Length, token);
-                if (bytesRead == 0)
+                int readLengthBytes = await tcpStream.ReadAsync(lengthBytes, 0, lengthBytes.Length, token);
+                if (readLengthBytes == 0)
                 {
                     break;
                 }
-                string data = Encoding.UTF8.GetString(bytes, 0, bytesRead);
-                Packet message = new(data);
+                int messageLength = BitConverter.ToInt32(lengthBytes, 0);
+                // one byte for packet type
+                byte[] typeBytes = new byte[2];
+                int readTypeBytes = await tcpStream.ReadAsync(typeBytes, 0, typeBytes.Length, token);
+                if (readTypeBytes == 0)
+                {
+                    break;
+                }
+                byte[] dataBytes = new byte[messageLength];
+                int readDataBytes = 0;
+                while (readDataBytes < messageLength)
+                {
+                    int read = await tcpStream.ReadAsync(dataBytes, readDataBytes, messageLength - readDataBytes, token);
+                    if (read == 0)
+                    {
+                        break;
+                    }
+                    readDataBytes += read;
+                }
+                string data = Encoding.UTF8.GetString(dataBytes, 0, readDataBytes);
+                Packet message = new(typeBytes[0], data);
                 TcpHandlePacket(message);
             }
         }

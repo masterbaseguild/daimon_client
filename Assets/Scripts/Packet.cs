@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using UnityEngine;
 
 public class Packet
 {
@@ -36,6 +37,12 @@ public class Packet
         var typeString = split[0];
         type = byte.Parse(typeString);
         data = split.Skip(1).ToArray();
+    }
+
+    public Packet(byte type, string data)
+    {
+        this.type = type;
+        this.data = data.Split('\t');
     }
 
     // the region data is compressed and encoded, so the packet exposes a method to parse it
