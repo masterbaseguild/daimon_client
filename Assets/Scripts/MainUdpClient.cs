@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Globalization;
 
 // the udp client communicates with the server to send and receive state data
 public class MainUdpClient : MonoBehaviour
@@ -250,13 +251,13 @@ public class MainUdpClient : MonoBehaviour
                         {
                             continue;
                         }
-                        float positionX = float.Parse(packet.data[i + 1]);
-                        float positionY = float.Parse(packet.data[i + 2]);
-                        float positionZ = float.Parse(packet.data[i + 3]);
-                        float rotationX = float.Parse(packet.data[i + 4]);
-                        float rotationY = float.Parse(packet.data[i + 5]);
-                        float rotationZ = float.Parse(packet.data[i + 6]);
-                        float cameraX = float.Parse(packet.data[i + 7]);
+                        float positionX = float.Parse(packet.data[i + 1], CultureInfo.InvariantCulture);
+                        float positionY = float.Parse(packet.data[i + 2], CultureInfo.InvariantCulture);
+                        float positionZ = float.Parse(packet.data[i + 3], CultureInfo.InvariantCulture);
+                        float rotationX = float.Parse(packet.data[i + 4], CultureInfo.InvariantCulture);
+                        float rotationY = float.Parse(packet.data[i + 5], CultureInfo.InvariantCulture);
+                        float rotationZ = float.Parse(packet.data[i + 6], CultureInfo.InvariantCulture);
+                        float cameraX = float.Parse(packet.data[i + 7], CultureInfo.InvariantCulture);
                         people.SetPosition(positionIndex, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, cameraX);
                     }
                     break;
