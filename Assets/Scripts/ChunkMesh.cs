@@ -214,7 +214,7 @@ public class ChunkMesh
         {
             int neighbour = world.GetNeighbourVoxel(x, y, z, directions[i]);
             BlockType neighbourBlockType = BlockPalette.GetBlockType(neighbour);
-            if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType.IsOpaque()))
+            if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType != neighbourBlockType))
             {
                 AddVertices(directions[i], x, y, z);
                 AddQuadTriangles();
