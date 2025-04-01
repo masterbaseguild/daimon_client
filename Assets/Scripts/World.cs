@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class World : MonoBehaviour
 {
     [SerializeField] private UI ui;
+    [SerializeField] private GameObject player;
     private BlockPalette blockPalette;
 
     // all materials are handled and exposed by the world class
@@ -150,5 +151,6 @@ public class World : MonoBehaviour
             yield return null;
         }
         ui.ToggleLoadingText(false);
+        player.SetActive(true);
     }
 }

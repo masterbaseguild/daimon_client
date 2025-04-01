@@ -5,9 +5,6 @@ public class MainUser : MonoBehaviour
 {
     [SerializeField] private MainUdpClient udpClient;
 
-    // the user controller won't be enabled until the user presses connect
-    private bool isEnabled = false;
-
     // unity api references
     [SerializeField] public GameObject playerCamera;
     [SerializeField] private Rigidbody rigidBody;
@@ -57,24 +54,23 @@ public class MainUser : MonoBehaviour
     private Vector3 movement;
 
     // setup components and cursor, then enable the user controller
-    public void Enable()
+
+    private void Awake()
+    {
+        transform.position = spawnPoint;
+    }
+
+    private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        Debug.Log(spawnPoint);
         transform.position = spawnPoint;
-        isEnabled = true;
-        gameObject.GetComponent<InputManager>().Enable();
     }
 
     // run input logic every frame
     private void Update()
     {
-        if (!isEnabled)
-        {
-            return;
-        }
-
-
         HandleMovement();
         HandleSpeedMultipliers();
         HandleSpeedCap();
@@ -99,12 +95,6 @@ public class MainUser : MonoBehaviour
     // run physics logic at a fixed interval
     private void FixedUpdate()
     {
-        if (!isEnabled)
-        {
-            return;
-        }
-
-
         transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
 
         MovementForce();

@@ -164,6 +164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ui: {fileID: 798923501}
+  player: {fileID: 1220779330}
   material: {fileID: 2100000, guid: f561ae1980cdbe9428b53ce1f936611f, type: 2}
   nonOpaqueMaterial: {fileID: 2100000, guid: 91c75c1e0b25e194e98c2e0234479b31, type: 2}
   physicMaterial: {fileID: 13400000, guid: 39cfb9b36270a134d940c2442b193651, type: 2}
@@ -1156,7 +1157,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1220779332
 Transform:
   m_ObjectHideFlags: 0

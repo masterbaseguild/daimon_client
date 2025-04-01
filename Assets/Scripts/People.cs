@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 // the people class stores and manages the data of all other connected users
 public class People : MonoBehaviour
@@ -38,7 +37,7 @@ public class People : MonoBehaviour
         user.name = "User" + index;
         user.GetComponent<User>().index = index;
         user.GetComponent<User>().username = username;
-        user.GetComponent<User>().Enable();
+        user.SetActive(true);
         connectedUsers.Add(user);
     }
 

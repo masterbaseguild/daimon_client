@@ -38,6 +38,8 @@ lineRenderer1.startColor = Color.blue
 lineRenderer1.endColor = Color.blue
 lineRenderer2.startColor = Color.blue
 lineRenderer2.endColor = Color.blue
+lineRenderer1.enabled = false
+lineRenderer2.enabled = false
 
 function Start()
     if RaycastCheck(userCamera.position, userCamera.forward, hookRange, ground) then

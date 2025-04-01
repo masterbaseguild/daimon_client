@@ -12,14 +12,13 @@ public class UI : MonoBehaviour
     [SerializeField] private InputField ipInput;
     [SerializeField] private Text loadingText;
 
-    private void OnEnable()
+    private void Start()
     {
         usernameInput.text = udpClient.GetUsername();
         ipInput.text = udpClient.GetAddress();
         playBtn.onClick.AddListener(() =>
         {
             httpClient.Connect();
-            mainUser.GetComponent<MainUser>().Enable();
             playBtn.gameObject.SetActive(false);
             usernameInput.gameObject.SetActive(false);
             ipInput.gameObject.SetActive(false);

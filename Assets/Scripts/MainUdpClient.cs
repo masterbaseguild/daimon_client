@@ -44,7 +44,8 @@ public class MainUdpClient : MonoBehaviour
     // send position data to the server every frame
     private void FixedUpdate()
     {
-        if (isEnabled)
+        // if udpclient enabled and user gameobject enabled
+        if (isEnabled && user.isActiveAndEnabled)
         {
             Vector3 position = user.GetPosition();
             Vector3 rotation = user.GetRotation();

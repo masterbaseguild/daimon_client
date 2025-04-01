@@ -7,7 +7,7 @@ public class User : MonoBehaviour
     public int index;
     private Transform usernameText;
 
-    public void Enable()
+    private void Start()
     {
         // Set the username text to the username of the user
         usernameText = transform.Find("Username");

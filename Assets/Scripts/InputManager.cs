@@ -3,11 +3,10 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     [SerializeField] private int slotCount;
-    private bool isEnabled;
 
     private AbilitySlot[] slots;
 
-    public void Enable()
+    private void Start()
     {
         slots = new AbilitySlot[slotCount];
 
@@ -16,7 +15,6 @@ public class InputManager : MonoBehaviour
         // temp
         SetSlot(0, new Ability(path + "HookL.lua", gameObject), KeyCode.Q);
         SetSlot(1, new Ability(path + "HookR.lua", gameObject), KeyCode.E);
-        isEnabled = true;
     }
 
     private void SetSlot(int index, Ability ability, KeyCode key)
@@ -26,12 +24,6 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
-        if (!isEnabled)
-        {
-            return;
-        }
-
-
         for (int i = 0; i < slotCount; i++)
         {
             if (slots[i] == null)
@@ -57,12 +49,6 @@ public class InputManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isEnabled)
-        {
-            return;
-        }
-
-
         for (int i = 0; i < slotCount; i++)
         {
             if (slots[i] == null)
