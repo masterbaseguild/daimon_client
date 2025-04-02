@@ -145,12 +145,14 @@ public class World : MonoBehaviour
         {
             DisplayChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
             displayedChunks++;
-            string loadingText = "Loading world: " + displayedChunks + "/" + chunkPositions.Count + " chunks";
+            var displayPercentage = Mathf.RoundToInt((float)displayedChunks / chunkPositions.Count * 100);
+            string loadingText = "Loading world: " + displayPercentage + "%";
             ui.SetLoadingText(loadingText);
 
             yield return null;
         }
         ui.ToggleLoadingText(false);
+        ui.ToggleBackground(false);
         player.SetActive(true);
     }
 }

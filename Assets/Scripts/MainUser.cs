@@ -55,17 +55,12 @@ public class MainUser : MonoBehaviour
 
     // setup components and cursor, then enable the user controller
 
-    private void Awake()
-    {
-        transform.position = spawnPoint;
-    }
-
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         Debug.Log(spawnPoint);
-        transform.position = spawnPoint;
+        rigidBody.MovePosition(spawnPoint);
     }
 
     // run input logic every frame
@@ -105,9 +100,8 @@ public class MainUser : MonoBehaviour
     {
         if (transform.position.y < loopbackY)
         {
-            transform.position = spawnPoint;
+            rigidBody.MovePosition(spawnPoint);
         }
-
     }
 
     private void HandleGrounded()

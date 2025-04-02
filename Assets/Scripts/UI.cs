@@ -11,6 +11,7 @@ public class UI : MonoBehaviour
     [SerializeField] private InputField usernameInput;
     [SerializeField] private InputField ipInput;
     [SerializeField] private Text loadingText;
+    [SerializeField] private Image backgroundImage;
 
     private void Start()
     {
@@ -40,6 +41,11 @@ public class UI : MonoBehaviour
     public void ToggleLoadingText(bool toggle)
     {
         loadingText.gameObject.SetActive(toggle);
+    }
+
+    public void ToggleBackground(bool toggle)
+    {
+        backgroundImage.gameObject.SetActive(toggle);
     }
 
     public void SetLoadingText(string text)
