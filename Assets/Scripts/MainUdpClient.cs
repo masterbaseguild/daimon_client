@@ -298,7 +298,6 @@ public class MainUdpClient : MonoBehaviour
                     break;
                 // the server has forced us to disconnect
                 case Packet.Client.DISCONNECT:
-                    Send($"{Packet.Server.DISCONNECT}\t{index}");
                     TcpDisconnect();
                     Application.Quit();
                     break;
