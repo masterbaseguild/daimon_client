@@ -48,7 +48,7 @@ public class World : MonoBehaviour
         return region.GetChunkCoords(position);
     }
 
-    private int GetVoxel(int x, int y, int z)
+    public int GetVoxel(int x, int y, int z)
     {
         return region.GetVoxel(x, y, z);
     }
@@ -56,16 +56,46 @@ public class World : MonoBehaviour
     public void SetVoxel(int x, int y, int z, int block)
     {
         region.SetVoxel(x, y, z, block);
+        UpdateVoxel(x, y, z, block, false);
+        // update the neighbouring voxels
+        UpdateVoxel(x+1, y, z, block, true);
+        UpdateVoxel(x-1, y, z, block, true);
+        UpdateVoxel(x, y+1, z, block, true);
+        UpdateVoxel(x, y-1, z, block, true);
+        UpdateVoxel(x, y, z+1, block, true);
+        UpdateVoxel(x, y, z-1, block, true);
+    }
+
+    private void UpdateVoxel(int x, int y, int z, int block, bool isNeighbour)
+    {
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
         int chunkZ = z / Chunk.CHUNK_SIZE;
         ChunkMesh chunkMesh = chunkMeshes[chunkX + (chunkY * Region.REGION_SIZE) + (chunkZ * Region.REGION_SIZE * Region.REGION_SIZE)];
         if (chunkMesh != null)
         {
-            // delete the chunk mesh
-            chunkMesh.DeleteMesh(0);
+            int voxelX = x % Chunk.CHUNK_SIZE;
+            int voxelY = y % Chunk.CHUNK_SIZE;
+            int voxelZ = z % Chunk.CHUNK_SIZE;
+            BlockMesh oldBlock = chunkMesh.GetBlockMesh(voxelX, voxelY, voxelZ);
+            if (!isNeighbour)
+            {
+                if (oldBlock != null)
+                {
+                    chunkMesh.RemoveBlockFromMesh(x, y, z, oldBlock.voxel, blockPalette);
+                }
+                chunkMesh.AddBlockToMesh(x, y, z, block, blockPalette, false);
+            }
+            else
+            {
+                if (oldBlock != null)
+                {
+                    int voxel = oldBlock.voxel;
+                    chunkMesh.RemoveBlockFromMesh(x, y, z, voxel, blockPalette);
+                    chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette, false);
+                }
+            }
         }
-            DisplayChunk(chunkX, chunkY, chunkZ);
     }
 
     private Vector3 GetNeighbourCoords(int x, int y, int z, Direction direction)
@@ -104,11 +134,12 @@ public class World : MonoBehaviour
                     int voxel = chunk.GetVoxel(i, j, k);
                     if (voxel != 0)
                     {
-                        chunkMesh.AddBlockToMesh(i + (x * Chunk.CHUNK_SIZE), j + (y * Chunk.CHUNK_SIZE), k + (z * Chunk.CHUNK_SIZE), voxel, blockPalette);
+                        chunkMesh.AddBlockToMesh(i + (x * Chunk.CHUNK_SIZE), j + (y * Chunk.CHUNK_SIZE), k + (z * Chunk.CHUNK_SIZE), voxel, blockPalette, true);
                     }
                 }
             }
         }
+        chunkMesh.UpdateAllMeshes();
     }
 
     private bool IsChunkEmpty(Chunk chunk)

@@ -13,16 +13,14 @@ public class ChunkMesh
     private readonly MeshCollider meshCollider; // component of the gameobject used to set the collision mesh
 
     private readonly Mesh mesh = new();
-    private readonly List<Vector3> vertices = new();
-    private readonly List<int> triangles = new();
-    private readonly List<Vector2> uvs = new();
-
     private readonly Mesh colliderMesh = new();
-    private readonly List<Vector3> colliderVertices = new();
-    private readonly List<int> colliderTriangles = new();
 
+    private readonly BlockMesh[,,] voxels = new BlockMesh[Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE];
+
+    private readonly int meshType;
     private readonly ChunkMesh nonOpaqueMesh; // the transparent mesh is another instance of chunkmesh and a child of the main mesh
     private readonly ChunkMesh nonConcreteMesh; // the non concrete mesh is another instance of chunkmesh and a child of the main mesh
+    private readonly ChunkMesh nonConcreteNonOpaqueMesh; // the non concrete mesh is another instance of chunkmesh and a child of the main mesh
 
     private static readonly Direction[] directions =
     {
@@ -34,198 +32,68 @@ public class ChunkMesh
         Direction.up
     };
 
-    public ChunkMesh(int meshType) // 0 = main mesh, 1 = non opaque mesh, 2 = non concrete mesh
+    public ChunkMesh(int meshType) // 0 = main mesh, 1 = non opaque mesh, 2 = non concrete mesh, 3 = non concrete non opaque mesh
     {
         world = GameObject.Find("World").GetComponent<World>();
-        if (meshType == 0)
-        {
-            nonOpaqueMesh = new ChunkMesh(1);
-            nonConcreteMesh = new ChunkMesh(2);
-        }
+
         gameObject = new GameObject();
         gameObject.transform.parent = GameObject.Find("World").transform;
         gameObject.name = "ChunkMesh";
-        if (meshType != 2)
-        {
-        gameObject.layer = LayerMask.NameToLayer("Ground");
-        meshCollider = gameObject.AddComponent<MeshCollider>();
-        meshCollider.sharedMaterial = world.physicMaterial;
-        meshCollider.sharedMesh = colliderMesh;
-        }
+
         meshFilter = gameObject.AddComponent<MeshFilter>();
+        meshFilter.mesh = mesh;
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        if (meshType != 0)
+
+        this.meshType = meshType;
+        if (meshType == 0) // main mesh
         {
-            meshRenderer.material = world.nonOpaqueMaterial;
+            nonOpaqueMesh = new ChunkMesh(1);
+            nonConcreteMesh = new ChunkMesh(2);
+            nonConcreteNonOpaqueMesh = new ChunkMesh(3);
         }
-        else
+        if (meshType <= 1) // concrete meshes
+        {
+            gameObject.layer = LayerMask.NameToLayer("Ground");
+            meshCollider = gameObject.AddComponent<MeshCollider>();
+            meshCollider.sharedMaterial = world.physicMaterial;
+            meshCollider.sharedMesh = colliderMesh;
+        }
+        if (meshType%2 == 0) // opaque meshes
         {
             meshRenderer.material = world.material;
         }
-        meshFilter.mesh = mesh;
+        else // non opaque meshes
+        {
+            meshRenderer.material = world.nonOpaqueMaterial;
+        }
     }
 
-    public void DeleteMesh(int meshType)
+    public void RemoveBlockFromMesh(int x, int y, int z, int voxel, BlockPalette BlockPalette)
     {
+        BlockType blockType = BlockPalette.GetBlockType(voxel);
+        int intendedMeshType = (blockType.IsConcrete() ? 0 : 2) + (blockType.IsOpaque() ? 0 : 1);
         if (meshType == 0)
         {
-            nonOpaqueMesh.DeleteMesh(1);
-            nonConcreteMesh.DeleteMesh(2);
-        }
-        Object.Destroy(gameObject);
-        Object.Destroy(mesh);
-        Object.Destroy(colliderMesh);
-    }
-
-    private void AddVertices(Direction direction, int x, int y, int z)
-    {
-        // order of vertices matters for the normals and how we render the mesh
-        switch (direction)
-        {
-            case Direction.backwards:
-                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                break;
-            case Direction.foreward:
-                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                break;
-            case Direction.left:
-                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                break;
-
-            case Direction.right:
-                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                break;
-            case Direction.down:
-                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                break;
-            case Direction.up:
-                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                vertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                vertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void AddColliderVertices(Direction direction, int x, int y, int z)
-    {
-        // order of vertices matters for the normals and how we render the mesh
-        switch (direction)
-        {
-            case Direction.backwards:
-                colliderVertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                break;
-            case Direction.foreward:
-                colliderVertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                break;
-            case Direction.left:
-                colliderVertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                break;
-
-            case Direction.right:
-                colliderVertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                break;
-            case Direction.down:
-                colliderVertices.Add(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                break;
-            case Direction.up:
-                colliderVertices.Add(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                colliderVertices.Add(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                colliderVertices.Add(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void AddQuadTriangles()
-    {
-        triangles.Add(vertices.Count - 4);
-        triangles.Add(vertices.Count - 3);
-        triangles.Add(vertices.Count - 2);
-
-        triangles.Add(vertices.Count - 4);
-        triangles.Add(vertices.Count - 2);
-        triangles.Add(vertices.Count - 1);
-    }
-
-    private void AddColliderQuadTriangles()
-    {
-        colliderTriangles.Add(colliderVertices.Count - 4);
-        colliderTriangles.Add(colliderVertices.Count - 3);
-        colliderTriangles.Add(colliderVertices.Count - 2);
-
-        colliderTriangles.Add(colliderVertices.Count - 4);
-        colliderTriangles.Add(colliderVertices.Count - 2);
-        colliderTriangles.Add(colliderVertices.Count - 1);
-    }
-
-    public void AddBlockToMesh(int x, int y, int z, int voxel, BlockPalette BlockPalette)
-    {
-        if (voxel == 0)
-        {
-            return;
-        }
-        BlockType blockType = BlockPalette.GetBlockType(voxel);
-        if (!blockType.IsConcrete() && nonConcreteMesh != null)
-        {
-            nonConcreteMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette);
-            return;
-        }
-        if (!blockType.IsOpaque() && nonOpaqueMesh != null)
-        {
-            nonOpaqueMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette);
-            return;
-        }
-        for (int i = 0; i < directions.Length; i++)
-        {
-            int neighbour = world.GetNeighbourVoxel(x, y, z, directions[i]);
-            BlockType neighbourBlockType = BlockPalette.GetBlockType(neighbour);
-            if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType != neighbourBlockType))
+            if (intendedMeshType == 1)
             {
-                AddVertices(directions[i], x, y, z);
-                AddQuadTriangles();
-                uvs.AddRange(BlockPalette.GetBlockUVs(voxel));
+                nonOpaqueMesh.RemoveBlockFromMesh(x, y, z, voxel, BlockPalette);
+                return;
             }
-            if (neighbour == 0 || (!neighbourBlockType.IsConcrete() && blockType.IsConcrete()))
+            if (intendedMeshType == 2)
             {
-                AddColliderVertices(directions[i], x, y, z);
-                AddColliderQuadTriangles();
+                nonConcreteMesh.RemoveBlockFromMesh(x, y, z, voxel, BlockPalette);
+                return;
+            }
+            if (intendedMeshType == 3)
+            {
+                nonConcreteNonOpaqueMesh.RemoveBlockFromMesh(x, y, z, voxel, BlockPalette);
+                return;
             }
         }
+        int chunkX = x % Chunk.CHUNK_SIZE;
+        int chunkY = y % Chunk.CHUNK_SIZE;
+        int chunkZ = z % Chunk.CHUNK_SIZE;
+        voxels[chunkX, chunkY, chunkZ] = null;
         UpdateMesh();
         if(blockType.IsConcrete())
         {
@@ -233,9 +101,93 @@ public class ChunkMesh
         }
     }
 
+    public void AddBlockToMesh(int x, int y, int z, int voxel, BlockPalette BlockPalette, bool isWorldInit)
+    {
+        if (voxel == 0)
+        {
+            return;
+        }
+        BlockType blockType = BlockPalette.GetBlockType(voxel);
+        int intendedMeshType = (blockType.IsConcrete() ? 0 : 2) + (blockType.IsOpaque() ? 0 : 1);
+        if (meshType == 0)
+        {
+            if (intendedMeshType == 1)
+            {
+                nonOpaqueMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette, isWorldInit);
+                return;
+            }
+            if (intendedMeshType == 2)
+            {
+                nonConcreteMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette, isWorldInit);
+                return;
+            }
+            if (intendedMeshType == 3)
+            {
+                nonConcreteNonOpaqueMesh.AddBlockToMesh(x, y, z, voxel, BlockPalette, isWorldInit);
+                return;
+            }
+        }
+        int chunkX = x % Chunk.CHUNK_SIZE;
+        int chunkY = y % Chunk.CHUNK_SIZE;
+        int chunkZ = z % Chunk.CHUNK_SIZE;
+        BlockMesh currentVoxel = new()
+        {
+            voxel = voxel
+        };
+        for (int i = 0; i < directions.Length; i++)
+        {
+            int neighbour = world.GetNeighbourVoxel(x, y, z, directions[i]);
+            BlockType neighbourBlockType = BlockPalette.GetBlockType(neighbour);
+            if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType != neighbourBlockType))
+            {
+                currentVoxel.AddVertices(directions[i], x, y, z);
+                currentVoxel.AddQuadTriangles();
+                currentVoxel.AddUvs(BlockPalette.GetBlockUVs(voxel));
+            }
+            if (neighbour == 0 || (!neighbourBlockType.IsConcrete() && blockType.IsConcrete()))
+            {
+                currentVoxel.AddColliderVertices(directions[i], x, y, z);
+                currentVoxel.AddColliderQuadTriangles();
+            }
+        }
+        voxels[chunkX, chunkY, chunkZ] = currentVoxel;
+        if(!isWorldInit)
+        {
+            UpdateMesh();
+            if(blockType.IsConcrete())
+            {
+                UpdateColliderMesh();
+            }
+        }
+    }
+
     // update the meshes every time a block in the chunk changes
     private void UpdateMesh()
     {
+        List<Vector3> vertices = new List<Vector3>();
+        List<int> triangles = new List<int>();
+        List<Vector2> uvs = new List<Vector2>();
+        for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
+        {
+            for (int y = 0; y < Chunk.CHUNK_SIZE; y++)
+            {
+                for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
+                {
+                    BlockMesh currentVoxel = voxels[x, y, z];
+                    if (currentVoxel != null)
+                    {
+                        var newTriangles = new List<int>(currentVoxel.triangles);
+                        for (int i = 0; i < newTriangles.Count; i++)
+                        {
+                            newTriangles[i] += vertices.Count;
+                        }
+                        triangles.AddRange(newTriangles);
+                        vertices.AddRange(currentVoxel.vertices);
+                        uvs.AddRange(currentVoxel.uvs);
+                    }
+                }
+            }
+        }
         mesh.Clear();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
@@ -247,10 +199,67 @@ public class ChunkMesh
     // update the meshes every time a block in the chunk changes
     private void UpdateColliderMesh()
     {
+        List<Vector3> colliderVertices = new List<Vector3>();
+        List<int> colliderTriangles = new List<int>();
+        for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
+        {
+            for (int y = 0; y < Chunk.CHUNK_SIZE; y++)
+            {
+                for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
+                {
+                    BlockMesh currentVoxel = voxels[x, y, z];
+                    if (currentVoxel != null)
+                    {
+                        var newTriangles = new List<int>(currentVoxel.colliderTriangles);
+                        for (int i = 0; i < newTriangles.Count; i++)
+                        {
+                            newTriangles[i] += colliderVertices.Count;
+                        }
+                        colliderTriangles.AddRange(newTriangles);
+                        colliderVertices.AddRange(currentVoxel.colliderVertices);
+                    }
+                }
+            }
+        }
         colliderMesh.Clear();
         colliderMesh.vertices = colliderVertices.ToArray();
         colliderMesh.triangles = colliderTriangles.ToArray();
         colliderMesh.RecalculateNormals();
         meshCollider.sharedMesh = colliderMesh;
+    }
+
+    public BlockMesh GetBlockMesh(int x, int y, int z)
+    {
+        if(meshType == 0)
+        {
+            if(voxels[x, y, z] != null)
+            {
+                return voxels[x, y, z];
+            }
+            else if (nonOpaqueMesh.GetBlockMesh(x, y, z) != null)
+            {
+                return nonOpaqueMesh.GetBlockMesh(x, y, z);
+            }
+            else if (nonConcreteMesh.GetBlockMesh(x, y, z) != null)
+            {
+                return nonConcreteMesh.GetBlockMesh(x, y, z);
+            }
+            else if (nonConcreteNonOpaqueMesh.GetBlockMesh(x, y, z) != null)
+            {
+                return nonConcreteNonOpaqueMesh.GetBlockMesh(x, y, z);
+            }
+            else return voxels[x, y, z];
+        }
+        return voxels[x, y, z];
+    }
+
+    public void UpdateAllMeshes()
+    {
+        UpdateMesh();
+        UpdateColliderMesh();
+        nonOpaqueMesh.UpdateMesh();
+        nonOpaqueMesh.UpdateColliderMesh();
+        nonConcreteMesh.UpdateMesh();
+        nonConcreteNonOpaqueMesh.UpdateMesh();
     }
 }
