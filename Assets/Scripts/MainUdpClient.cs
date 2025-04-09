@@ -17,6 +17,11 @@ public class MainUdpClient : MonoBehaviour
     [SerializeField] private MainUser user;
     [SerializeField] private People people;
 
+    [SerializeField] private float lastKeepAlive = 0f;
+    [SerializeField] private float keepAliveGracePeriod; // in seconds
+
+    private string lastSentPosition;
+
     // the udp client won't be enabled until the user presses connect
     private bool isEnabled = false;
     private string serverAddress = "arena.daimon.world";
@@ -50,7 +55,22 @@ public class MainUdpClient : MonoBehaviour
             Vector3 position = user.GetPosition();
             Vector3 rotation = user.GetRotation();
             Vector3 camera = user.GetCamera();
-            Send($"{Packet.Server.NEWPOSITION}\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
+            var newPosition = $"{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}";
+            // if the position has changed, send it to the server
+            if (lastSentPosition != newPosition)
+            {
+                lastSentPosition = newPosition;
+                Send($"{Packet.Server.NEWPOSITION}\t{index}\t{position.x}\t{position.y}\t{position.z}\t{rotation.x}\t{rotation.y}\t{rotation.z}\t{camera.x}");
+            }
+            lastSentPosition = newPosition;
+        }
+        // if the last keep alive packet was received more than x seconds ago, disconnect
+        if (isEnabled && Time.time - lastKeepAlive > keepAliveGracePeriod)
+        {
+            print("Server timeout, disconnecting...");
+            Send($"{Packet.Server.DISCONNECT}\t{index}");
+            TcpDisconnect();
+            Application.Quit();
         }
     }
 
@@ -295,9 +315,11 @@ public class MainUdpClient : MonoBehaviour
                         string firstUsername = packet.data[i + 1];
                         people.AddUser(firstIndex, firstUsername);
                     }
+                    lastKeepAlive = Time.time;
                     break;
                 // the server has forced us to disconnect
                 case Packet.Client.DISCONNECT:
+                    print($"Disconnected from server");
                     TcpDisconnect();
                     Application.Quit();
                     break;
@@ -319,6 +341,11 @@ public class MainUdpClient : MonoBehaviour
                         return;
                     }
                     people.RemoveUser(disconnectedIndex);
+                    break;
+                case Packet.Client.KEEPALIVE:
+                    // send back a keep alive packet to the server
+                    Send($"{Packet.Server.KEEPALIVE}\t{index}");
+                    lastKeepAlive = Time.time;
                     break;
                 // catch-all: unknown packet type
                 default:
