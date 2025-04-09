@@ -347,6 +347,9 @@ public class MainUdpClient : MonoBehaviour
                     Send($"{Packet.Server.KEEPALIVE}\t{index}");
                     lastKeepAlive = Time.time;
                     break;
+                case Packet.Client.SCRIPT:
+                    Debug.Log($"Script packet received: {packet.data[0]}");
+                    break;
                 // catch-all: unknown packet type
                 default:
                     print($"Unknown packet type: {packet.type}");
