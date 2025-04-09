@@ -688,6 +688,8 @@ MonoBehaviour:
   httpClient: {fileID: 1885752321}
   user: {fileID: 1220779333}
   people: {fileID: 729440718}
+  lastKeepAlive: 0
+  keepAliveGracePeriod: 30
 --- !u!1 &526741443
 GameObject:
   m_ObjectHideFlags: 0
