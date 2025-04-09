@@ -383,7 +383,6 @@ public class MainUdpClient : MonoBehaviour
                     world.SetRegion(packet.ParseRegionData());
                     List<Task<string>> tasks = new();
                     int count = world.GetRegion().GetHeaderCount();
-                    Debug.Log("Count: " + count);
                     for (int i = 0; i < count; i++)
                     {
                         tasks.Add(httpClient.GetResource("item", world.GetRegion().GetHeaderLine(i)));
