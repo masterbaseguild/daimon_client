@@ -1,5 +1,7 @@
 ---@diagnostic disable: undefined-global
 
+Prefix = 2
+
 local userObject
 local userCamera
 local userRigidBody
@@ -85,4 +87,13 @@ function Stop()
     isHooked = false
     lineRenderer1.enabled = false
     lineRenderer2.enabled = false
+end
+
+function Receive(messageArray)
+    for i, v in ipairs(messageArray) do
+        Debug.Log("Index: " .. i .. " Value: " .. v)
+    end
+    local responseArray = {}
+    responseArray[1] = "response_hookr"
+    Send(responseArray)
 end

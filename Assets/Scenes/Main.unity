@@ -688,6 +688,7 @@ MonoBehaviour:
   httpClient: {fileID: 1885752321}
   user: {fileID: 1220779333}
   people: {fileID: 729440718}
+  inputManager: {fileID: 1220779336}
   lastKeepAlive: 0
   keepAliveGracePeriod: 30
 --- !u!1 &526741443
@@ -1369,6 +1370,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a01a6a1cc9fab2949b01a865f0ad3bbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainUdpClient: {fileID: 371012553}
   slotCount: 2
 --- !u!1 &1339262828
 GameObject:

@@ -8,6 +8,9 @@ using System;
 public class Ability
 {
     private readonly Script script;
+    private InputManager inputManager;
+
+    public int prefix;
 
     // support functions
     private GameObject CreateGameObject(string name)
@@ -44,9 +47,15 @@ public class Ability
     {
         return new Vector3(x, y, z);
     }
+    private void Send(string[] packet)
+    {
+        inputManager.Send(packet);
+    }
 
     public Ability(string path, GameObject user)
     {
+        // get input manager
+        inputManager = GameObject.Find("MainUser").GetComponent<InputManager>();
         // init script
         script = new Script();
 
@@ -72,12 +81,22 @@ public class Ability
         script.Globals["Normalize"] = DynValue.FromObject(script, new Func<Vector3, Vector3>(Normalize));
         script.Globals["AddForce"] = DynValue.FromObject(script, new Action<Rigidbody, Vector3, string>(AddForce));
         script.Globals["CreateVector3"] = DynValue.FromObject(script, new Func<float, float, float, Vector3>(CreateVector3));
+        script.Globals["Send"] = DynValue.FromObject(script, new Action<string[]>(Send));
 
         // pass user
         script.Globals["user"] = DynValue.FromObject(script, user);
 
         // run script
         _ = script.DoString(File.ReadAllText(path));
+
+        // get prefix from lua global variable "prefix"
+        DynValue prefixValue = script.Globals.Get("Prefix");
+        if (prefixValue == null)
+        {
+            Debug.LogError("Prefix not found in script");
+            return;
+        }
+        prefix = (int)prefixValue.Number;
     }
 
     private void RegisterUnityEngineTypes()
@@ -129,5 +148,23 @@ public class Ability
             return;
         }
         _ = script.Call(script.Globals["Stop"]);
+    }
+
+    public void Receive(string[] packet)
+    {
+        var packetString = string.Join("_", packet);
+        Debug.Log("Ability received packet: " + packetString);
+        Table luaTable = new Table(script);
+        for (int i = 0; i < packet.Length; i++)
+        {
+            luaTable[i + 1] = packet[i]; // Lua is 1-based index
+        }
+        object function = script.Globals["Receive"];
+        if (function == null)
+        {
+            Debug.LogError("Receive function not found in script");
+            return;
+        }
+        _ = script.Call(script.Globals["Receive"], luaTable);
     }
 }

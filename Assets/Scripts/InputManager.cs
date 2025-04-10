@@ -1,7 +1,9 @@
 using UnityEngine;
+using System.Linq;
 
 public class InputManager : MonoBehaviour
 {
+    [SerializeField] private MainUdpClient mainUdpClient;
     [SerializeField] private int slotCount;
 
     private AbilitySlot[] slots;
@@ -62,5 +64,33 @@ public class InputManager : MonoBehaviour
                 slots[i].ability.Tick();
             }
         }
+    }
+
+    public void Receive(string[] packet)
+    {
+        int packetType = int.Parse(packet[0]);
+        string[] data = packet.Skip(1).ToArray();
+        for (int i = 0; i < slotCount; i++)
+        {
+            if (slots[i] == null)
+            {
+                continue;
+            }
+
+            if (slots[i].ability.prefix == packetType)
+            {
+                slots[i].ability.Receive(data);
+            }
+        }
+    }
+
+    public void Send(string[] packet)
+    {
+        int packetType = Packet.Server.SCRIPT;
+        int index = mainUdpClient.GetIndex();
+        var packetString = string.Join("\t", packet);
+        string message = packetType + "\t" + index + "\t" + packetString;
+        Debug.Log("Sending packet: " + message);
+        mainUdpClient.Send(message);
     }
 }

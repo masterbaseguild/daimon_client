@@ -1,5 +1,7 @@
 ---@diagnostic disable: undefined-global
 
+Prefix = 3
+
 local tailwindPower = 500
 
 local script = user:GetComponent("MainUser")

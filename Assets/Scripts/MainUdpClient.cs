@@ -16,6 +16,7 @@ public class MainUdpClient : MonoBehaviour
     [SerializeField] private MainHttpClient httpClient;
     [SerializeField] private MainUser user;
     [SerializeField] private People people;
+    [SerializeField] private InputManager inputManager;
 
     [SerializeField] private float lastKeepAlive = 0f;
     [SerializeField] private float keepAliveGracePeriod; // in seconds
@@ -107,7 +108,7 @@ public class MainUdpClient : MonoBehaviour
         return UnityEngine.Random.Range(1000, 9999);
     }
 
-    private void Send(string data)
+    public void Send(string data)
     {
         try
         {
@@ -348,7 +349,8 @@ public class MainUdpClient : MonoBehaviour
                     lastKeepAlive = Time.time;
                     break;
                 case Packet.Client.SCRIPT:
-                    Debug.Log($"Script packet received: {packet.data[0]}");
+                    Debug.Log($"Script packet received on MainUdpClient: {packet.data[0]}");
+                    inputManager.Receive(packet.data);
                     break;
                 // catch-all: unknown packet type
                 default:
@@ -441,6 +443,11 @@ public class MainUdpClient : MonoBehaviour
     {
         Send($"{Packet.Server.DISCONNECT}\t{index}");
         TcpDisconnect();
+    }
+
+    public int GetIndex()
+    {
+        return index;
     }
 }
 

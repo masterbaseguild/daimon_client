@@ -1,5 +1,7 @@
 ---@diagnostic disable: undefined-global
 
+Prefix = 4
+
 local updraftPower = 500
 
 local script = user:GetComponent("MainUser")
