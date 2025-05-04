@@ -17,9 +17,6 @@ public class World : MonoBehaviour
 
     private Region[] regions;
 
-    // list of all the chunk meshes in all regions
-    private readonly ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
-
     public void SetTexture(Texture2D texture)
     {
         material.mainTexture = texture;
@@ -35,6 +32,7 @@ public class World : MonoBehaviour
     public void SetRegions(Region[] regions)
     {
         this.regions = regions;
+        Debug.Log("Set "+regions.Length+" regions");
     }
 
     public Region GetRegion(int regionX, int regionY, int regionZ)
@@ -63,9 +61,12 @@ public class World : MonoBehaviour
 
     public int GetVoxel(int x, int y, int z)
     {
-        int regionX = x / Region.REGION_SIZE;
-        int regionY = y / Region.REGION_SIZE;
-        int regionZ = z / Region.REGION_SIZE;
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
         Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
         if (region == null)
         {
@@ -76,9 +77,12 @@ public class World : MonoBehaviour
 
     public void SetVoxel(int x, int y, int z, int block)
     {
-        int regionX = x / Region.REGION_SIZE;
-        int regionY = y / Region.REGION_SIZE;
-        int regionZ = z / Region.REGION_SIZE;
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
         Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
         if (region == null)
         {
@@ -100,7 +104,16 @@ public class World : MonoBehaviour
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
         int chunkZ = z / Chunk.CHUNK_SIZE;
-        ChunkMesh chunkMesh = chunkMeshes[chunkX + (chunkY * Region.REGION_SIZE) + (chunkZ * Region.REGION_SIZE * Region.REGION_SIZE)];
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return;
+        }
+        ChunkMesh[] chunkMeshes = region.GetChunkMeshes();
+        ChunkMesh chunkMesh = chunkMeshes[chunkX % Region.REGION_SIZE + (chunkY % Region.REGION_SIZE * Region.REGION_SIZE) + (chunkZ % Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE)];
         if (chunkMesh != null)
         {
             int voxelX = x % Chunk.CHUNK_SIZE;
@@ -151,9 +164,18 @@ public class World : MonoBehaviour
     // methods to render the world
     private void DisplayChunk(int chunkX, int chunkY, int chunkZ)
     {
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return;
+        }
+        ChunkMesh[] chunkMeshes = region.GetChunkMeshes();
         Chunk chunk = GetChunk(chunkX, chunkY, chunkZ);
         ChunkMesh chunkMesh = new(0);
-        chunkMeshes[chunkX + (chunkY * Region.REGION_SIZE) + (chunkZ * Region.REGION_SIZE * Region.REGION_SIZE)] = chunkMesh;
+        chunkMeshes[chunkX % Region.REGION_SIZE + (chunkY % Region.REGION_SIZE * Region.REGION_SIZE) + (chunkZ % Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE)] = chunkMesh;
         for (int i = 0; i < Chunk.CHUNK_SIZE; i++)
         {
             for (int j = 0; j < Chunk.CHUNK_SIZE; j++)
@@ -171,17 +193,17 @@ public class World : MonoBehaviour
         chunkMesh.UpdateAllMeshes();
     }
 
-    private bool IsChunkEmpty(int x, int y, int z)
+    private bool IsChunkEmpty(int chunkX, int chunkY, int chunkZ)
     {
-        int regionX = x / Region.REGION_SIZE;
-        int regionY = y / Region.REGION_SIZE;
-        int regionZ = z / Region.REGION_SIZE;
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
         Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
         if (region == null)
         {
             return true;
         }
-        return region.IsChunkEmpty(x, y, z);
+        return region.IsChunkEmpty(chunkX, chunkY, chunkZ);
     }
 
     public void DisplayWorld()
@@ -194,15 +216,23 @@ public class World : MonoBehaviour
         ui.ToggleLoadingText(true);
         List<Vector3Int> chunkPositions = new();
 
-        for (int x = 0; x < Region.REGION_SIZE; x++)
+        foreach (Region region in regions)
         {
-            for (int y = 0; y < Region.REGION_SIZE; y++)
+            for (int x = 0; x < Region.REGION_SIZE; x++)
             {
-                for (int z = 0; z < Region.REGION_SIZE; z++)
+                for (int y = 0; y < Region.REGION_SIZE; y++)
                 {
-                    if (!IsChunkEmpty(x, y, z))
+                    for (int z = 0; z < Region.REGION_SIZE; z++)
                     {
-                        chunkPositions.Add(new Vector3Int(x, y, z));
+                        if (!IsChunkEmpty(x, y, z))
+                        {
+                            Vector3Int regionCoordinates = region.GetCoordinates();
+                            chunkPositions.Add(new Vector3Int(
+                                regionCoordinates.x * Region.REGION_SIZE + x,
+                                regionCoordinates.y * Region.REGION_SIZE + y,
+                                regionCoordinates.z * Region.REGION_SIZE + z
+                            ));
+                        }
                     }
                 }
             }

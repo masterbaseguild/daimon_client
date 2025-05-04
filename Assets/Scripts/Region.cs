@@ -21,6 +21,9 @@ public class Region
 
     private readonly Vector3Int coordinates;
 
+    // list of all the chunk meshes in all regions
+    private readonly ChunkMesh[] chunkMeshes = new ChunkMesh[REGION_SIZE * REGION_SIZE * REGION_SIZE];
+
     public Region()
     {
 
@@ -94,7 +97,7 @@ public class Region
 
     public Chunk GetChunk(int chunkX, int chunkY, int chunkZ)
     {
-        return chunks[chunkX, chunkY, chunkZ];
+        return chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE];
     }
 
     public bool IsChunkEmpty(int x, int y, int z)
@@ -105,22 +108,26 @@ public class Region
 
     public int GetVoxel(int x, int y, int z)
     {
-        int chunkX = x % REGION_SIZE;
-        int chunkY = y % REGION_SIZE;
-        int chunkZ = z % REGION_SIZE;
-        return chunks[chunkX, chunkY, chunkZ].GetVoxel(x, y, z);
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        return chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].GetVoxel(x, y, z);
     }
 
     public void SetVoxel(int x, int y, int z, int block)
     {
-        int chunkX = x % REGION_SIZE;
-        int chunkY = y % REGION_SIZE;
-        int chunkZ = z % REGION_SIZE;
-        chunks[chunkX, chunkY, chunkZ].SetVoxel(x, y, z, block);
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].SetVoxel(x, y, z, block);
     }
 
     public Vector3Int GetCoordinates()
     {
         return coordinates;
+    }
+    public ChunkMesh[] GetChunkMeshes()
+    {
+        return chunkMeshes;
     }
 }
