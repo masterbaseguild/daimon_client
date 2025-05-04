@@ -32,7 +32,6 @@ public class MainUdpClient : MonoBehaviour
     private int index; // user index in the server user list
     private UdpClient client;
     private IPEndPoint remoteIpEndPoint;
-    private bool hasReceivedRegion = false;
     private TcpClient tcpClient;
     private NetworkStream tcpStream;
     private CancellationTokenSource cancellationTokenSource;
@@ -370,22 +369,10 @@ public class MainUdpClient : MonoBehaviour
                 case Packet.Client.CONNECT:
                     print($"Connected via TCP");
                     TcpSend($"{Packet.Server.WORLD}");
-                    // wait 5 seconds, then check if we have received the region data
-                    await Task.Delay(5000);
-                    if (!hasReceivedRegion)
-                    {
-                        print("Failed to receive region data, using fallback local packet...");
-                        // load packet from binary file in documents folder
-                        packet = new Packet($"{Packet.Client.WORLD}" + Convert.ToBase64String(System.IO.File.ReadAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat")));
-                        TcpHandlePacket(packet);
-                    }
                     break;
                 // the server has sent us the region data
                 case Packet.Client.WORLD:
-                    hasReceivedRegion = true;
-                    // save packet to binary file in documents folder
-                    // System.IO.File.WriteAllBytes(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/region.dat", Convert.FromBase64String(packet.data[0]));
-                    world.SetRegion(packet.ParseRegionData());
+                    world.SetRegions(packet.ParseWorldData());
                     List<Task<string>> tasks = new();
                     int count = world.GetRegion().GetHeaderCount();
                     for (int i = 0; i < count; i++)

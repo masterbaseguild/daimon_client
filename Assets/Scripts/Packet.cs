@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using UnityEngine;
+using System.Collections.Generic;
 
 public class Packet
 {
@@ -47,12 +49,17 @@ public class Packet
     }
 
     // the region data is compressed and encoded, so the packet exposes a method to parse it
-    public byte[] ParseRegionData()
+    public Region[] ParseWorldData()
     {
-        string data = this.data[0];
-        byte[] bytes = Convert.FromBase64String(data);
-        byte[] decompressed = ZlibDecompress(bytes);
-        return decompressed;
+        Region[] regions = new Region[data.Length / 4];
+        for (int i = 0; i < data.Length; i+=4)
+        {
+            Vector3Int coordinates = new(int.Parse(data[i]), int.Parse(data[i + 1]), int.Parse(data[i + 2]));
+            byte[] bytes = Convert.FromBase64String(data[i + 3]);
+            byte[] decompressed = ZlibDecompress(bytes);
+            regions[i / 4] = new Region(decompressed, coordinates);
+        }
+        return regions;
     }
 
     private byte[] ZlibDecompress(byte[] data)

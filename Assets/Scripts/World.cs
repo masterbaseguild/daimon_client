@@ -15,6 +15,7 @@ public class World : MonoBehaviour
     public Material nonOpaqueMaterial;
     public PhysicsMaterial physicMaterial;
 
+    private Region[] regions;
     private Region region; // the single region
 
     // list of all the chunk meshes in all regions
@@ -32,9 +33,24 @@ public class World : MonoBehaviour
         blockPalette = new BlockPalette(results);
     }
 
-    public void SetRegion(byte[] regionData)
+    public void SetRegions(Region[] regions)
     {
-        region = new Region(regionData);
+        this.regions = regions;
+        Vector3Int mainRegionCoordinates = new Vector3Int(0, 0, 0);
+        for (int i = 0; i < regions.Length; i++)
+        {
+            Region region = regions[i];
+            if (region.GetCoordinates() == mainRegionCoordinates)
+            {
+                this.region = region;
+                break;
+            }
+        }
+    }
+
+    public void SetRegion(Region region)
+    {
+        this.region = region;
     }
 
     public Region GetRegion()

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System;
+using UnityEngine;
 
 // a region is a 16x16x16 grid of chunks
 
@@ -18,6 +19,8 @@ public class Region
     private static readonly int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
     private readonly List<string> Header = new();
 
+    private readonly Vector3Int coordinates;
+
     public Region()
     {
 
@@ -33,8 +36,9 @@ public class Region
         }
     }
 
-    public Region(byte[] data)
+    public Region(byte[] data, Vector3Int coordinates)
     {
+        this.coordinates = coordinates;
         // split header and content
         byte[] headerBuffer = new byte[HEADER_SIZE];
         byte[] contentBuffer = new byte[data.Length - HEADER_SIZE];
@@ -113,5 +117,10 @@ public class Region
         int chunkY = y % REGION_SIZE;
         int chunkZ = z % REGION_SIZE;
         chunks[chunkX, chunkY, chunkZ].SetVoxel(x, y, z, block);
+    }
+
+    public Vector3Int GetCoordinates()
+    {
+        return coordinates;
     }
 }
