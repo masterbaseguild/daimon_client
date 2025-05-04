@@ -21,7 +21,10 @@ public class Chunk
 
     public int GetVoxel(int x, int y, int z)
     {
-        return voxels[x, y, z];
+        int voxelX = x % CHUNK_SIZE;
+        int voxelY = y % CHUNK_SIZE;
+        int voxelZ = z % CHUNK_SIZE;
+        return voxels[voxelX, voxelY, voxelZ];
     }
 
     public void SetVoxel(int x, int y, int z, int block)
@@ -30,5 +33,23 @@ public class Chunk
         int voxelY = y % CHUNK_SIZE;
         int voxelZ = z % CHUNK_SIZE;
         voxels[voxelX, voxelY, voxelZ] = block;
+    }
+
+    public bool IsEmpty()
+    {
+        for (int x = 0; x < CHUNK_SIZE; x++)
+        {
+            for (int y = 0; y < CHUNK_SIZE; y++)
+            {
+                for (int z = 0; z < CHUNK_SIZE; z++)
+                {
+                    if (voxels[x, y, z] != 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

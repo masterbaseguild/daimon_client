@@ -43,9 +43,9 @@ public class World : MonoBehaviour
     }
 
     // methods to get neighbour voxel data
-    public Vector3 GetChunkCoords(Vector3 position)
+    public Chunk GetChunk(int chunkX, int chunkY, int chunkZ)
     {
-        return region.GetChunkCoords(position);
+        return region.GetChunk(chunkX, chunkY, chunkZ);
     }
 
     public int GetVoxel(int x, int y, int z)
@@ -120,11 +120,11 @@ public class World : MonoBehaviour
     }
 
     // methods to render the world
-    private void DisplayChunk(int x, int y, int z)
+    private void DisplayChunk(int chunkX, int chunkY, int chunkZ)
     {
-        Chunk chunk = region.GetChunk(x, y, z);
+        Chunk chunk = GetChunk(chunkX, chunkY, chunkZ);
         ChunkMesh chunkMesh = new(0);
-        chunkMeshes[x + (y * Region.REGION_SIZE) + (z * Region.REGION_SIZE * Region.REGION_SIZE)] = chunkMesh;
+        chunkMeshes[chunkX + (chunkY * Region.REGION_SIZE) + (chunkZ * Region.REGION_SIZE * Region.REGION_SIZE)] = chunkMesh;
         for (int i = 0; i < Chunk.CHUNK_SIZE; i++)
         {
             for (int j = 0; j < Chunk.CHUNK_SIZE; j++)
@@ -134,7 +134,7 @@ public class World : MonoBehaviour
                     int voxel = chunk.GetVoxel(i, j, k);
                     if (voxel != 0)
                     {
-                        chunkMesh.AddBlockToMesh(i + (x * Chunk.CHUNK_SIZE), j + (y * Chunk.CHUNK_SIZE), k + (z * Chunk.CHUNK_SIZE), voxel, blockPalette, true);
+                        chunkMesh.AddBlockToMesh(i + (chunkX * Chunk.CHUNK_SIZE), j + (chunkY * Chunk.CHUNK_SIZE), k + (chunkZ * Chunk.CHUNK_SIZE), voxel, blockPalette, true);
                     }
                 }
             }
@@ -142,9 +142,9 @@ public class World : MonoBehaviour
         chunkMesh.UpdateAllMeshes();
     }
 
-    private bool IsChunkEmpty(Chunk chunk)
+    private bool IsChunkEmpty(int x, int y, int z)
     {
-        return region.IsChunkEmpty(chunk);
+        return region.IsChunkEmpty(x, y, z);
     }
 
     public void DisplayWorld()
@@ -155,7 +155,7 @@ public class World : MonoBehaviour
     private IEnumerator<string> DisplayWorldCoroutine()
     {
         ui.ToggleLoadingText(true);
-        List<Vector3> chunkPositions = new();
+        List<Vector3Int> chunkPositions = new();
 
         for (int x = 0; x < Region.REGION_SIZE; x++)
         {
@@ -163,18 +163,18 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z < Region.REGION_SIZE; z++)
                 {
-                    if (!IsChunkEmpty(region.GetChunk(x, y, z)))
+                    if (!IsChunkEmpty(x, y, z))
                     {
-                        chunkPositions.Add(new Vector3(x, y, z));
+                        chunkPositions.Add(new Vector3Int(x, y, z));
                     }
                 }
             }
         }
 
         int displayedChunks = 0;
-        foreach (Vector3 chunkPos in chunkPositions)
+        foreach (Vector3Int chunkPos in chunkPositions)
         {
-            DisplayChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+            DisplayChunk(chunkPos.x, chunkPos.y, chunkPos.z);
             displayedChunks++;
             var displayPercentage = Mathf.RoundToInt((float)displayedChunks / chunkPositions.Count * 100);
             string loadingText = "Loading world: " + displayPercentage + "%";

@@ -1,4 +1,3 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System;
 
@@ -89,56 +88,30 @@ public class Region
         return Header.Count;
     }
 
-    public Chunk GetChunk(int x, int y, int z)
+    public Chunk GetChunk(int chunkX, int chunkY, int chunkZ)
     {
-        return chunks[x, y, z];
+        return chunks[chunkX, chunkY, chunkZ];
     }
 
-    public Vector3 GetChunkCoords(Vector3 position)
+    public bool IsChunkEmpty(int x, int y, int z)
     {
-        int x = (int)Math.Floor(position.x / Chunk.CHUNK_SIZE);
-        int y = (int)Math.Floor(position.y / Chunk.CHUNK_SIZE);
-        int z = (int)Math.Floor(position.z / Chunk.CHUNK_SIZE);
-        return new Vector3(x, y, z);
-    }
-
-    public bool IsChunkEmpty(Chunk chunk)
-    {
-        for (int x = 0; x < Chunk.CHUNK_SIZE; x++)
-        {
-            for (int y = 0; y < Chunk.CHUNK_SIZE; y++)
-            {
-                for (int z = 0; z < Chunk.CHUNK_SIZE; z++)
-                {
-                    if (chunk.GetVoxel(x, y, z) != 0)
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
+        Chunk chunk = chunks[x, y, z];
+        return chunk.IsEmpty();
     }
 
     public int GetVoxel(int x, int y, int z)
     {
-        int chunkX = x / Chunk.CHUNK_SIZE;
-        int chunkY = y / Chunk.CHUNK_SIZE;
-        int chunkZ = z / Chunk.CHUNK_SIZE;
-        int voxelX = x % Chunk.CHUNK_SIZE;
-        int voxelY = y % Chunk.CHUNK_SIZE;
-        int voxelZ = z % Chunk.CHUNK_SIZE;
-        return chunks[chunkX, chunkY, chunkZ].GetVoxel(voxelX, voxelY, voxelZ);
+        int chunkX = x % REGION_SIZE;
+        int chunkY = y % REGION_SIZE;
+        int chunkZ = z % REGION_SIZE;
+        return chunks[chunkX, chunkY, chunkZ].GetVoxel(x, y, z);
     }
 
     public void SetVoxel(int x, int y, int z, int block)
     {
-        int chunkX = x / Chunk.CHUNK_SIZE;
-        int chunkY = y / Chunk.CHUNK_SIZE;
-        int chunkZ = z / Chunk.CHUNK_SIZE;
-        int voxelX = x % Chunk.CHUNK_SIZE;
-        int voxelY = y % Chunk.CHUNK_SIZE;
-        int voxelZ = z % Chunk.CHUNK_SIZE;
-        chunks[chunkX, chunkY, chunkZ].SetVoxel(voxelX, voxelY, voxelZ, block);
+        int chunkX = x % REGION_SIZE;
+        int chunkY = y % REGION_SIZE;
+        int chunkZ = z % REGION_SIZE;
+        chunks[chunkX, chunkY, chunkZ].SetVoxel(x, y, z, block);
     }
 }
