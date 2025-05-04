@@ -374,10 +374,10 @@ public class MainUdpClient : MonoBehaviour
                 case Packet.Client.WORLD:
                     world.SetRegions(packet.ParseWorldData());
                     List<Task<string>> tasks = new();
-                    int count = world.GetRegion().GetHeaderCount();
+                    int count = world.GetRegion(0, 0, 0).GetHeaderCount();
                     for (int i = 0; i < count; i++)
                     {
-                        tasks.Add(httpClient.GetResource("item", world.GetRegion().GetHeaderLine(i)));
+                        tasks.Add(httpClient.GetResource("item", world.GetRegion(0, 0, 0).GetHeaderLine(i)));
                     }
                     string[] results = await Task.WhenAll(tasks);
                     world.SetBlockPalette(results);

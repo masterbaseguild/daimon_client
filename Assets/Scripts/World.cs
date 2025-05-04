@@ -16,7 +16,6 @@ public class World : MonoBehaviour
     public PhysicsMaterial physicMaterial;
 
     private Region[] regions;
-    private Region region; // the single region
 
     // list of all the chunk meshes in all regions
     private readonly ChunkMesh[] chunkMeshes = new ChunkMesh[Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE];
@@ -36,41 +35,55 @@ public class World : MonoBehaviour
     public void SetRegions(Region[] regions)
     {
         this.regions = regions;
-        Vector3Int mainRegionCoordinates = new Vector3Int(0, 0, 0);
-        for (int i = 0; i < regions.Length; i++)
+    }
+
+    public Region GetRegion(int regionX, int regionY, int regionZ)
+    {
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
         {
-            Region region = regions[i];
-            if (region.GetCoordinates() == mainRegionCoordinates)
-            {
-                this.region = region;
-                break;
-            }
+            return null;
         }
-    }
-
-    public void SetRegion(Region region)
-    {
-        this.region = region;
-    }
-
-    public Region GetRegion()
-    {
         return region;
     }
 
     // methods to get neighbour voxel data
     public Chunk GetChunk(int chunkX, int chunkY, int chunkZ)
     {
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return null;
+        }
         return region.GetChunk(chunkX, chunkY, chunkZ);
     }
 
     public int GetVoxel(int x, int y, int z)
     {
+        int regionX = x / Region.REGION_SIZE;
+        int regionY = y / Region.REGION_SIZE;
+        int regionZ = z / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return 0;
+        }
         return region.GetVoxel(x, y, z);
     }
 
     public void SetVoxel(int x, int y, int z, int block)
     {
+        int regionX = x / Region.REGION_SIZE;
+        int regionY = y / Region.REGION_SIZE;
+        int regionZ = z / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return;
+        }
         region.SetVoxel(x, y, z, block);
         UpdateVoxel(x, y, z, block, false);
         // update the neighbouring voxels
@@ -160,6 +173,14 @@ public class World : MonoBehaviour
 
     private bool IsChunkEmpty(int x, int y, int z)
     {
+        int regionX = x / Region.REGION_SIZE;
+        int regionY = y / Region.REGION_SIZE;
+        int regionZ = z / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return true;
+        }
         return region.IsChunkEmpty(x, y, z);
     }
 
@@ -201,5 +222,17 @@ public class World : MonoBehaviour
         ui.ToggleLoadingText(false);
         ui.ToggleBackground(false);
         player.SetActive(true);
+    }
+
+    private Region FindRegion(Vector3Int coordinates)
+    {
+        foreach (Region region in regions)
+        {
+            if (region.GetCoordinates() == coordinates)
+            {
+                return region;
+            }
+        }
+        return null;
     }
 }
