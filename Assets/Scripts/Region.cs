@@ -14,9 +14,8 @@ public class Region
     private readonly Chunk[,,] chunks = new Chunk[REGION_SIZE, REGION_SIZE, REGION_SIZE];
 
     // header data
+    private static readonly int HEADER_SIZE_BUFFER_SIZE = 4; // in bytes
     private static readonly int HEADER_BLOCK_SIZE = 6;
-    private static readonly int HEADER_BLOCK_COUNT = 256;
-    private static readonly int HEADER_SIZE = HEADER_BLOCK_SIZE * HEADER_BLOCK_COUNT;
     private readonly List<string> Header = new();
 
     private readonly Vector3Int coordinates;
@@ -42,14 +41,33 @@ public class Region
     public Region(byte[] data, Vector3Int coordinates)
     {
         this.coordinates = coordinates;
+
         // split header and content
-        byte[] headerBuffer = new byte[HEADER_SIZE];
-        byte[] contentBuffer = new byte[data.Length - HEADER_SIZE];
-        Array.Copy(data, headerBuffer, headerBuffer.Length);
-        Array.Copy(data, HEADER_SIZE, contentBuffer, 0, contentBuffer.Length);
+        byte[] headerSizeBuffer = new byte[HEADER_SIZE_BUFFER_SIZE];
+        Array.Copy(data, headerSizeBuffer, HEADER_SIZE_BUFFER_SIZE);
+        int headerSize = BitConverter.ToInt32(headerSizeBuffer, 0);
+
+        int byteWidth;
+        if (headerSize <= 0xFF)
+        {
+            byteWidth = 1;
+        }
+        else if (headerSize <= 0xFFFF)
+        {
+            byteWidth = 2;
+        }
+        else
+        {
+            byteWidth = 4;
+        }
+
+        byte[] headerBuffer = new byte[headerSize * HEADER_BLOCK_SIZE];
+        byte[] contentBuffer = new byte[data.Length - headerSize * HEADER_BLOCK_SIZE - HEADER_SIZE_BUFFER_SIZE];
+        Array.Copy(data, HEADER_SIZE_BUFFER_SIZE, headerBuffer, 0, headerSize * HEADER_BLOCK_SIZE);
+        Array.Copy(data, HEADER_SIZE_BUFFER_SIZE + headerSize * HEADER_BLOCK_SIZE, contentBuffer, 0, contentBuffer.Length);
 
         // parse header
-        for (int i = 0; i < HEADER_BLOCK_COUNT; i++)
+        for (int i = 0; i < headerSize; i++)
         {
             string headerLine = BitConverter.ToString(headerBuffer, i * HEADER_BLOCK_SIZE, HEADER_BLOCK_SIZE).Replace("-", "").ToLower();
             if (headerLine == "000000000000" && i != 0)
@@ -75,8 +93,17 @@ public class Region
                         {
                             for (int voxelZ = 0; voxelZ < Chunk.CHUNK_SIZE; voxelZ++)
                             {
-                                byte voxelData = contentBuffer[index++];
-                                chunk.SetVoxel(voxelX, voxelY, voxelZ, voxelData);
+                                byte[] voxelData = new byte[byteWidth];
+                                Array.Copy(contentBuffer, index * byteWidth, voxelData, 0, byteWidth);
+                                int voxelValue = byteWidth switch
+                                {
+                                    1 => voxelData[0],
+                                    2 => BitConverter.ToInt16(voxelData, 0),
+                                    4 => BitConverter.ToInt32(voxelData, 0),
+                                    _ => throw new InvalidOperationException($"Unsupported byteWidth: {byteWidth}")
+                                };
+                                chunk.SetVoxel(voxelX, voxelY, voxelZ, voxelValue);
+                                index++;
                             }
                         }
                     }
