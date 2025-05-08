@@ -354,6 +354,12 @@ public class MainUser : MonoBehaviour
             voxel = 3;
         }
 
+        // if user presses 4, set voxel to 4
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            voxel = 4;
+        }
+
     }
 
     private void HandlePhase()
