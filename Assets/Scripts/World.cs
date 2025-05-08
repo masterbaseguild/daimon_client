@@ -8,7 +8,6 @@ public class World : MonoBehaviour
 {
     [SerializeField] private UI ui;
     [SerializeField] private GameObject player;
-    private BlockPalette blockPalette;
 
     // all materials are handled and exposed by the world class
     public Material material;
@@ -17,16 +16,12 @@ public class World : MonoBehaviour
 
     private Region[] regions;
 
+    private string[] blockList;
+
     public void SetTexture(Texture2D texture)
     {
         material.mainTexture = texture;
         nonOpaqueMaterial.mainTexture = texture;
-    }
-
-    // set block palette and region
-    public void SetBlockPalette(string[] results)
-    {
-        blockPalette = new BlockPalette(results);
     }
 
     public void SetRegions(Region[] regions)
@@ -43,6 +38,11 @@ public class World : MonoBehaviour
             return null;
         }
         return region;
+    }
+
+    public Region[] GetRegions()
+    {
+        return regions;
     }
 
     // methods to get neighbour voxel data
@@ -77,6 +77,11 @@ public class World : MonoBehaviour
 
     public void SetVoxel(int x, int y, int z, int block)
     {
+        string blockId = blockList[block];
+        if (blockId == null)
+        {
+            return;
+        }
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
         int chunkZ = z / Chunk.CHUNK_SIZE;
@@ -88,7 +93,7 @@ public class World : MonoBehaviour
         {
             return;
         }
-        region.SetVoxel(x, y, z, block);
+        region.SetVoxel(x, y, z, blockId);
         UpdateVoxel(x, y, z, block, false);
         // update the neighbouring voxels
         UpdateVoxel(x+1, y, z, block, true);
@@ -124,17 +129,17 @@ public class World : MonoBehaviour
             {
                 if (oldBlock != null)
                 {
-                    chunkMesh.RemoveBlockFromMesh(x, y, z, oldBlock.voxel, blockPalette);
+                    chunkMesh.RemoveBlockFromMesh(x, y, z, oldBlock.voxel, region.GetBlockPalette());
                 }
-                chunkMesh.AddBlockToMesh(x, y, z, block, blockPalette, false);
+                chunkMesh.AddBlockToMesh(x, y, z, block, region.GetBlockPalette(), false);
             }
             else
             {
                 if (oldBlock != null)
                 {
                     int voxel = oldBlock.voxel;
-                    chunkMesh.RemoveBlockFromMesh(x, y, z, voxel, blockPalette);
-                    chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette, false);
+                    chunkMesh.RemoveBlockFromMesh(x, y, z, voxel, region.GetBlockPalette());
+                    chunkMesh.AddBlockToMesh(x, y, z, voxel, region.GetBlockPalette(), false);
                 }
             }
         }
@@ -185,7 +190,7 @@ public class World : MonoBehaviour
                     int voxel = chunk.GetVoxel(i, j, k);
                     if (voxel != 0)
                     {
-                        chunkMesh.AddBlockToMesh(i + (chunkX * Chunk.CHUNK_SIZE), j + (chunkY * Chunk.CHUNK_SIZE), k + (chunkZ * Chunk.CHUNK_SIZE), voxel, blockPalette, true);
+                        chunkMesh.AddBlockToMesh(i + (chunkX * Chunk.CHUNK_SIZE), j + (chunkY * Chunk.CHUNK_SIZE), k + (chunkZ * Chunk.CHUNK_SIZE), voxel, region.GetBlockPalette(), true);
                     }
                 }
             }
@@ -264,5 +269,10 @@ public class World : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public void SetBlockList(string[] blockList)
+    {
+        this.blockList = blockList;
     }
 }

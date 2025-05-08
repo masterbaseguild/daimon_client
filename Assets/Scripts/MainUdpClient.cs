@@ -368,19 +368,26 @@ public class MainUdpClient : MonoBehaviour
                 // the server has confirmed our connection
                 case Packet.Client.CONNECT:
                     print($"Connected via TCP");
+                    string[] blockList = packet.data;
+                    Debug.Log($"Block list: {string.Join(", ", blockList)}");
+                    world.SetBlockList(blockList);
                     TcpSend($"{Packet.Server.WORLD}");
                     break;
                 // the server has sent us the region data
                 case Packet.Client.WORLD:
                     world.SetRegions(packet.ParseWorldData());
-                    List<Task<string>> tasks = new();
-                    int count = world.GetRegion(0, 0, 0).GetHeaderCount();
-                    for (int i = 0; i < count; i++)
+                    Region[] regions = world.GetRegions();
+                    foreach (Region region in regions)
                     {
-                        tasks.Add(httpClient.GetResource("item", world.GetRegion(0, 0, 0).GetHeaderLine(i)));
+                        List<Task<string>> tasks = new();
+                        int count = region.GetHeaderCount();
+                        for (int i = 0; i < count; i++)
+                        {
+                            tasks.Add(httpClient.GetResource("item", world.GetRegion(0, 0, 0).GetHeaderLine(i)));
+                        }
+                        string[] results = await Task.WhenAll(tasks);
+                        region.SetBlockPalette(results);
                     }
-                    string[] results = await Task.WhenAll(tasks);
-                    world.SetBlockPalette(results);
                     world.DisplayWorld();
                     break;
                 case Packet.Client.SETBLOCK:

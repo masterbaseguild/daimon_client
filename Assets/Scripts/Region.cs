@@ -22,6 +22,18 @@ public class Region
 
     // list of all the chunk meshes in all regions
     private readonly ChunkMesh[] chunkMeshes = new ChunkMesh[REGION_SIZE * REGION_SIZE * REGION_SIZE];
+    private BlockPalette blockPalette;
+
+    // set block palette and region
+    public void SetBlockPalette(string[] results)
+    {
+        blockPalette = new BlockPalette(results);
+    }
+
+    public BlockPalette GetBlockPalette()
+    {
+        return blockPalette;
+    }
 
     public Region()
     {
@@ -141,12 +153,19 @@ public class Region
         return chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].GetVoxel(x, y, z);
     }
 
-    public void SetVoxel(int x, int y, int z, int block)
+    public void SetVoxel(int x, int y, int z, string block)
     {
+        int blockIdIndex = Header.IndexOf(block);
+        if (blockIdIndex == -1)
+        {
+            // add blockId to header
+            blockIdIndex = Header.Count;
+            Header.Add(block);
+        }
         int chunkX = x / Chunk.CHUNK_SIZE;
         int chunkY = y / Chunk.CHUNK_SIZE;
         int chunkZ = z / Chunk.CHUNK_SIZE;
-        chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].SetVoxel(x, y, z, block);
+        chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].SetVoxel(x, y, z, blockIdIndex);
     }
 
     public Vector3Int GetCoordinates()
