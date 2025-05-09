@@ -67,7 +67,7 @@ public class MainUdpClient : MonoBehaviour
         // if the last keep alive packet was received more than x seconds ago, disconnect
         if (isEnabled && Time.time - lastKeepAlive > keepAliveGracePeriod)
         {
-            print("Server timeout, disconnecting...");
+            Debug.Log("Server timeout, disconnecting...");
             Send($"{Packet.Server.DISCONNECT}\t{index}");
             TcpDisconnect();
             Application.Quit();
@@ -116,7 +116,7 @@ public class MainUdpClient : MonoBehaviour
         }
         catch (Exception e)
         {
-            print(e.ToString());
+            Debug.Log(e.ToString());
         }
     }
 
@@ -129,7 +129,7 @@ public class MainUdpClient : MonoBehaviour
         }
         catch (Exception e)
         {
-            print(e.ToString());
+            Debug.Log(e.ToString());
         }
     }
 
@@ -145,7 +145,7 @@ public class MainUdpClient : MonoBehaviour
         }
         catch (Exception e)
         {
-            print(e.ToString());
+            Debug.Log(e.ToString());
         }
         Send($"{Packet.Server.CONNECT}\t0\t{username}");
         isEnabled = true;
@@ -159,7 +159,7 @@ public class MainUdpClient : MonoBehaviour
             tcpClient = new TcpClient();
             await tcpClient.ConnectAsync(serverAddress, serverPort);
             tcpStream = tcpClient.GetStream();
-            Debug.Log("Connected to server via TCP");
+            Debug.Log("Connected via TCP");
             // send the connect packet to the server
             TcpSend($"{Packet.Server.CONNECT}\t{index}");
             // start listening for packets from the server
@@ -167,7 +167,7 @@ public class MainUdpClient : MonoBehaviour
         }
         catch (Exception e)
         {
-            print(e.ToString());
+            Debug.Log(e.ToString());
         }
     }
 
@@ -178,11 +178,11 @@ public class MainUdpClient : MonoBehaviour
             tcpStream.Close();
             tcpClient.Close();
             cancellationTokenSource.Cancel();
-            Debug.Log("Disconnected from server via TCP");
+            Debug.Log("Disconnected via TCP");
         }
         catch (Exception e)
         {
-            print(e.ToString());
+            Debug.Log(e.ToString());
         }
     }
 
@@ -226,7 +226,7 @@ public class MainUdpClient : MonoBehaviour
         {
             if (!token.IsCancellationRequested)
             {
-                print(e.ToString());
+                Debug.Log(e.ToString());
             }
         }
     }
@@ -245,7 +245,7 @@ public class MainUdpClient : MonoBehaviour
         }
         catch (Exception e)
         {
-            print(e.ToString());
+            Debug.Log(e.ToString());
             return;
         }
     }
@@ -302,7 +302,7 @@ public class MainUdpClient : MonoBehaviour
                     break;
                 // the server has confirmed our connection
                 case Packet.Client.CONNECT:
-                    print($"Connected with index: {packet.data[0]}");
+                    Debug.Log("Connected via UDP");
                     index = int.Parse(packet.data[0]);
                     await TcpConnect(index);
                     for (int i = 1; i < packet.data.Length; i += 2)
@@ -319,7 +319,7 @@ public class MainUdpClient : MonoBehaviour
                     break;
                 // the server has forced us to disconnect
                 case Packet.Client.DISCONNECT:
-                    print($"Disconnected from server");
+                    Debug.Log("Disconnected via UDP");
                     TcpDisconnect();
                     Application.Quit();
                     break;
@@ -353,7 +353,7 @@ public class MainUdpClient : MonoBehaviour
                     break;
                 // catch-all: unknown packet type
                 default:
-                    print($"Unknown packet type: {packet.type}");
+                    Debug.Log($"Unknown packet type: {packet.type}");
                     break;
             }
         });
@@ -367,9 +367,7 @@ public class MainUdpClient : MonoBehaviour
             {
                 // the server has confirmed our connection
                 case Packet.Client.CONNECT:
-                    print($"Connected via TCP");
                     string[] blockList = packet.data;
-                    Debug.Log($"Block list: {string.Join(", ", blockList)}");
                     world.SetBlockList(blockList);
                     TcpSend($"{Packet.Server.WORLD}");
                     break;
@@ -393,9 +391,16 @@ public class MainUdpClient : MonoBehaviour
                     int blockIndex = int.Parse(packet.data[3]);
                     world.SetVoxel(x, y, z, blockIndex);
                     break;
+                case Packet.Client.SETMINIBLOCK:
+                    int minix = int.Parse(packet.data[0]);
+                    int miniy = int.Parse(packet.data[1]);
+                    int miniz = int.Parse(packet.data[2]);
+                    int miniBlockIndex = int.Parse(packet.data[3]);
+                    world.SetMiniVoxel(minix, miniy, miniz, miniBlockIndex);
+                    break;
                 // catch-all: unknown packet type
                 default:
-                    print($"Unknown packet type: {packet.type}");
+                    Debug.Log($"Unknown packet type: {packet.type}");
                     break;
             }
         });
@@ -408,13 +413,13 @@ public class MainUdpClient : MonoBehaviour
 
     private void PrintChatMessage(string message)
     {
-        print(message);
+        Debug.Log(message);
     }
 
     // debug function to current log game state
     public void LogGameState()
     {
-        print("Logging game state...");
+        Debug.Log("Logging game state...");
         string log = "";
         log += $"index: {index}\n";
         log += $"username: {username}\n";
@@ -425,7 +430,7 @@ public class MainUdpClient : MonoBehaviour
             log += $"\t{user.GetComponent<User>().index} {user.GetComponent<User>().username}\n";
         }
         log += $"position: {user.GetPosition()}\n";
-        print(log);
+        Debug.Log(log);
     }
 
     // disconnect on application quit

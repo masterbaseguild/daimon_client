@@ -141,6 +141,14 @@ public class Region
         return chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].GetVoxel(x, y, z);
     }
 
+    public int GetMiniVoxel(int x, int y, int z)
+    {
+        int chunkX = x / (Chunk.CHUNK_SIZE*2);
+        int chunkY = y / (Chunk.CHUNK_SIZE*2);
+        int chunkZ = z / (Chunk.CHUNK_SIZE*2);
+        return chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].GetMiniVoxel(x, y, z);
+    }
+
     public void SetVoxel(int x, int y, int z, string block)
     {
         int blockIdIndex = Header.IndexOf(block);
@@ -154,6 +162,21 @@ public class Region
         int chunkY = y / Chunk.CHUNK_SIZE;
         int chunkZ = z / Chunk.CHUNK_SIZE;
         chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].SetVoxel(x, y, z, blockIdIndex);
+    }
+
+    public void SetMiniVoxel(int x, int y, int z, string block)
+    {
+        int blockIdIndex = Header.IndexOf(block);
+        if (blockIdIndex == -1)
+        {
+            // add blockId to header
+            blockIdIndex = Header.Count;
+            Header.Add(block);
+        }
+        int chunkX = x / (Chunk.CHUNK_SIZE*2);
+        int chunkY = y / (Chunk.CHUNK_SIZE*2);
+        int chunkZ = z / (Chunk.CHUNK_SIZE*2);
+        chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].SetMiniVoxel(x, y, z, blockIdIndex);
     }
 
     public Vector3Int GetCoordinates()

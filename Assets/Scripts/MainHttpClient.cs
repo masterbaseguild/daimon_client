@@ -36,22 +36,21 @@ public class MainHttpClient : MonoBehaviour
         {
             _ = Ping().ContinueWith(task =>
             {
-                print("Attempting to connect to API...");
                 if (task.Result)
                 {
-                    print("Connected to API!");
+                    Debug.Log("Connected via HTTPS");
                     udpClient.Connect();
                 }
                 else
                 {
-                    print("Failed to connect to API!");
+                    Debug.Log("Failed to connect to API");
                     Application.Quit();
                 }
             });
         }
         catch (Exception e)
         {
-            print(e.ToString());
+            Debug.Log(e.ToString());
         }
     }
 }

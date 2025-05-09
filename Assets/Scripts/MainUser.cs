@@ -47,6 +47,7 @@ public class MainUser : MonoBehaviour
     private bool pressedFirstTimeW = false;
     private float lastPressedTimeW;
     private int voxel = 1;
+    private bool isFullVoxel = false;
 
     private float xRotation;
     private float yRotation;
@@ -59,7 +60,6 @@ public class MainUser : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        Debug.Log(spawnPoint);
         rigidBody.MovePosition(spawnPoint);
     }
 
@@ -290,23 +290,39 @@ public class MainUser : MonoBehaviour
 
     }
 
-    // NOTE: not implemented for now
     private void BreakBlock()
     {
+        Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
-            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point - (hit.normal / 2));
-            udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t0");
+            if(isFullVoxel)
+            {
+                Vector3Int placedBlockPos = Vector3Int.FloorToInt(hit.point - (hit.normal * 0.5f) + offset);
+                udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t0");
+            }
+            else
+            {
+                Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point - (hit.normal * 0.25f) + offset)*2);
+                udpClient.TcpSend($"{Packet.Server.SETMINIBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t0");
+            }
         }
     }
 
-    // NOTE: not implemented for now
     private void PlaceBlock()
     {
+        Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f);
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
-            Vector3Int placedBlockPos = Vector3Int.RoundToInt(hit.point + (hit.normal / 2));
-            udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t{voxel}");
+            if(isFullVoxel)
+            {
+                Vector3Int placedBlockPos = Vector3Int.FloorToInt(hit.point + (hit.normal * 0.5f) + offset);
+                udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t{voxel}");
+            }
+            else
+            {
+                Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point + (hit.normal * 0.25f) + offset)*2);
+                udpClient.TcpSend($"{Packet.Server.SETMINIBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t{voxel}");
+            }
         }
     }
 
@@ -360,6 +376,19 @@ public class MainUser : MonoBehaviour
             voxel = 4;
         }
 
+        // if user presses 5, toggle isFullVoxel
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            isFullVoxel = !isFullVoxel;
+            if(isFullVoxel)
+            {
+                Debug.Log("Now placing full blocks");
+            }
+            else
+            {
+                Debug.Log("Now placing mini blocks");
+            }
+        }
     }
 
     private void HandlePhase()

@@ -33,7 +33,6 @@ public class World : MonoBehaviour
     public void SetRegions(Region[] regions)
     {
         this.regions = regions;
-        Debug.Log("Set "+regions.Length+" regions");
     }
 
     public Region GetRegion(int regionX, int regionY, int regionZ)
@@ -81,6 +80,22 @@ public class World : MonoBehaviour
         return region.GetVoxel(x, y, z);
     }
 
+    public int GetMiniVoxel(int x, int y, int z)
+    {
+        int chunkX = x / (Chunk.CHUNK_SIZE*2);
+        int chunkY = y / (Chunk.CHUNK_SIZE*2);
+        int chunkZ = z / (Chunk.CHUNK_SIZE*2);
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return 0;
+        }
+        return region.GetMiniVoxel(x, y, z);
+    }
+
     public void SetVoxel(int x, int y, int z, int block)
     {
         string blockId = blockList[block];
@@ -108,6 +123,35 @@ public class World : MonoBehaviour
         UpdateVoxel(x, y-1, z, block, true);
         UpdateVoxel(x, y, z+1, block, true);
         UpdateVoxel(x, y, z-1, block, true);
+    }
+
+    public void SetMiniVoxel(int x, int y, int z, int block)
+    {
+        string blockId = blockList[block];
+        if (blockId == null)
+        {
+            return;
+        }
+        int chunkX = x / (Chunk.CHUNK_SIZE*2);
+        int chunkY = y / (Chunk.CHUNK_SIZE*2);
+        int chunkZ = z / (Chunk.CHUNK_SIZE*2);
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return;
+        }
+        region.SetMiniVoxel(x, y, z, blockId);
+        UpdateMiniVoxel(x, y, z, block, false);
+        // update the neighbouring voxels
+        //UpdateMiniVoxel(x+1, y, z, block, true);
+        //UpdateMiniVoxel(x-1, y, z, block, true);
+        //UpdateMiniVoxel(x, y+1, z, block, true);
+        //UpdateMiniVoxel(x, y-1, z, block, true);
+        //UpdateMiniVoxel(x, y, z+1, block, true);
+        //UpdateMiniVoxel(x, y, z-1, block, true);
     }
 
     private void UpdateVoxel(int x, int y, int z, int block, bool isNeighbour)
@@ -146,6 +190,47 @@ public class World : MonoBehaviour
                     int voxel = oldBlock.voxel;
                     chunkMesh.RemoveBlockFromMesh(x, y, z, voxel, blockPalette);
                     chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette, false);
+                }
+            }
+        }
+    }
+
+    private void UpdateMiniVoxel(int x, int y, int z, int block, bool isNeighbour)
+    {
+        int chunkX = x / (Chunk.CHUNK_SIZE*2);
+        int chunkY = y / (Chunk.CHUNK_SIZE*2);
+        int chunkZ = z / (Chunk.CHUNK_SIZE*2);
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return;
+        }
+        ChunkMesh[] chunkMeshes = region.GetChunkMeshes();
+        ChunkMesh chunkMesh = chunkMeshes[chunkX % Region.REGION_SIZE + (chunkY % Region.REGION_SIZE * Region.REGION_SIZE) + (chunkZ % Region.REGION_SIZE * Region.REGION_SIZE * Region.REGION_SIZE)];
+        if (chunkMesh != null)
+        {
+            int voxelX = x % (Chunk.CHUNK_SIZE*2);
+            int voxelY = y % (Chunk.CHUNK_SIZE*2);
+            int voxelZ = z % (Chunk.CHUNK_SIZE*2);
+            MiniBlockMesh oldBlock = chunkMesh.GetMiniBlockMesh(voxelX, voxelY, voxelZ);
+            if (!isNeighbour)
+            {
+                if (oldBlock != null)
+                {
+                    chunkMesh.RemoveMiniBlockFromMesh(x, y, z, oldBlock.voxel, blockPalette);
+                }
+                chunkMesh.AddMiniBlockToMesh(x, y, z, block, blockPalette, false);
+            }
+            else
+            {
+                if (oldBlock != null)
+                {
+                    int voxel = oldBlock.voxel;
+                    chunkMesh.RemoveMiniBlockFromMesh(x, y, z, voxel, blockPalette);
+                    chunkMesh.AddMiniBlockToMesh(x, y, z, voxel, blockPalette, false);
                 }
             }
         }
@@ -197,6 +282,20 @@ public class World : MonoBehaviour
                     if (voxel != 0)
                     {
                         chunkMesh.AddBlockToMesh(i + (chunkX * Chunk.CHUNK_SIZE), j + (chunkY * Chunk.CHUNK_SIZE), k + (chunkZ * Chunk.CHUNK_SIZE), voxel, blockPalette, true);
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < Chunk.CHUNK_SIZE*2; i++)
+        {
+            for (int j = 0; j < Chunk.CHUNK_SIZE*2; j++)
+            {
+                for (int k = 0; k < Chunk.CHUNK_SIZE*2; k++)
+                {
+                    int voxel = chunk.GetMiniVoxel(i, j, k);
+                    if (voxel != 0)
+                    {
+                        chunkMesh.AddMiniBlockToMesh(i + (chunkX * Chunk.CHUNK_SIZE*2), j + (chunkY * Chunk.CHUNK_SIZE*2), k + (chunkZ * Chunk.CHUNK_SIZE*2), voxel, blockPalette, true);
                     }
                 }
             }
