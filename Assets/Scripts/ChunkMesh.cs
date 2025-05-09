@@ -230,11 +230,19 @@ public class ChunkMesh
         };
         for (int i = 0; i < directions.Length; i++)
         {
-            currentVoxel.AddVertices(directions[i], x, y, z);
-            currentVoxel.AddQuadTriangles();
-            currentVoxel.AddUvs(BlockPalette.GetBlockUVs(voxel));
-            currentVoxel.AddColliderVertices(directions[i], x, y, z);
-            currentVoxel.AddColliderQuadTriangles();
+            int neighbour = world.GetNeighbourMiniVoxel(x, y, z, directions[i]);
+            BlockType neighbourBlockType = BlockPalette.GetBlockType(neighbour);
+            if (neighbour == 0 || (!neighbourBlockType.IsOpaque() && blockType != neighbourBlockType))
+            {
+                currentVoxel.AddVertices(directions[i], x, y, z);
+                currentVoxel.AddQuadTriangles();
+                currentVoxel.AddUvs(BlockPalette.GetBlockUVs(voxel));
+            }
+            if (neighbour == 0 || (!neighbourBlockType.IsConcrete() && blockType.IsConcrete()))
+            {
+                currentVoxel.AddColliderVertices(directions[i], x, y, z);
+                currentVoxel.AddColliderQuadTriangles();
+            }
         }
         miniVoxels[chunkX, chunkY, chunkZ] = currentVoxel;
         if(!isWorldInit)

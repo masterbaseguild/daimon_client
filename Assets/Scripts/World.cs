@@ -257,6 +257,26 @@ public class World : MonoBehaviour
         return GetVoxel((int)neighbour.x, (int)neighbour.y, (int)neighbour.z);
     }
 
+    private Vector3 GetNeighbourMiniCoords(int x, int y, int z, Direction direction)
+    {
+        return direction switch
+        {
+            Direction.backwards => new Vector3(x, y, z - 1),
+            Direction.down => new Vector3(x, y - 1, z),
+            Direction.foreward => new Vector3(x, y, z + 1),
+            Direction.left => new Vector3(x - 1, y, z),
+            Direction.right => new Vector3(x + 1, y, z),
+            Direction.up => new Vector3(x, y + 1, z),
+            _ => new Vector3(x, y, z),
+        };
+    }
+
+    public int GetNeighbourMiniVoxel(int x, int y, int z, Direction direction)
+    {
+        Vector3 neighbour = GetNeighbourMiniCoords(x, y, z, direction);
+        return GetMiniVoxel((int)neighbour.x, (int)neighbour.y, (int)neighbour.z);
+    }
+
     // methods to render the world
     private void DisplayChunk(int chunkX, int chunkY, int chunkZ)
     {
