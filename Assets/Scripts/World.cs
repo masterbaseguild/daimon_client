@@ -17,11 +17,17 @@ public class World : MonoBehaviour
     private Region[] regions;
 
     private string[] blockList;
+    private BlockPalette blockPalette;
 
     public void SetTexture(Texture2D texture)
     {
         material.mainTexture = texture;
         nonOpaqueMaterial.mainTexture = texture;
+    }
+
+    public void SetBlockPalette(string[] results)
+    {
+        blockPalette = new BlockPalette(results);
     }
 
     public void SetRegions(Region[] regions)
@@ -129,17 +135,17 @@ public class World : MonoBehaviour
             {
                 if (oldBlock != null)
                 {
-                    chunkMesh.RemoveBlockFromMesh(x, y, z, oldBlock.voxel, region.GetBlockPalette());
+                    chunkMesh.RemoveBlockFromMesh(x, y, z, oldBlock.voxel, blockPalette);
                 }
-                chunkMesh.AddBlockToMesh(x, y, z, block, region.GetBlockPalette(), false);
+                chunkMesh.AddBlockToMesh(x, y, z, block, blockPalette, false);
             }
             else
             {
                 if (oldBlock != null)
                 {
                     int voxel = oldBlock.voxel;
-                    chunkMesh.RemoveBlockFromMesh(x, y, z, voxel, region.GetBlockPalette());
-                    chunkMesh.AddBlockToMesh(x, y, z, voxel, region.GetBlockPalette(), false);
+                    chunkMesh.RemoveBlockFromMesh(x, y, z, voxel, blockPalette);
+                    chunkMesh.AddBlockToMesh(x, y, z, voxel, blockPalette, false);
                 }
             }
         }
@@ -190,7 +196,7 @@ public class World : MonoBehaviour
                     int voxel = chunk.GetVoxel(i, j, k);
                     if (voxel != 0)
                     {
-                        chunkMesh.AddBlockToMesh(i + (chunkX * Chunk.CHUNK_SIZE), j + (chunkY * Chunk.CHUNK_SIZE), k + (chunkZ * Chunk.CHUNK_SIZE), voxel, region.GetBlockPalette(), true);
+                        chunkMesh.AddBlockToMesh(i + (chunkX * Chunk.CHUNK_SIZE), j + (chunkY * Chunk.CHUNK_SIZE), k + (chunkZ * Chunk.CHUNK_SIZE), voxel, blockPalette, true);
                     }
                 }
             }
@@ -274,5 +280,19 @@ public class World : MonoBehaviour
     public void SetBlockList(string[] blockList)
     {
         this.blockList = blockList;
+    }
+
+    public int GetBlockCount()
+    {
+        return blockList.Length;
+    }
+
+    public string GetBlock(int blockId)
+    {
+        if (blockId < 0 || blockId >= blockList.Length)
+        {
+            return null;
+        }
+        return blockList[blockId];
     }
 }

@@ -22,18 +22,6 @@ public class Region
 
     // list of all the chunk meshes in all regions
     private readonly ChunkMesh[] chunkMeshes = new ChunkMesh[REGION_SIZE * REGION_SIZE * REGION_SIZE];
-    private BlockPalette blockPalette;
-
-    // set block palette and region
-    public void SetBlockPalette(string[] results)
-    {
-        blockPalette = new BlockPalette(results);
-    }
-
-    public BlockPalette GetBlockPalette()
-    {
-        return blockPalette;
-    }
 
     public Region()
     {

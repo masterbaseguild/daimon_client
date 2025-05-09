@@ -376,18 +376,14 @@ public class MainUdpClient : MonoBehaviour
                 // the server has sent us the region data
                 case Packet.Client.WORLD:
                     world.SetRegions(packet.ParseWorldData());
-                    Region[] regions = world.GetRegions();
-                    foreach (Region region in regions)
+                    List<Task<string>> tasks = new();
+                    int count = world.GetBlockCount();
+                    for (int i = 0; i < count; i++)
                     {
-                        List<Task<string>> tasks = new();
-                        int count = region.GetHeaderCount();
-                        for (int i = 0; i < count; i++)
-                        {
-                            tasks.Add(httpClient.GetResource("item", world.GetRegion(0, 0, 0).GetHeaderLine(i)));
-                        }
-                        string[] results = await Task.WhenAll(tasks);
-                        region.SetBlockPalette(results);
+                        tasks.Add(httpClient.GetResource("item", world.GetBlock(i)));
                     }
+                    string[] results = await Task.WhenAll(tasks);
+                    world.SetBlockPalette(results);
                     world.DisplayWorld();
                     break;
                 case Packet.Client.SETBLOCK:
