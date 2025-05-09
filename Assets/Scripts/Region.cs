@@ -110,6 +110,37 @@ public class Region
                 }
             }
         }
+        // parse mini blocks
+        for (int chunkX = 0; chunkX < REGION_SIZE; chunkX++)
+        {
+            for (int chunkY = 0; chunkY < REGION_SIZE; chunkY++)
+            {
+                for (int chunkZ = 0; chunkZ < REGION_SIZE; chunkZ++)
+                {
+                    Chunk chunk = chunks[chunkX, chunkY, chunkZ];
+                    for (int voxelX = 0; voxelX < Chunk.CHUNK_SIZE*2; voxelX++)
+                    {
+                        for (int voxelY = 0; voxelY < Chunk.CHUNK_SIZE*2; voxelY++)
+                        {
+                            for (int voxelZ = 0; voxelZ < Chunk.CHUNK_SIZE*2; voxelZ++)
+                            {
+                                byte[] voxelData = new byte[byteWidth];
+                                Array.Copy(contentBuffer, index * byteWidth, voxelData, 0, byteWidth);
+                                int voxelValue = byteWidth switch
+                                {
+                                    1 => voxelData[0],
+                                    2 => BitConverter.ToInt16(voxelData, 0),
+                                    4 => BitConverter.ToInt32(voxelData, 0),
+                                    _ => throw new InvalidOperationException($"Unsupported byteWidth: {byteWidth}")
+                                };
+                                chunk.SetMiniVoxel(voxelX, voxelY, voxelZ, voxelValue);
+                                index++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public string GetHeaderLine(int index)

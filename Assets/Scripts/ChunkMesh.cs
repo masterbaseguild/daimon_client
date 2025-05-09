@@ -110,17 +110,17 @@ public class ChunkMesh
         {
             if (intendedMeshType == 1)
             {
-                nonOpaqueMesh.RemoveBlockFromMesh(x, y, z, voxel, BlockPalette);
+                nonOpaqueMesh.RemoveMiniBlockFromMesh(x, y, z, voxel, BlockPalette);
                 return;
             }
             if (intendedMeshType == 2)
             {
-                nonConcreteMesh.RemoveBlockFromMesh(x, y, z, voxel, BlockPalette);
+                nonConcreteMesh.RemoveMiniBlockFromMesh(x, y, z, voxel, BlockPalette);
                 return;
             }
             if (intendedMeshType == 3)
             {
-                nonConcreteNonOpaqueMesh.RemoveBlockFromMesh(x, y, z, voxel, BlockPalette);
+                nonConcreteNonOpaqueMesh.RemoveMiniBlockFromMesh(x, y, z, voxel, BlockPalette);
                 return;
             }
         }
