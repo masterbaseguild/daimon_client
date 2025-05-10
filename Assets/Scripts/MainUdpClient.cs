@@ -65,13 +65,13 @@ public class MainUdpClient : MonoBehaviour
             lastSentPosition = newPosition;
         }
         // if the last keep alive packet was received more than x seconds ago, disconnect
-        if (isEnabled && Time.time - lastKeepAlive > keepAliveGracePeriod)
+        /* if (isEnabled && Time.time - lastKeepAlive > keepAliveGracePeriod)
         {
             Debug.Log("Server timeout, disconnecting...");
             Send($"{Packet.Server.DISCONNECT}\t{index}");
             TcpDisconnect();
             Application.Quit();
-        }
+        } */
     }
 
     public void SetUsername(string newUsername)

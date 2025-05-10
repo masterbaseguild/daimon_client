@@ -146,12 +146,12 @@ public class World : MonoBehaviour
         region.SetMiniVoxel(x, y, z, blockId);
         UpdateMiniVoxel(x, y, z, block, false);
         // update the neighbouring voxels
-        //UpdateMiniVoxel(x+1, y, z, block, true);
-        //UpdateMiniVoxel(x-1, y, z, block, true);
-        //UpdateMiniVoxel(x, y+1, z, block, true);
-        //UpdateMiniVoxel(x, y-1, z, block, true);
-        //UpdateMiniVoxel(x, y, z+1, block, true);
-        //UpdateMiniVoxel(x, y, z-1, block, true);
+        UpdateMiniVoxel(x+1, y, z, block, true);
+        UpdateMiniVoxel(x-1, y, z, block, true);
+        UpdateMiniVoxel(x, y+1, z, block, true);
+        UpdateMiniVoxel(x, y-1, z, block, true);
+        UpdateMiniVoxel(x, y, z+1, block, true);
+        UpdateMiniVoxel(x, y, z-1, block, true);
     }
 
     private void UpdateVoxel(int x, int y, int z, int block, bool isNeighbour)
