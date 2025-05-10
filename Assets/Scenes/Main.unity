@@ -1284,6 +1284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   udpClient: {fileID: 371012553}
+  world: {fileID: 92587896}
   playerCamera: {fileID: 323020081}
   rigidBody: {fileID: 1220779334}
   ground:
@@ -1308,6 +1309,7 @@ MonoBehaviour:
   flyingSpeedMultiplier: 1.5
   fallingSpeedMultiplier: 0.25
   sneakingSpeedMultiplier: 0.5
+  blockSound: {fileID: 8300000, guid: 4aa92723d6be0024483352d985ec469b, type: 3}
 --- !u!54 &1220779334
 Rigidbody:
   m_ObjectHideFlags: 0
