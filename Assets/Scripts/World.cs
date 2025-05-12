@@ -17,7 +17,9 @@ public class World : MonoBehaviour
     private Region[] regions;
 
     private string[] blockList;
+    private string[] modelList;
     private BlockPalette blockPalette;
+    private ModelPalette modelPalette;
 
     public void SetTexture(Texture2D texture)
     {
@@ -413,5 +415,25 @@ public class World : MonoBehaviour
             return null;
         }
         return blockList[blockId];
+    }
+
+    public void SetModelList(string[] modelList)
+    {
+        this.modelList = modelList;
+        modelPalette = new ModelPalette(modelList);
+    }
+
+    public int GetModelCount()
+    {
+        return modelList.Length;
+    }
+
+    public string GetModel(int modelId)
+    {
+        if (modelId < 0 || modelId >= modelList.Length)
+        {
+            return null;
+        }
+        return modelList[modelId];
     }
 }
