@@ -129,4 +129,10 @@ public class BlockPalette
             new Vector2((x + TEXTURE_SIZE) / atlasWidth, 0), // 1
         };
     }
+
+    public bool IsTransparent(int blockId)
+    {
+        return blocks[blockId].isTransparent;
+    }   
+
 }

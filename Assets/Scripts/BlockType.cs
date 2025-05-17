@@ -12,6 +12,8 @@ public class BlockType
     public Action OnTextureLoaded;
     public bool isLoaded = false;
 
+    public int emission; //Valore di luce emessa in base al tipo
+
     public BlockType(string id, string display, int type)
     {
         this.id = id;
@@ -63,4 +65,6 @@ public class BlockType
     {
         return isConcrete;
     }
+    
+    
 }

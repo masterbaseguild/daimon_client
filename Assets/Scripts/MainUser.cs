@@ -55,7 +55,7 @@ public class MainUser : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, ground);
         move = (transform.forward * move.z + transform.right * move.x + transform.up * move.y).normalized * moveSpeed * moveSpeedMultiplier;
         move.y += gravityAcceleration;
-        rigidBody.velocity = move;
+        rigidBody.linearVelocity = move;
 
         transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
