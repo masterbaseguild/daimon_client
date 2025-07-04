@@ -180,6 +180,14 @@ public class Region
         return chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].GetMiniVoxel(x, y, z);
     }
 
+    public Model GetModel(int x, int y, int z)
+    {
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        return chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].GetModel(x, y, z);
+    }
+
     public void SetVoxel(int x, int y, int z, string block)
     {
         int blockIdIndex = Header.IndexOf(block);
@@ -208,6 +216,22 @@ public class Region
         int chunkY = y / (Chunk.CHUNK_SIZE*2);
         int chunkZ = z / (Chunk.CHUNK_SIZE*2);
         chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].SetMiniVoxel(x, y, z, blockIdIndex);
+    }
+
+    public void SetModel(int id, Vector3 position)
+    {
+        int chunkX = (int)position.x / Chunk.CHUNK_SIZE;
+        int chunkY = (int)position.y / Chunk.CHUNK_SIZE;
+        int chunkZ = (int)position.z / Chunk.CHUNK_SIZE;
+        chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].SetModel(id, position);
+    }
+
+    public void RemoveModel(int x, int y, int z)
+    {
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        chunks[chunkX % REGION_SIZE, chunkY % REGION_SIZE, chunkZ % REGION_SIZE].RemoveModel(x, y, z);
     }
 
     public Vector3Int GetCoordinates()

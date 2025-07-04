@@ -98,6 +98,22 @@ public class World : MonoBehaviour
         return region.GetMiniVoxel(x, y, z);
     }
 
+    public Model GetModel(int x, int y, int z)
+    {
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return null;
+        }
+        return region.GetModel(x, y, z);
+    }
+
     public void SetVoxel(int x, int y, int z, int block)
     {
         string blockId = blockList[block];
@@ -154,6 +170,38 @@ public class World : MonoBehaviour
         UpdateMiniVoxel(x, y-1, z, block, true);
         UpdateMiniVoxel(x, y, z+1, block, true);
         UpdateMiniVoxel(x, y, z-1, block, true);
+    }
+
+    public void SetModel(int id, Vector3 position)
+    {
+        int chunkX = (int)position.x / Chunk.CHUNK_SIZE;
+        int chunkY = (int)position.y / Chunk.CHUNK_SIZE;
+        int chunkZ = (int)position.z / Chunk.CHUNK_SIZE;
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return;
+        }
+        region.SetModel(id, position);
+    }
+
+    public void RemoveModel(int x, int y, int z)
+    {
+        int chunkX = x / Chunk.CHUNK_SIZE;
+        int chunkY = y / Chunk.CHUNK_SIZE;
+        int chunkZ = z / Chunk.CHUNK_SIZE;
+        int regionX = chunkX / Region.REGION_SIZE;
+        int regionY = chunkY / Region.REGION_SIZE;
+        int regionZ = chunkZ / Region.REGION_SIZE;
+        Region region = FindRegion(new Vector3Int(regionX, regionY, regionZ));
+        if (region == null)
+        {
+            return;
+        }
+        region.RemoveModel(x, y, z);
     }
 
     private void UpdateVoxel(int x, int y, int z, int block, bool isNeighbour)

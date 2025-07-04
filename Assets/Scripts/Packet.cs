@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using UnityEngine;
-using System.Collections.Generic;
 
 public class Packet
 {
@@ -17,9 +16,10 @@ public class Packet
         public const byte CHAT = 5;
         public const byte SETBLOCK = 6;
         public const byte SETMINIBLOCK = 7;
-        public const byte SCRIPT = 8;
-        public const byte USERCONNECT = 9;
-        public const byte USERDISCONNECT = 10;
+        public const byte SETMODEL = 8;
+        public const byte SCRIPT = 9;
+        public const byte USERCONNECT = 10;
+        public const byte USERDISCONNECT = 11;
     }
     public static class Server
     {
@@ -31,7 +31,9 @@ public class Packet
         public const byte CHAT = 5;
         public const byte SETBLOCK = 6;
         public const byte SETMINIBLOCK = 7;
-        public const byte SCRIPT = 8;
+        public const byte SETMODEL = 8;
+        public const byte SCRIPT = 9;
+
     }
     public byte type;
     public string[] data;

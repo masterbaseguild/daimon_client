@@ -19,7 +19,8 @@ public class ModelPalette
             {
                 models.Add(modelData);
                 // debug: instantiate model
-                InstantiateModel(models.Count - 1, Vector3.zero, Quaternion.identity);
+                Vector3 spawnpoint = new Vector3(80, 64, 94);
+                InstantiateModel(models.Count - 1, spawnpoint, Quaternion.identity);
             });
         }
         Debug.Log("ModelPalette initialized with " + modelUrls.Count + " models.");
@@ -57,6 +58,7 @@ public class ModelPalette
 
     public void InstantiateModel(int index, Vector3 position, Quaternion rotation)
     {
+        Vector3 offset = new Vector3(-0.5f, 0.5f, 0.5f);
         string modelData = GetModel(index);
         if (modelData != null)
         {
@@ -74,6 +76,7 @@ public class ModelPalette
                 loadedObject.name = $"Model_{index}";
                 // add collider
                 GameObject child = loadedObject.transform.GetChild(0).gameObject;
+                child.transform.localPosition = offset;
                 MeshCollider meshCollider = child.AddComponent<MeshCollider>();
                 meshCollider.sharedMesh = child.GetComponent<MeshFilter>().mesh;
                 loadedObject.layer = LayerMask.NameToLayer("Ground");
