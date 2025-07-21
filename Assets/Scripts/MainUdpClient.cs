@@ -367,20 +367,34 @@ public class MainUdpClient : MonoBehaviour
             {
                 // the server has confirmed our connection
                 case Packet.Client.CONNECT:
-                    int blockCount = int.Parse(packet.data[0]);
-                    string[] blockList = new string[blockCount];
-                    for (int i = 1; i < blockCount + 1; i++)
+                    int mode = int.Parse(packet.data[0]);
+                    if (mode == 0) // edit mode
                     {
-                        blockList[i - 1] = packet.data[i];
+                        int blockCount = int.Parse(packet.data[0]);
+                        string[] blockList = new string[blockCount];
+                        for (int i = 1; i < blockCount + 1; i++)
+                        {
+                            blockList[i - 1] = packet.data[i];
+                        }
+                        world.SetBlockList(blockList);
+                        int modelCount = int.Parse(packet.data[blockCount + 1]);
+                        string[] modelList = new string[modelCount];
+                        for (int i = blockCount + 2; i < packet.data.Length; i++)
+                        {
+                            modelList[i - blockCount - 2] = packet.data[i];
+                        }
+                        world.SetModelList(modelList);
                     }
-                    world.SetBlockList(blockList);
-                    int modelCount = int.Parse(packet.data[blockCount + 1]);
-                    string[] modelList = new string[modelCount];
-                    for (int i = blockCount + 2; i < packet.data.Length; i++)
+                    else if (mode == 1) // play mode
                     {
-                        modelList[i - blockCount - 2] = packet.data[i];
+                        int itemCount = int.Parse(packet.data[0]);
+                        string[] itemList = new string[itemCount];
+                        for (int i = 1; i < itemCount + 1; i++)
+                        {
+                            itemList[i - 1] = packet.data[i];
+                        }
+                        world.SetItemList(itemList);
                     }
-                    world.SetModelList(modelList);
                     TcpSend($"{Packet.Server.WORLD}");
                     break;
                 // the server has sent us the region data

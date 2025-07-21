@@ -1,4 +1,4 @@
-public class InputManager : MonoBehaviour
+public class Inventory : MonoBehaviour
 {
     [SerializeField] private MainUdpClient mainUdpClient;
     [SerializeField] private int slotCount;
