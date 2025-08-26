@@ -236,7 +236,11 @@ public class ChunkMesh
             {
                 currentVoxel.AddVertices(directions[i], x, y, z);
                 currentVoxel.AddQuadTriangles();
-                currentVoxel.AddUvs(BlockPalette.GetBlockUVs(voxel));
+                Vector2[] blockUVs = BlockPalette.GetBlockUVs(voxel);
+                Vector2 firstBlockUV = blockUVs[0];
+                float halfTextureSizeX = (blockUVs[2].x - blockUVs[1].x) / 2;
+                Vector2[] splitUVs = SplitBlockUVs(firstBlockUV, halfTextureSizeX, directions[i], x, y, z);
+                currentVoxel.AddUvs(splitUVs);
             }
             if (neighbour == 0 || (!neighbourBlockType.IsConcrete() && blockType.IsConcrete()))
             {
@@ -253,6 +257,67 @@ public class ChunkMesh
                 UpdateColliderMesh();
             }
         }
+    }
+
+    private Vector2[] SplitBlockUVs(Vector2 firstBlockUV, float halfTextureSizeX, Direction direction, int x, int y, int z)
+    {
+        // Split the block UVs based on the direction and position
+        bool isFirstHalfX = x % 2 == 0;
+        bool isFirstHalfY = y % 2 == 0;
+        bool isFirstHalfZ = z % 2 == 0;
+        /* return new Vector2[]
+        {
+            new(firstBlockUV.x, firstBlockUV.y),
+            new(firstBlockUV.x + halfTextureSizeX, firstBlockUV.y),
+            new(firstBlockUV.x + halfTextureSizeX, firstBlockUV.y + 0.5f),
+            new(firstBlockUV.x, firstBlockUV.y + 0.5f)
+        }; */
+        return direction switch
+        {
+            Direction.backwards => new Vector2[]
+                {
+                    new(isFirstHalfX ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f),
+                    new(isFirstHalfX ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(isFirstHalfX ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(isFirstHalfX ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f)
+                },
+            Direction.foreward => new Vector2[]
+                {
+                    new(!isFirstHalfX ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f),
+                    new(!isFirstHalfX ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(!isFirstHalfX ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(!isFirstHalfX ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f)
+                },
+            Direction.left => new Vector2[]
+                {
+                    new(!isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f),
+                    new(!isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(!isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(!isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f)
+                },
+            Direction.right => new Vector2[]
+                {
+                    new(isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f),
+                    new(isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfY ? firstBlockUV.y : firstBlockUV.y + 0.5f)
+                },
+            Direction.down => new Vector2[]
+                {
+                    new(isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfX ? firstBlockUV.y : firstBlockUV.y + 0.5f),
+                    new(isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfX ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfX ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfX ? firstBlockUV.y : firstBlockUV.y + 0.5f)
+                },
+            Direction.up => new Vector2[]
+                {
+                    new(!isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfX ? firstBlockUV.y : firstBlockUV.y + 0.5f),
+                    new(!isFirstHalfZ ? firstBlockUV.x : firstBlockUV.x + halfTextureSizeX, isFirstHalfX ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(!isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfX ? firstBlockUV.y + 0.5f : firstBlockUV.y + 1f),
+                    new(!isFirstHalfZ ? firstBlockUV.x + halfTextureSizeX : firstBlockUV.x + halfTextureSizeX*2, isFirstHalfX ? firstBlockUV.y : firstBlockUV.y + 0.5f)
+                },
+            _ => new Vector2[] { },
+        };
     }
 
     // update the meshes every time a block in the chunk changes

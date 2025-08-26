@@ -52,9 +52,7 @@ public class BlockPalette
     // debug function to save texture to disk
     private void SaveTextureToDisk(Texture2D texture)
     {
-        string macPath = "/Users/entity/Downloads/texture.png";
-        string winPath = "C:\\Users\\Dario\\Downloads\\texture.png";
-        string path = Application.platform == RuntimePlatform.OSXEditor ? macPath : winPath;
+        string path = "C:\\Users\\dario\\Downloads\\texture.png";
         byte[] bytes = texture.EncodeToPNG();
         System.IO.File.WriteAllBytes(path, bytes);
         Debug.Log("Saved texture to " + path);
@@ -83,6 +81,7 @@ public class BlockPalette
             textureAtlas.Apply();
             //SaveTextureToDisk(textureAtlas);
             world.SetTexture(textureAtlas);
+            SaveTextureToDisk(textureAtlas);
         };
     }
 
