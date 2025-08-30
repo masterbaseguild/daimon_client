@@ -5,6 +5,7 @@ public class MainUser : MonoBehaviour
 {
     [SerializeField] private MainUdpClient udpClient;
     [SerializeField] private World world;
+    [SerializeField] private UI ui;
 
     // unity api references
     [SerializeField] public GameObject playerCamera;
@@ -20,7 +21,7 @@ public class MainUser : MonoBehaviour
     [SerializeField] private float jumpCooldown;
     [SerializeField] private float groundCheckDistance;
     [SerializeField] private float gravityAcceleration;
-    [SerializeField] private float cameraSensitivity;
+    [SerializeField] public float cameraSensitivity;
     [SerializeField] private float delayBetweenDoublePresses;
     [SerializeField] private int loopbackY;
     [SerializeField] private float groundDrag;
@@ -57,6 +58,8 @@ public class MainUser : MonoBehaviour
     private float movementSpeedMultiplier;
     private Vector3 movement;
 
+    public EditModeVoxel[] hotbarSlots = new EditModeVoxel[10];
+
     // setup components and cursor, then enable the user controller
 
     private void Start()
@@ -70,21 +73,26 @@ public class MainUser : MonoBehaviour
     private void Update()
     {
         HandleMovement();
-        HandleSpeedMultipliers();
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            HandleSpeedMultipliers();
+        }
         HandleSpeedCap();
-
         HandleGrounded();
         HandleDrag();
-        HandleJump();
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            HandleJump();
 
-        HandleRun();
-        HandleDoubleWRun();
+            HandleRun();
+            HandleDoubleWRun();
 
-        HandleDoubleSpaceFlight();
-        HandlePhase();
+            HandleDoubleSpaceFlight();
+            HandlePhase();
 
-        HandleCamera();
-        HandleBreakPlace();
+            HandleCamera();
+            HandleBreakPlace();
+        }
 
         HandleLoopback();
         HandleDebug();
@@ -93,7 +101,10 @@ public class MainUser : MonoBehaviour
     // run physics logic at a fixed interval
     private void FixedUpdate()
     {
-        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
+        }
 
         MovementForce();
         GravityForce();
@@ -120,36 +131,38 @@ public class MainUser : MonoBehaviour
     private void HandleMovement()
     {
         movement = Vector3.zero;
-        if (Input.GetKey(KeyCode.W))
+        if (Cursor.lockState == CursorLockMode.Locked)
         {
-            movement.z += 1f;
-        }
+            if (Input.GetKey(KeyCode.W))
+            {
+                movement.z += 1f;
+            }
 
-        if (Input.GetKey(KeyCode.S))
-        {
-            movement.z += -1f;
-        }
+            if (Input.GetKey(KeyCode.S))
+            {
+                movement.z += -1f;
+            }
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            movement.x += -1f;
-        }
+            if (Input.GetKey(KeyCode.A))
+            {
+                movement.x += -1f;
+            }
 
-        if (Input.GetKey(KeyCode.D))
-        {
-            movement.x += 1f;
-        }
+            if (Input.GetKey(KeyCode.D))
+            {
+                movement.x += 1f;
+            }
 
-        if (Input.GetKey(KeyCode.Space) && isFlying)
-        {
-            movement.y += 1f;
-        }
+            if (Input.GetKey(KeyCode.Space) && isFlying)
+            {
+                movement.y += 1f;
+            }
 
-        if (Input.GetKey(KeyCode.LeftShift) && isFlying)
-        {
-            movement.y += -1f;
+            if (Input.GetKey(KeyCode.LeftShift) && isFlying)
+            {
+                movement.y += -1f;
+            }
         }
-
     }
 
     private void HandleSpeedMultipliers()
@@ -401,53 +414,81 @@ public class MainUser : MonoBehaviour
         // if user presses 1, set voxel to 1
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            voxel = 1;
-            isFullVoxel = true;
+            voxel = hotbarSlots[0].id;
+            isFullVoxel = hotbarSlots[0].isFullVoxel;
         }
 
         // if user presses 2, set voxel to 2
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            voxel = 2;
-            isFullVoxel = true;
+            voxel = hotbarSlots[1].id;
+            isFullVoxel = hotbarSlots[1].isFullVoxel;
         }
 
         // if user presses 3, set voxel to 3
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            voxel = 3;
-            isFullVoxel = true;
+            voxel = hotbarSlots[2].id;
+            isFullVoxel = hotbarSlots[2].isFullVoxel;
         }
 
         // if user presses 4, set voxel to 4
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            voxel = 4;
-            isFullVoxel = true;
+            voxel = hotbarSlots[3].id;
+            isFullVoxel = hotbarSlots[3].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            voxel = 1;
-            isFullVoxel = false;
+            voxel = hotbarSlots[4].id;
+            isFullVoxel = hotbarSlots[4].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha6))
         {
-            voxel = 2;
-            isFullVoxel = false;
+            voxel = hotbarSlots[5].id;
+            isFullVoxel = hotbarSlots[5].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha7))
         {
-            voxel = 3;
-            isFullVoxel = false;
+            voxel = hotbarSlots[6].id;
+            isFullVoxel = hotbarSlots[6].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha8))
         {
-            voxel = 4;
-            isFullVoxel = false;
+            voxel = hotbarSlots[7].id;
+            isFullVoxel = hotbarSlots[7].isFullVoxel;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            voxel = hotbarSlots[8].id;
+            isFullVoxel = hotbarSlots[8].isFullVoxel;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            voxel = hotbarSlots[9].id;
+            isFullVoxel = hotbarSlots[9].isFullVoxel;
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                ui.ToggleMenu(true);
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                ui.ToggleMenu(false);
+            }
         }
     }
 
