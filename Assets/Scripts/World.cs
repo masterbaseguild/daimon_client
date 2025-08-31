@@ -27,6 +27,8 @@ public class World : MonoBehaviour
 
     public void SetBlockPalette(string[] results)
     {
+        //ui.SetBlockInventory(results.Length);
+        ui.SetBlockInventory(96);
         blockPalette = new BlockPalette(results);
     }
 

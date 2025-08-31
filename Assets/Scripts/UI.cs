@@ -15,6 +15,7 @@ public class UI : MonoBehaviour
     [SerializeField] private GameObject hotbar;
     [SerializeField] private GameObject menu;
     [SerializeField] private Slider sensitivitySlider;
+    [SerializeField] private GameObject scrollViewport;
 
     private void Start()
     {
@@ -32,21 +33,36 @@ public class UI : MonoBehaviour
         ipInput.onValueChanged.AddListener(delegate { EditAddressText(); });
         sensitivitySlider.onValueChanged.AddListener(delegate { EditSensitivity(); });
 
-        // center the menu rectangle, then set it to 50% of the screen height and width
-
         RectTransform menuRect = menu.GetComponent<RectTransform>();
         RectTransform canvasRect = menuRect.GetComponentInParent<Canvas>().GetComponent<RectTransform>();
         menuRect.sizeDelta = new Vector2(canvasRect.rect.width * 0.5f, canvasRect.rect.height * 0.5f);
-        menuRect.anchoredPosition = Vector2.zero;
+    }
 
-        // set the Items panel 40 units smaller than the menu
-        RectTransform itemsRect = menu.transform.Find("Items").GetComponent<RectTransform>();
-        itemsRect.sizeDelta = new Vector2(-40, -80);
-        itemsRect.anchoredPosition = new Vector2(0, -20);
-
-        // set the Slider rect 20 units under the menu panel
-        RectTransform sliderRect = sensitivitySlider.GetComponent<RectTransform>();
-        sliderRect.anchoredPosition = new Vector2(0, -40);
+    public void SetBlockInventory(int count)
+    {
+        // divide by 10
+        int rows = (count + 9) / 10;
+        // set slotSize to 1/10 of viewport width
+        float slotSize = scrollViewport.GetComponent<RectTransform>().rect.width / 10;
+        // set scroll
+        scrollViewport.GetComponent<RectTransform>().sizeDelta = new Vector2(0, rows * slotSize);
+        // update the UI
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                GameObject slot = new GameObject("Slot");
+                slot.AddComponent<RectTransform>();
+                slot.AddComponent<Image>();
+                slot.transform.SetParent(scrollViewport.transform, false);
+                RectTransform slotRect = slot.GetComponent<RectTransform>();
+                slotRect.sizeDelta = new Vector2(slotSize, slotSize);
+                slotRect.anchorMin = new Vector2(0, 1);
+                slotRect.anchorMax = new Vector2(0, 1);
+                slotRect.pivot = new Vector2(0, 1);
+                slotRect.anchoredPosition = new Vector2(j * slotSize, -(i * slotSize));
+            }
+        }
     }
 
     private void EditText()
