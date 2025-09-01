@@ -50,7 +50,7 @@ public class MainUser : MonoBehaviour
     private float lastPressedTimeSpace;
     private bool pressedFirstTimeW = false;
     private float lastPressedTimeW;
-    private int voxel = 1;
+    private int voxel = 0;
     private bool isFullVoxel = true;
 
     private float xRotation;
@@ -59,6 +59,7 @@ public class MainUser : MonoBehaviour
     private Vector3 movement;
 
     public EditModeVoxel[] hotbarSlots = new EditModeVoxel[10];
+    public int selectedHotbarSlot = 0;
 
     // setup components and cursor, then enable the user controller
 
@@ -67,6 +68,7 @@ public class MainUser : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         rigidBody.MovePosition(spawnPoint);
+        ui.InitSensitivitySlider();
     }
 
     // run input logic every frame
@@ -317,13 +319,13 @@ public class MainUser : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(blockSound, hit.point);
             Vector3Int fullBlockPos = Vector3Int.FloorToInt(hit.point - (hit.normal * 0.25f) + offset);
-            if(!world.GetVoxel(fullBlockPos.x, fullBlockPos.y, fullBlockPos.z).Equals(0))
+            if (!world.GetVoxel(fullBlockPos.x, fullBlockPos.y, fullBlockPos.z).Equals(0))
             {
                 udpClient.TcpSend($"{Packet.Server.SETBLOCK}\t0\t{fullBlockPos.x}\t{fullBlockPos.y}\t{fullBlockPos.z}\t0");
             }
             else
             {
-                Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point - (hit.normal * 0.25f) + offset)*2);
+                Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point - (hit.normal * 0.25f) + offset) * 2);
                 udpClient.TcpSend($"{Packet.Server.SETMINIBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t0");
             }
         }
@@ -334,18 +336,18 @@ public class MainUser : MonoBehaviour
         Vector3 offset = new(0.5f, 0.5f, 0.5f);
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
-            if(isFullVoxel)
+            if (isFullVoxel)
             {
                 Vector3Int placedBlockPos = Vector3Int.FloorToInt(hit.point + (hit.normal * 0.25f) + offset);
-                if(
-                    world.GetMiniVoxel(placedBlockPos.x*2, placedBlockPos.y*2, placedBlockPos.z*2).Equals(0)&&
-                    world.GetMiniVoxel(placedBlockPos.x*2+1, placedBlockPos.y*2, placedBlockPos.z*2).Equals(0)&&
-                    world.GetMiniVoxel(placedBlockPos.x*2+1, placedBlockPos.y*2+1, placedBlockPos.z*2).Equals(0)&&
-                    world.GetMiniVoxel(placedBlockPos.x*2+1, placedBlockPos.y*2+1, placedBlockPos.z*2+1).Equals(0)&&
-                    world.GetMiniVoxel(placedBlockPos.x*2, placedBlockPos.y*2+1, placedBlockPos.z*2).Equals(0)&&
-                    world.GetMiniVoxel(placedBlockPos.x*2, placedBlockPos.y*2+1, placedBlockPos.z*2+1).Equals(0)&&
-                    world.GetMiniVoxel(placedBlockPos.x*2, placedBlockPos.y*2, placedBlockPos.z*2+1).Equals(0)&&
-                    world.GetMiniVoxel(placedBlockPos.x*2+1, placedBlockPos.y*2, placedBlockPos.z*2+1).Equals(0)
+                if (
+                    world.GetMiniVoxel(placedBlockPos.x * 2, placedBlockPos.y * 2, placedBlockPos.z * 2).Equals(0) &&
+                    world.GetMiniVoxel(placedBlockPos.x * 2 + 1, placedBlockPos.y * 2, placedBlockPos.z * 2).Equals(0) &&
+                    world.GetMiniVoxel(placedBlockPos.x * 2 + 1, placedBlockPos.y * 2 + 1, placedBlockPos.z * 2).Equals(0) &&
+                    world.GetMiniVoxel(placedBlockPos.x * 2 + 1, placedBlockPos.y * 2 + 1, placedBlockPos.z * 2 + 1).Equals(0) &&
+                    world.GetMiniVoxel(placedBlockPos.x * 2, placedBlockPos.y * 2 + 1, placedBlockPos.z * 2).Equals(0) &&
+                    world.GetMiniVoxel(placedBlockPos.x * 2, placedBlockPos.y * 2 + 1, placedBlockPos.z * 2 + 1).Equals(0) &&
+                    world.GetMiniVoxel(placedBlockPos.x * 2, placedBlockPos.y * 2, placedBlockPos.z * 2 + 1).Equals(0) &&
+                    world.GetMiniVoxel(placedBlockPos.x * 2 + 1, placedBlockPos.y * 2, placedBlockPos.z * 2 + 1).Equals(0)
                 )
                 {
                     AudioSource.PlayClipAtPoint(blockSound, hit.point);
@@ -355,9 +357,9 @@ public class MainUser : MonoBehaviour
             else
             {
                 Vector3Int fullBlockPos = Vector3Int.FloorToInt(hit.point + (hit.normal * 0.25f) + offset);
-                if(world.GetVoxel(fullBlockPos.x, fullBlockPos.y, fullBlockPos.z).Equals(0))
+                if (world.GetVoxel(fullBlockPos.x, fullBlockPos.y, fullBlockPos.z).Equals(0))
                 {
-                    Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point + (hit.normal * 0.25f) + offset)*2);
+                    Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point + (hit.normal * 0.25f) + offset) * 2);
                     udpClient.TcpSend($"{Packet.Server.SETMINIBLOCK}\t0\t{placedBlockPos.x}\t{placedBlockPos.y}\t{placedBlockPos.z}\t{voxel}");
                     AudioSource.PlayClipAtPoint(blockSound, hit.point);
                 }
@@ -371,14 +373,14 @@ public class MainUser : MonoBehaviour
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit hit, breakPlaceRange))
         {
             Vector3Int fullBlockPos = Vector3Int.FloorToInt(hit.point - (hit.normal * 0.25f) + offset);
-            if(!world.GetVoxel(fullBlockPos.x, fullBlockPos.y, fullBlockPos.z).Equals(0))
+            if (!world.GetVoxel(fullBlockPos.x, fullBlockPos.y, fullBlockPos.z).Equals(0))
             {
                 voxel = world.GetVoxel(fullBlockPos.x, fullBlockPos.y, fullBlockPos.z);
                 isFullVoxel = true;
             }
             else
             {
-                Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point - (hit.normal * 0.25f) + offset)*2);
+                Vector3Int placedBlockPos = Vector3Int.FloorToInt((hit.point - (hit.normal * 0.25f) + offset) * 2);
                 voxel = world.GetMiniVoxel(placedBlockPos.x, placedBlockPos.y, placedBlockPos.z);
                 isFullVoxel = false;
             }
@@ -414,65 +416,110 @@ public class MainUser : MonoBehaviour
         // if user presses 1, set voxel to 1
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            voxel = hotbarSlots[0].id;
-            isFullVoxel = hotbarSlots[0].isFullVoxel;
+            selectedHotbarSlot = 0;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         // if user presses 2, set voxel to 2
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            voxel = hotbarSlots[1].id;
-            isFullVoxel = hotbarSlots[1].isFullVoxel;
+            selectedHotbarSlot = 1;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         // if user presses 3, set voxel to 3
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            voxel = hotbarSlots[2].id;
-            isFullVoxel = hotbarSlots[2].isFullVoxel;
+            selectedHotbarSlot = 2;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         // if user presses 4, set voxel to 4
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            voxel = hotbarSlots[3].id;
-            isFullVoxel = hotbarSlots[3].isFullVoxel;
+            selectedHotbarSlot = 3;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            voxel = hotbarSlots[4].id;
-            isFullVoxel = hotbarSlots[4].isFullVoxel;
+            selectedHotbarSlot = 4;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha6))
         {
-            voxel = hotbarSlots[5].id;
-            isFullVoxel = hotbarSlots[5].isFullVoxel;
+            selectedHotbarSlot = 5;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha7))
         {
-            voxel = hotbarSlots[6].id;
-            isFullVoxel = hotbarSlots[6].isFullVoxel;
+            selectedHotbarSlot = 6;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha8))
         {
-            voxel = hotbarSlots[7].id;
-            isFullVoxel = hotbarSlots[7].isFullVoxel;
+            selectedHotbarSlot = 7;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha9))
         {
-            voxel = hotbarSlots[8].id;
-            isFullVoxel = hotbarSlots[8].isFullVoxel;
+            selectedHotbarSlot = 8;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
-            voxel = hotbarSlots[9].id;
-            isFullVoxel = hotbarSlots[9].isFullVoxel;
+            selectedHotbarSlot = 9;
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
+        }
+
+        // handle scroll wheel
+
+        if (Input.mouseScrollDelta.y > 0f && Cursor.lockState == CursorLockMode.Locked)
+        {
+            selectedHotbarSlot--;
+            if (selectedHotbarSlot < 0)
+            {
+                selectedHotbarSlot = 9;
+            }
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
+        }
+        else if (Input.mouseScrollDelta.y < 0f && Cursor.lockState == CursorLockMode.Locked)
+        {
+            selectedHotbarSlot++;
+            if (selectedHotbarSlot > 9)
+            {
+                selectedHotbarSlot = 0;
+            }
+            ui.SetHotbarSelectedSlot(selectedHotbarSlot);
+            voxel = hotbarSlots[selectedHotbarSlot].id;
+            isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
         if (Input.GetKeyDown(KeyCode.L))
@@ -540,5 +587,17 @@ public class MainUser : MonoBehaviour
     public Vector3 GetCamera()
     {
         return GameObject.Find("MainUser").transform.GetChild(0).gameObject.transform.eulerAngles;
+    }
+
+    public void SetHotbarSlot(int index, int blockIndex, bool isFullVoxel)
+    {
+        if (index < 0 || index > 9) return;
+        hotbarSlots[index].id = blockIndex;
+        hotbarSlots[index].isFullVoxel = isFullVoxel;
+        if (selectedHotbarSlot == index)
+        {
+            voxel = blockIndex;
+            this.isFullVoxel = isFullVoxel;
+        }
     }
 }

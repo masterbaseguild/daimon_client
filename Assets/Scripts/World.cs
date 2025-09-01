@@ -21,14 +21,14 @@ public class World : MonoBehaviour
 
     public void SetTexture(Texture2D texture)
     {
+        ui.SetBlockInventory(texture);
         material.mainTexture = texture;
         nonOpaqueMaterial.mainTexture = texture;
     }
 
     public void SetBlockPalette(string[] results)
     {
-        //ui.SetBlockInventory(results.Length);
-        ui.SetBlockInventory(96);
+        ui.SetBlockCount(results.Length);
         blockPalette = new BlockPalette(results);
     }
 
