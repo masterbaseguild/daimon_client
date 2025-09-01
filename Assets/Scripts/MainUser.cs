@@ -522,7 +522,7 @@ public class MainUser : MonoBehaviour
             isFullVoxel = hotbarSlots[selectedHotbarSlot].isFullVoxel;
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.Escape)||Input.GetKeyDown(KeyCode.L))
         {
             if (Cursor.lockState == CursorLockMode.Locked)
             {

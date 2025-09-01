@@ -79,9 +79,8 @@ public class BlockPalette
                 xOffset += TEXTURE_SIZE;
             }
             textureAtlas.Apply();
-            //SaveTextureToDisk(textureAtlas);
             world.SetTexture(textureAtlas);
-            SaveTextureToDisk(textureAtlas);
+            //SaveTextureToDisk(textureAtlas);
         };
     }
 
