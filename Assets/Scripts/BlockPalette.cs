@@ -11,7 +11,7 @@ public class BlockPalette
 {
     private readonly World world;
     private readonly List<BlockType> blocks = new();
-    private readonly int TEXTURE_SIZE = 16;
+    private readonly int TEXTURE_SIZE = 32;
     // texture atlas: a single big image containing all block textures,
     // which the game extracts via UV mapping
     private Texture2D textureAtlas;
